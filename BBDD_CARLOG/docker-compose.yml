@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos MySQL
+  mysqldb:
+    image: mysql:8.0
+    container_name: carlog-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root       # Contraseña maestra
+      MYSQL_DATABASE: carlog_db       # Crea la BBDD automáticamente
+      MYSQL_USER: carlog_user         # Usuario específico para la App
+      MYSQL_PASSWORD: carlog_password # Contraseña para la App
+    ports:
+      - "3306:3306"                   # Expone el puerto al exterior
+    volumes:
+      - mysql_data:/var/lib/mysql     # ¡IMPORTANTE! Persistencia de datos
+
+  # Opcional: phpMyAdmin (para ver la BBDD desde el navegador sin instalar nada)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: carlog-admin
+    links:
+      - mysqldb
+    environment:
+      PMA_HOST: mysqldb
+    ports:
+      - "8080:80"
+
+volumes:
+  mysql_data:

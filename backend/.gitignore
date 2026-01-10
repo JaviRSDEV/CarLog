@@ -1,10 +1,49 @@
+##############################
+# GENERICO (Sistema Operativo)
+##############################
+.DS_Store
+Thumbs.db
+*.log
+
+##############################
+# JAVA / SPRING BOOT (Backend)
+##############################
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+.mvn/
+mvnw
+mvnw.cmd
+*.class
+*.jar
+*.war
 
-### STS ###
+##############################
+# ANGULAR / NODE (Frontend) - ¡MUY IMPORTANTE!
+##############################
+node_modules/
+dist/
+out-tsc/
+bazel-out/
+.angular/
+.vscode/
+npm-debug.log
+yarn-error.log
+package-lock.json # Opcional: Hay gente que lo sube y gente que no. Yo suelo subirlo.
+
+##############################
+# IDEs (IntelliJ, Eclipse, VSCode)
+##############################
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+### STS / Eclipse ###
 .apt_generated
 .classpath
 .factorypath
@@ -12,22 +51,6 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
 ### VS Code ###
 .vscode/

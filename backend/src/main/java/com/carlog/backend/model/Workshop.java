@@ -1,10 +1,13 @@
 package com.carlog.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +19,7 @@ public class Workshop {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long workshopId;
 
     @Column(name = "name", nullable = false)
     private String workshopName;
@@ -32,4 +35,8 @@ public class Workshop {
 
     @Column(name = "icon")
     private String icon;
+
+    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
+    @JsonIgnore // ¡IMPORTANTE! Para que al pedir un taller no te devuelva los usuarios, y los usuarios el taller...
+    private List<User> employees;
 }

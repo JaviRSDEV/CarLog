@@ -21,7 +21,7 @@ public record NewUserDTO(String dni,
                 u.getPassword(),
                 u.getRole(),
                 u.isMustChangePsswd(),
-                u.getWorkShopId()
+                u.getWorkshop() != null ? u.getWorkshop().getWorkshopId(): null
         );}
     }
 

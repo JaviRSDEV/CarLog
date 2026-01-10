@@ -4,6 +4,7 @@ import com.carlog.backend.DTO.NewUserDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.WorkshopNotFoundException;
 import com.carlog.backend.model.User;
+import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,14 +38,14 @@ public class UserService {
     }
 
     public NewUserDTO add(NewUserDTO dto){
-        var result = userJpaRepository.findByName(dto.name());
-        if(result.isPresent()) throw new RuntimeException("Ya existe un empleado con el nombre y apellidos " + dto.name());
+        Workshop workshop = null;
+        if(userJpaRepository.findByDni(dto.dni()).isPresent()) throw new RuntimeException("Ya existe un empleado con el DNI " + dto.dni());
         if (dto.workShopId() != null) {
-            workshopJpaRepository.findById(dto.workShopId())
+             workshop = workshopJpaRepository.findById(dto.workShopId())
                     .orElseThrow(() -> new WorkshopNotFoundException(dto.workShopId()));
         }
 
-        var newUser = User.builder().dni(dto.dni()).name(dto.name()).email(dto.email()).phone(dto.phone()).password(dto.password()).role(dto.role()).mustChangePsswd(dto.mustChangePassword()).workShopId(dto.workShopId()).build();
+        var newUser = User.builder().dni(dto.dni()).name(dto.name()).email(dto.email()).phone(dto.phone()).password(dto.password()).role(dto.role()).mustChangePsswd(dto.mustChangePassword()).workshop(workshop).build();
         return NewUserDTO.of(userJpaRepository.save(newUser));
     }
 
@@ -57,7 +58,14 @@ public class UserService {
             user.setPassword(dto.password());
             user.setRole(dto.role());
             user.setMustChangePsswd(dto.mustChangePassword());
-            user.setWorkShopId(dto.workShopId());
+
+            if (dto.workShopId() != null) {
+               Workshop w = workshopJpaRepository.findById(dto.workShopId())
+                        .orElseThrow(() -> new WorkshopNotFoundException(dto.workShopId()));
+               user.setWorkshop(w);
+            }else{
+                user.setWorkshop(null);
+            }
             return NewUserDTO.of(userJpaRepository.save(user));
         }).orElseThrow( () -> new UserNotFoundException());
     }

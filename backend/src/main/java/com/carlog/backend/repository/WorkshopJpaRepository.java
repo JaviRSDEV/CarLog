@@ -12,7 +12,6 @@ import java.util.Optional;
 public interface WorkshopJpaRepository extends JpaRepository<Workshop, Long> {
     Optional<Workshop> findByWorkshopName(String workshopName);
 
-    @Query("SELECT u FROM User u WHERE u.workShopId = :id")
     List<User> findUserByWorkshopId(@Param("id") Long workShopId);
 
     void deleteByWorkshopName(String workshopName);

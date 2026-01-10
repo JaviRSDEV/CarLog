@@ -1,5 +1,6 @@
 package com.carlog.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +37,8 @@ public class User {
     @Column(name = "must_change_psswd")
     private boolean mustChangePsswd;
 
-    @Column(name = "workshop_id")
-    private Long workShopId;
+    @ManyToOne(fetch = FetchType.LAZY) // Carga el taller solo si se lo pides
+    @JoinColumn(name = "workshop_id")  // Nombre de la columna en la tabla SQL
+    @JsonIgnoreProperties({"employees", "hibernateLazyInitializer", "handler"}) // EVITA BUCLE INFINITO
+    private Workshop workshop;
 }

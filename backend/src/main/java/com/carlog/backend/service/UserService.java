@@ -28,8 +28,12 @@ public class UserService {
         return userJpaRepository.findByDni(dni).orElseThrow(() -> new UserNotFoundException(dni));
     }
 
-    public User getByName(String name){
-        return userJpaRepository.findByName(name).orElseThrow(() -> new UserNotFoundException());
+    public List<User> getByName(String name){
+        List<User> results = userJpaRepository.findByNameContainingIgnoreCase(name);
+        if(results.isEmpty())
+            throw new UserNotFoundException();
+
+        return results;
     }
 
     public NewUserDTO add(NewUserDTO dto){

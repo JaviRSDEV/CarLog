@@ -28,6 +28,11 @@ public class UserController {
         return userService.getByDni(DNI);
     }
 
+    @GetMapping("/search/{name}")
+    public List<User> searchByName(@PathVariable String name){
+        return userService.getByName(name);
+    }
+
     @PostMapping
     public ResponseEntity<NewUserDTO> store(@RequestBody NewUserDTO user){
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.add(user));

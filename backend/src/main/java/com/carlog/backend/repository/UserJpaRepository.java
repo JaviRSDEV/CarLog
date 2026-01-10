@@ -4,6 +4,7 @@ import com.carlog.backend.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserJpaRepository extends JpaRepository<User, Long> {
@@ -12,4 +13,5 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
     @Transactional
     void deleteByDni(String dni);
     Optional<User> findFirstByEmail(String email);
+    List<User> findByNameContainingIgnoreCase(String name);
 }

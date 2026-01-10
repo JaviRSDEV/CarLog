@@ -37,4 +37,9 @@ public class UserController {
     public NewUserDTO update(@RequestBody NewUserDTO userData, @PathVariable String DNI){
         return userService.edit(userData, DNI);
     }
+
+    @DeleteMapping("/{DNI}")
+    public NewUserDTO destroy(@PathVariable String DNI){
+        return userService.delete(DNI);
+    }
 }

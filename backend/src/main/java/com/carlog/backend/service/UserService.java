@@ -4,7 +4,6 @@ import com.carlog.backend.DTO.NewUserDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.WorkshopNotFoundException;
 import com.carlog.backend.model.User;
-import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import lombok.RequiredArgsConstructor;

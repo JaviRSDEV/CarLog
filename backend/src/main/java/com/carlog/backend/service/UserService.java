@@ -3,6 +3,7 @@ package com.carlog.backend.service;
 import com.carlog.backend.DTO.NewUserDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.WorkshopNotFoundException;
+import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
@@ -39,7 +40,20 @@ public class UserService {
 
     public NewUserDTO add(NewUserDTO dto){
         Workshop workshop = null;
+        Role roleToSave = Role.CLIENT;
         if(userJpaRepository.findByDni(dto.dni()).isPresent()) throw new RuntimeException("Ya existe un empleado con el DNI " + dto.dni());
+        //Evitamos que alguien pueda auto contratarse en un taller
+        if(dto.workShopId() != null){
+            throw new RuntimeException("No puedes unirte a un taller durante el registro, debes ser contratado por uno");
+        }
+        //Si el rol es diferente a null le asignamos el pasado por el dto
+        if(dto.role() != null)
+            roleToSave = dto.role();
+        //Si el rol elegido es co_manager o mechanic en el registro, el sistema por seguridad asignara el rol de cliente
+        if(roleToSave == Role.CO_MANAGER || roleToSave == Role.MECHANIC){
+            roleToSave = Role.CLIENT;
+        }
+        //comprobamos que la asignación de taller sea con un taller existente
         if (dto.workShopId() != null) {
              workshop = workshopJpaRepository.findById(dto.workShopId())
                     .orElseThrow(() -> new WorkshopNotFoundException(dto.workShopId()));
@@ -75,5 +89,28 @@ public class UserService {
         if(result.isEmpty()) throw new UserNotFoundException();
         userJpaRepository.deleteByDni(dni);
         return NewUserDTO.of(result.get());
+    }
+
+    public NewUserDTO promoteToWorker(String managerDni, String employeeDni, Role newRole){
+
+        User manager = userJpaRepository.findByDni(managerDni).orElseThrow(() -> new UserNotFoundException(managerDni));
+        //comprobamos que el que va a realizar la contratación es un manager
+        if(manager.getRole() != Role.MANAGER || manager.getWorkshop() == null){
+            throw new RuntimeException("Solo un manager con taller puede realiza contrataciones");
+        }
+        //Buscamos el trabajador en la base de datos con el dni proporcionado
+        User employee = userJpaRepository.findByDni(employeeDni).orElseThrow(() -> new UserNotFoundException(employeeDni));
+        //Comprobamos que el usuario no trabaje en otro taller
+        if(employee.getWorkshop() != null){
+            throw new RuntimeException("Este usuario ya trabaja en otro taller");
+        }
+        //Comprobamos que el rol para la contratación o es mechanic o co_manager
+        if(newRole != Role.MECHANIC && newRole != Role.CO_MANAGER){
+            throw new RuntimeException("Rol inválido para contratación");
+        }
+
+        employee.setRole(newRole);
+        employee.setWorkshop(manager.getWorkshop());
+        return NewUserDTO.of(userJpaRepository.save(employee));
     }
 }

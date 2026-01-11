@@ -1,6 +1,7 @@
 package com.carlog.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,4 +40,8 @@ public class Workshop {
     @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonIgnore // ¡IMPORTANTE! Para que al pedir un taller no te devuelva los usuarios, y los usuarios el taller...
     private List<User> employees;
+
+    @OneToMany(mappedBy = "workshop")
+    @JsonIgnoreProperties("workshop")
+    private List<Vehicle> vehicles;
 }

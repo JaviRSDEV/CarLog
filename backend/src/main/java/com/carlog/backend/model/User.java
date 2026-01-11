@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -37,8 +38,12 @@ public class User {
     @Column(name = "must_change_psswd")
     private boolean mustChangePsswd;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Carga el taller solo si se lo pides
-    @JoinColumn(name = "workshop_id")  // Nombre de la columna en la tabla SQL
-    @JsonIgnoreProperties({"employees", "hibernateLazyInitializer", "handler"}) // EVITA BUCLE INFINITO
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workshop_id")
+    @JsonIgnoreProperties({"employees", "hibernateLazyInitializer", "handler"})
     private Workshop workshop;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("owner")
+    private List<Vehicle> vehicles;
 }

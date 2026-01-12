@@ -1,6 +1,6 @@
 package com.carlog.backend.service;
 
-import com.carlog.backend.DTO.NewWorkshopDTO;
+import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.error.WorkshopNotFoundException;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;

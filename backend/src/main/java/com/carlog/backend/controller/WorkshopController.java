@@ -1,6 +1,6 @@
 package com.carlog.backend.controller;
 
-import com.carlog.backend.DTO.NewWorkshopDTO;
+import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
 import com.carlog.backend.service.WorkshopService;

@@ -1,6 +1,6 @@
 package com.carlog.backend.service;
 
-import com.carlog.backend.DTO.NewUserDTO;
+import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.WorkshopNotFoundException;
 import com.carlog.backend.model.Role;

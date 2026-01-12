@@ -1,4 +1,4 @@
-package com.carlog.backend.DTO;
+package com.carlog.backend.dto;
 
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;

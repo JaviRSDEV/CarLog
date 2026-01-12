@@ -1,6 +1,6 @@
 package com.carlog.backend.service;
 
-import com.carlog.backend.DTO.NewVehicleDTO;
+import com.carlog.backend.dto.NewVehicleDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.VehicleNotFoundException;
 import com.carlog.backend.error.VehicleOcuppiedException;

@@ -1,6 +1,6 @@
 package com.carlog.backend.controller;
 
-import com.carlog.backend.DTO.NewUserDTO;
+import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.model.User;
 import com.carlog.backend.service.UserService;
 import lombok.RequiredArgsConstructor;

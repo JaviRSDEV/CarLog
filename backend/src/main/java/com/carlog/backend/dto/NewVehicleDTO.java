@@ -1,8 +1,6 @@
-package com.carlog.backend.DTO;
+package com.carlog.backend.dto;
 
-import com.carlog.backend.model.User;
 import com.carlog.backend.model.Vehicle;
-import com.carlog.backend.model.Workshop;
 
 import java.time.LocalDate;
 

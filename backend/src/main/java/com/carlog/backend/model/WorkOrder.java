@@ -1,0 +1,57 @@
+package com.carlog.backend.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "work_order")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class WorkOrder {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(columnDefinition = "TEXT")
+    private String mechanicNotes;
+
+    @Enumerated(EnumType.STRING)
+    private WorkOrderStatus status;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    private LocalDate closedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    private Vehicle vehicle;
+
+    @ManyToOne
+    @JoinColumn(name = "mechanic_id", nullable = false)
+    private User mechanic;
+
+    @ManyToOne
+    @JoinColumn(name = "workshop_id", nullable = false)
+    private Workshop workshop;
+
+    private Double totalAmount;
+
+    @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkOrderLine> lines;
+
+}

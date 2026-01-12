@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
     Optional<WorkOrder> findByVehicle_Plate(String plate);
-    Optional<WorkOrder> findByUser_Dni(String dni);
+    Optional<WorkOrder> findByMechanic_Dni(String dni);
     @Transactional
     void deleteById(String id);
     Optional<WorkOrder> findByStatus(String status);
-    Optional<WorkOrder> findWorkshop_Id(String workshopId);
+    Optional<WorkOrder> findByWorkshop_workshopId(String workshopId);
 }

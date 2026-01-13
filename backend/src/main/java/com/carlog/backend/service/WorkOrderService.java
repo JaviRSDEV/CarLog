@@ -1,6 +1,9 @@
 package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewWorkOrderDTO;
+import com.carlog.backend.dto.NewWorkOrderLineDTO;
+import com.carlog.backend.dto.NewWorkOrderResponseDTO;
+import com.carlog.backend.dto.UpdateWorkOrderDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.VehicleNotFoundException;
 import com.carlog.backend.error.WorkOrderNotFoundException;
@@ -27,26 +30,82 @@ public class WorkOrderService {
         return result;
     }
 
-    public WorkOrder getByEmployee(String dni){
-        return workOrderJpaRepository.findByMechanic_Dni(dni).orElseThrow(() -> new WorkOrderNotFoundException());
+    public List<WorkOrder> getByEmployee(String dni){
+        List<WorkOrder> workOrders = workOrderJpaRepository.findByMechanic_Dni(dni);
+        if(workOrders.isEmpty()) throw new WorkOrderNotFoundException();
+        return workOrders;
     }
 
-    public WorkOrder getByVehicle(String plate){
-        return workOrderJpaRepository.findByVehicle_Plate(plate).orElseThrow(() -> new WorkOrderNotFoundException());
+    public List<WorkOrder> getByVehicle(String plate){
+        List<WorkOrder> workOrders = workOrderJpaRepository.findByVehicle_Plate(plate);
+        if(workOrders.isEmpty()) throw new WorkOrderNotFoundException();
+        return workOrders;
     }
 
-    public NewWorkOrderDTO add(NewWorkOrderDTO dto, String userDni, String vehiclePlate){
+    public NewWorkOrderResponseDTO add(NewWorkOrderDTO dto, String userDni, String vehiclePlate){
         User connectedUser = userJpaRepository.findByDni(userDni).orElseThrow(() -> new UserNotFoundException(userDni));
         Vehicle referedVehicle = vehicleJpaRepository.findByPlate(vehiclePlate).orElseThrow(() -> new VehicleNotFoundException(vehiclePlate));
 
         boolean isWorker = connectedUser.getRole() == Role.MECHANIC || connectedUser.getRole() == Role.MANAGER || connectedUser.getRole() == Role.CO_MANAGER || connectedUser.getRole() == Role.DIY;
-        if(isWorker){
-            if(connectedUser.getWorkshop() == null && connectedUser.getRole() != Role.DIY){
-                throw new RuntimeException("Error: El mecanico o manager no dispone de un taller asignado");
-            }
-
-            var newWorkOrder = WorkOrder.builder().description(dto.description()).mechanicNotes(null).status(WorkOrderStatus.PENDING).vehicle(referedVehicle).mechanic(connectedUser);
+        if(!isWorker) {
+            throw new RuntimeException("Error: El usuario no tiene permisos para crear una orden de trabajo");
         }
+
+        if (connectedUser.getWorkshop() == null && connectedUser.getRole() != Role.DIY) {
+            throw new RuntimeException("Error: El mecanico o manager no dispone de un taller asignado");
+        }
+
+        var newWorkOrder = WorkOrder.builder().description(dto.description()).mechanicNotes(null).status(WorkOrderStatus.PENDING).vehicle(referedVehicle).mechanic(connectedUser).workshop(connectedUser.getWorkshop()).totalAmount(0.0).build();
+        return NewWorkOrderResponseDTO.of(workOrderJpaRepository.save(newWorkOrder));
+    }
+
+    public NewWorkOrderResponseDTO addLine(Long orderId, NewWorkOrderLineDTO lineDto){
+        WorkOrder workOrder = workOrderJpaRepository.findById(orderId).orElseThrow(() -> new WorkOrderNotFoundException());
+
+        if(workOrder.getStatus() == WorkOrderStatus.COMPLETED)
+            throw new RuntimeException("No se pueden añadir nuevas lineas a una orden cerrada");
+
+        WorkOrderLine newLine = new WorkOrderLine();
+        newLine.setConcept(lineDto.concept());
+        newLine.setQuantity(lineDto.quantity());
+        newLine.setPricePerUnit(lineDto.pricePerUnit());
+
+        newLine.setSubTotal(lineDto.quantity() * lineDto.pricePerUnit());
+        workOrder.addWorkOrderLine(newLine);
+
+        if(workOrder.getStatus() == WorkOrderStatus.PENDING){
+            workOrder.setStatus(WorkOrderStatus.IN_PROGRESS);
+        }
+
+        WorkOrder updateWorkOrder = workOrderJpaRepository.save(workOrder);
+
+        return NewWorkOrderResponseDTO.of(updateWorkOrder);
+    }
+
+    public NewWorkOrderResponseDTO edit(UpdateWorkOrderDTO dto, Long workOrderId){
+        WorkOrder order = workOrderJpaRepository.findById(workOrderId).orElseThrow(() -> new WorkOrderNotFoundException());
+
+        if(dto.mechanicNotes() != null)
+            order.setMechanicNotes(dto.mechanicNotes());
+
+        if(dto.status() != null) {
+            order.setStatus(dto.status());
+
+            if(dto.status() == WorkOrderStatus.COMPLETED){
+                order.setClosedAt(java.time.LocalDate.now());
+            }else{
+                order.setClosedAt(null);
+            }
+        }
+
+        return NewWorkOrderResponseDTO.of(workOrderJpaRepository.save(order));
+    }
+
+    public NewWorkOrderResponseDTO delete(Long workOrderId){
+        WorkOrder workOrder = workOrderJpaRepository.findById(workOrderId).orElseThrow(() -> new WorkOrderNotFoundException());
+        workOrderJpaRepository.delete(workOrder);
+
+        return NewWorkOrderResponseDTO.of(workOrder);
     }
 
 

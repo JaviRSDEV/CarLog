@@ -54,4 +54,19 @@ public class WorkOrder {
     @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkOrderLine> lines;
 
+    public void addWorkOrderLine(WorkOrderLine line){
+
+        if(this.lines == null){
+            this.lines = new java.util.ArrayList<>();
+        }
+
+        this.lines.add(line);
+        line.setWorkOrder(this);
+
+        if(this.totalAmount == null){
+            this.totalAmount = line.getSubTotal();
+        }else{
+            this.totalAmount += line.getSubTotal();
+        }
+    }
 }

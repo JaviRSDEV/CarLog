@@ -1,5 +1,6 @@
 package com.carlog.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,5 +32,6 @@ public class WorkOrderLine {
 
     @ManyToOne
     @JoinColumn(name = "work_order_id", nullable = false)
+    @JsonIgnore
     private WorkOrder workOrder;
 }

@@ -47,7 +47,7 @@ public class VehicleService {
         Workshop currentWorkshop;
 
         //Comprueba si es un mecanico el que esta registrando el vehiculo o si es un cliente
-        boolean isWorker = connectedUser.getRole() == Role.MECHANIC || connectedUser.getRole() == Role.MANAGER;
+        boolean isWorker = connectedUser.getRole() == Role.MECHANIC || connectedUser.getRole() == Role.MANAGER || connectedUser.getRole() == Role.CO_MANAGER || connectedUser.getRole() == Role.DIY;
         if(isWorker){
             if(dto.ownerId() != null && !dto.ownerId().isBlank()){
                 owner = userJpaRepository.findByDni(dto.ownerId()).orElseThrow(() -> new UserNotFoundException(dto.ownerId()));
@@ -56,7 +56,7 @@ public class VehicleService {
             }
 
             currentWorkshop = connectedUser.getWorkshop();
-            if(currentWorkshop == null){
+            if(currentWorkshop == null && connectedUser.getRole() != Role.DIY){
                 throw new RuntimeException("Error: El mecanico o manager no dispone de taller asignado.");
             }
         }else{

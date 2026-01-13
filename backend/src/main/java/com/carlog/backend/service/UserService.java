@@ -91,7 +91,9 @@ public class UserService {
         return NewUserDTO.of(result.get());
     }
 
-    public NewUserDTO promoteToWorker(String managerDni, String employeeDni, Role newRole){
+    public NewUserDTO promoteToWorker
+
+            (String managerDni, String employeeDni, Role newRole){
 
         User manager = userJpaRepository.findByDni(managerDni).orElseThrow(() -> new UserNotFoundException(managerDni));
         //comprobamos que el que va a realizar la contratación es un manager

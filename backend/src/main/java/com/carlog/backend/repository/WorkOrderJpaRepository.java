@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface WorkOrderRepository extends JpaRepository<WorkOrder, Long> {
+public interface WorkOrderJpaRepository extends JpaRepository<WorkOrder, Long> {
     Optional<WorkOrder> findByVehicle_Plate(String plate);
     Optional<WorkOrder> findByMechanic_Dni(String dni);
     @Transactional

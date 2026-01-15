@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -40,8 +41,9 @@ public class WorkOrderController {
     }
 
     @PostMapping
-    public ResponseEntity<NewWorkOrderResponseDTO> store(@RequestBody NewWorkOrderDTO workOrder, @RequestHeader("User-Dni") String connectedUser, @RequestHeader("Vehicle-plate") String plate){
-        return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.add(workOrder, connectedUser, plate));
+    public ResponseEntity<NewWorkOrderResponseDTO> store(@RequestBody NewWorkOrderDTO workOrder, @RequestHeader("Vehicle-plate") String plate, Principal principal){
+        String userEmail = principal.getName();
+        return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.add(workOrder, userEmail, plate));
     }
 
     @PutMapping("/{workOrderId}")

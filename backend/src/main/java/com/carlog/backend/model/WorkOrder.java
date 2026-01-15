@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -49,10 +50,12 @@ public class WorkOrder {
     @JoinColumn(name = "workshop_id", nullable = false)
     private Workshop workshop;
 
-    private Double totalAmount;
+    @Builder.Default
+    private Double totalAmount = 0.0;
 
     @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WorkOrderLine> lines;
+    @Builder.Default
+    private List<WorkOrderLine> lines = new ArrayList<>();
 
     public void addWorkOrderLine(WorkOrderLine line){
 
@@ -63,10 +66,6 @@ public class WorkOrder {
         this.lines.add(line);
         line.setWorkOrder(this);
 
-        if(this.totalAmount == null){
-            this.totalAmount = line.getSubTotal();
-        }else{
-            this.totalAmount += line.getSubTotal();
-        }
+        this.totalAmount += line.getSubTotal();
     }
 }

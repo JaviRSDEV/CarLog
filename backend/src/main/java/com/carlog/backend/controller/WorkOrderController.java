@@ -34,6 +34,11 @@ public class WorkOrderController {
         return ResponseEntity.ok(workOrderService.getByVehicle(plate));
     }
 
+    @GetMapping("/mechanic/{Dni}")
+    public ResponseEntity<List<WorkOrder>> showByMechanic(@PathVariable String dni){
+        return ResponseEntity.ok(workOrderService.getByEmployee(dni));
+    }
+
     @PostMapping
     public ResponseEntity<NewWorkOrderResponseDTO> store(@RequestBody NewWorkOrderDTO workOrder, @RequestHeader("User-Dni") String connectedUser, @RequestHeader("Vehicle-plate") String plate){
         return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.add(workOrder, connectedUser, plate));

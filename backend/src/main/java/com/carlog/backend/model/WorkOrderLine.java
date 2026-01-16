@@ -28,10 +28,33 @@ public class WorkOrderLine {
     @Column(nullable = false)
     private Double pricePerUnit;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Double IVA = 0.0;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Double discount = 0.0;
+
+    @Column
     private Double subTotal;
 
     @ManyToOne
     @JoinColumn(name = "work_order_id", nullable = false)
     @JsonIgnore
     private WorkOrder workOrder;
+
+    @PreUpdate
+    public void calculateSubTotal(){
+        if(this.quantity != null && this.pricePerUnit != null){
+            double priceWithoutIVA = this.quantity * this.pricePerUnit;
+            double IVAUnit = (priceWithoutIVA * this.IVA)/100;
+            double subTotalWithoutDiscount = priceWithoutIVA + IVAUnit;
+            double discountAmount = (subTotalWithoutDiscount * this.discount)/100;
+
+            this.subTotal = subTotalWithoutDiscount - discountAmount;
+        }else{
+            this.subTotal = 0.0;
+        }
+    }
 }

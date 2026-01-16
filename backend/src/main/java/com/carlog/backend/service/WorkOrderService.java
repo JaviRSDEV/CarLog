@@ -11,6 +11,7 @@ import com.carlog.backend.model.*;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.repository.WorkOrderJpaRepository;
+import com.carlog.backend.repository.WorkOrderLineJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class WorkOrderService {
     private final UserJpaRepository userJpaRepository;
     private final VehicleJpaRepository vehicleJpaRepository;
     private final WorkOrderJpaRepository workOrderJpaRepository;
+    private final WorkOrderLineJpaRepository workOrderLineJpaRepository;
 
     public List<WorkOrder> getAll(){
         var result = workOrderJpaRepository.findAll();
@@ -69,8 +71,9 @@ public class WorkOrderService {
         newLine.setConcept(lineDto.concept());
         newLine.setQuantity(lineDto.quantity());
         newLine.setPricePerUnit(lineDto.pricePerUnit());
+        newLine.setIVA(lineDto.IVA());
+        newLine.setDiscount(lineDto.discount());
 
-        newLine.setSubTotal(lineDto.quantity() * lineDto.pricePerUnit());
         workOrder.addWorkOrderLine(newLine);
 
         if(workOrder.getStatus() == WorkOrderStatus.PENDING){
@@ -80,6 +83,24 @@ public class WorkOrderService {
         WorkOrder updateWorkOrder = workOrderJpaRepository.save(workOrder);
 
         return NewWorkOrderResponseDTO.of(updateWorkOrder);
+    }
+
+    public NewWorkOrderResponseDTO deleteLine(Long orderId, Long lineId){
+        WorkOrderLine line = workOrderLineJpaRepository.findById(lineId).orElseThrow(() -> new RuntimeException("Linea no encontrada"));
+
+        if(!line.getWorkOrder().getId().equals(orderId))
+            throw new RuntimeException("Error: La línea " + lineId + " no pertenece a la orden");
+
+        WorkOrder order = line.getWorkOrder();
+
+        if(order.getStatus() == WorkOrderStatus.COMPLETED)
+            throw new RuntimeException("No se puede borrar líneas de una orden cerrada");
+
+        order.removeWorkOrderLine(line);
+
+        WorkOrder updatedOrder = workOrderJpaRepository.save(order);
+
+        return NewWorkOrderResponseDTO.of(updatedOrder);
     }
 
     public NewWorkOrderResponseDTO edit(UpdateWorkOrderDTO dto, Long workOrderId){

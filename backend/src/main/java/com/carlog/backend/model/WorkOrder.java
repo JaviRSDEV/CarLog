@@ -66,6 +66,31 @@ public class WorkOrder {
         this.lines.add(line);
         line.setWorkOrder(this);
 
-        this.totalAmount += line.getSubTotal();
+        double subTotalLine = line.getQuantity() * line.getPricePerUnit();
+
+        double IVAPercent = (subTotalLine * line.getIVA())/100;
+        double subTotalWithoutDiscount = subTotalLine + IVAPercent;
+
+        double discountPercent = (subTotalWithoutDiscount * line.getDiscount())/100;
+        double discountAmount = subTotalWithoutDiscount - discountPercent;
+
+        line.setSubTotal(discountAmount);
+
+        this.totalAmount += discountAmount;
+    }
+
+    public void removeWorkOrderLine(WorkOrderLine line){
+        this.lines.remove(line);
+
+        line.setWorkOrder(null);
+
+        if(line.getSubTotal() != null){
+            this.totalAmount -= line.getSubTotal();
+        }
+
+        if(this.totalAmount < 0)
+            this.totalAmount = 0.0;
+
+        this.totalAmount = (this.totalAmount * 100)/100;
     }
 }

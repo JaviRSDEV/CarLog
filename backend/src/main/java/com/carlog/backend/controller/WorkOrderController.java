@@ -61,4 +61,9 @@ public class WorkOrderController {
         return ResponseEntity.ok(workOrderService.delete(id));
     }
 
+    @DeleteMapping("/{orderId}/lines/{lineId}")
+    public ResponseEntity<NewWorkOrderResponseDTO> deleteLine(@PathVariable Long orderId, @PathVariable Long lineId){
+        return ResponseEntity.ok(workOrderService.deleteLine(orderId, lineId));
+    }
+
 }

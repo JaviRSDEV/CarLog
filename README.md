@@ -5,7 +5,7 @@ CarLog: Plataforma Full Stack para la gestión integral de talleres mecánicos. 
 
 Esta documentación describe los endpoints, formatos de datos y flujos de seguridad de la API REST de CarLog (Sistema de Gestión de Talleres).
 
-##⚙️ Configuración General
+## ⚙️ Configuración General
 
 URL Base (Local): http://localhost:8081/api
 

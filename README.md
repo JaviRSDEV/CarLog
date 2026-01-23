@@ -1,11 +1,11 @@
 # CarLog
 CarLog: Plataforma Full Stack para la gestión integral de talleres mecánicos. Tech Stack usado: Angular (Frontend), Java &amp; Spring Boot (Backend API), MySQL y Docker. Arquitectura RESTful robusta y escalable.
 
-📘 CarLog API - Guía de Referencia y Uso
+## 📘 CarLog API - Guía de Referencia y Uso
 
 Esta documentación describe los endpoints, formatos de datos y flujos de seguridad de la API REST de CarLog (Sistema de Gestión de Talleres).
 
-⚙️ Configuración General
+##⚙️ Configuración General
 
 URL Base (Local): http://localhost:8081/api
 
@@ -19,35 +19,37 @@ Todas las peticiones (salvo /auth) requieren la cabecera:
 
 Authorization: Bearer <tu_token_aqui>
 
-🔁 Flujo de Trabajo Típico (Workflow)
+---
 
-Registrarse en /auth/register (Obtienes Token).
+## 🔁 Flujo de Trabajo Típico (Workflow)
 
-Login en /auth/authenticate (Si necesitas renovar el Token).
+Registrarse en **/auth/register** {POST} (Obtienes Token).
 
-Registrar Vehículo en /vehicles (Opcional si ya existe).
+Login en **/auth/authenticate** {POST} (Si necesitas renovar el Token).
 
-Entrada a Taller en /vehicles/{plate}/entry (El mecánico registra la entrada).
+Registrar Vehículo en **/vehicles** {POST} (Opcional si ya existe).
 
-Crear Orden en /workorders (Abres la ficha de reparación).
+Entrada a Taller en **/vehicles/{plate}/entry** {POST} (El mecánico registra la entrada del coche al taller).
 
-Añadir Líneas en /workorders/{id}/lines (Añades piezas y mano de obra).
+Crear Orden en **/workorders** {POST} (Creas la ficha de reparación).
 
-Cerrar Orden en /workorders/{id} (Cambias estado a COMPLETED).
+Añadir Líneas en **/workorders/{id}/lines** {POST} (Añades piezas y mano de obra).
 
-🔐 1. Autenticación (Auth)
+Cerrar Orden en **/workorders/{id}** {POST} (Cambias estado a COMPLETED y se cierra la ficha de reparación).
+
+## 🔐 1. Autenticación (Auth)
 
 Accesible públicamente.
 
 Registrar Usuario
 
-Crea una nueva cuenta (Mecánico, Manager, Cliente).
+Crea una nueva cuenta (Mecánico, Manager, Cliente, DIY).
 
-Método: POST
+**Método**: POST
 
-URL: /auth/register
+**URL**: /auth/register
 
-Body:
+**Body**:
 
 ```json
 {
@@ -61,19 +63,17 @@ Body:
 }
 ```
 
-
-
-(Roles disponibles: ADMIN, MANAGER, MECHANIC, CLIENT, DIY)
-
-Iniciar Sesión
+(Roles disponibles: MANAGER, MECHANIC, CLIENT, DIY)
+---
+### Iniciar Sesión
 
 Obtiene el token de acceso.
 
-Método: POST
+**Método**: POST
 
-URL: /auth/authenticate
+**URL**: /auth/authenticate
 
-Body:
+**Body**:
 
 ```json
 {
@@ -82,9 +82,7 @@ Body:
 }
 ```
 
-
-
-Respuesta Exitosa:
+**Respuesta Exitosa:**
 
 ```json
 {
@@ -93,8 +91,7 @@ Respuesta Exitosa:
 ```
 
 
-
-📋 2. Gestión de Órdenes (WorkOrders)
+## 📋 2. Gestión de Órdenes (WorkOrders)
 
 Requiere Auth Token.
 
@@ -102,40 +99,39 @@ Crear Nueva Orden
 
 Abre una orden de trabajo para un vehículo específico. El sistema asigna automáticamente el mecánico logueado y su taller.
 
-Método: POST
+**Método** POST
 
-URL: /workorders
+**URL**: /workorders
 
-Headers Específicos:
+**Headers Específicos**:
 
-Vehicle-plate: 1234-BBB (Matrícula del coche a reparar)
+**Vehicle-plate**: 1234-BBB (Matrícula del coche a reparar)
 
-Body:
+**Body**:
 
 ```json
 {
   "description": "El cliente reporta ruido en los frenos y solicita cambio de aceite."
 }
 ```
-
-
+---
 Listar Órdenes
 
-Método: GET
+**Método**: GET
 
-URL: /workorders
+**URL**: /workorders
 
-Opcional: /workorders?mechanicDni=12345678Z (Filtrar por mecánico)
-
+**Opcional**: /workorders?mechanicDni=12345678Z (Filtrar por mecánico)
+---
 Cerrar Orden / Editar Notas
 
 Actualiza el estado o las notas. Si se pasa a COMPLETED, se genera fecha de cierre y se bloquea la edición de líneas.
 
-Método: PUT
+**Método**: PUT
 
-URL: /workorders/{id}
+**URL**: /workorders/{id}
 
-Body:
+**Body**:
 
 ```json
 {
@@ -144,21 +140,20 @@ Body:
 }
 ```
 
-
-
 (Estados: PENDING, IN_PROGRESS, COMPLETED, CANCELLED)
 
-🛠️ 3. Facturación (Líneas de Orden)
+---
+### 🛠️ 3. Facturación (Líneas de Orden)
 
 El sistema calcula automáticamente: (Cantidad * Precio) + IVA - Descuento.
 
 Añadir Línea (Pieza o Mano de Obra)
 
-Método: POST
+**Método**: POST
 
-URL: /workorders/{orderId}/lines
+**URL**: /workorders/{orderId}/lines
 
-Body:
+**Body**:
 
 ```json
 {
@@ -170,24 +165,24 @@ Body:
 }
 ```
 
-
 Respuesta: Devuelve la orden completa con el totalAmount recalculado.
 
+---
 Borrar Línea
 
-Método: DELETE
+**Método**: DELETE
 
-URL: /workorders/{orderId}/lines/{lineId}
+**URL**: /workorders/{orderId}/lines/{lineId}
 
-🚗 4. Vehículos (Vehicles)
+### 🚗 4. Vehículos (Vehicles)
 
 Registrar Vehículo
 
-Método: POST
+**Método**: POST
 
-URL: /vehicles
+**URL**: /vehicles
 
-Body:
+**Body**:
 
 ```json
 {
@@ -199,39 +194,39 @@ Body:
   "ownerId": "87654321X" // Opcional. Si se omite, se asigna al usuario logueado.
 }
 ```
-
-
-
+---
 Registrar Entrada en Taller (Check-in)
 
 Mueve el coche al taller especificado. Falla si el coche ya está en otro taller.
 
-Método: POST
+**Método**: POST
 
-URL: /vehicles/{plate}/entry?workshopId=1
+**URL**: /vehicles/{plate}/entry?workshopId=1
 
+---
 Registrar Salida (Check-out)
 
 Libera el coche del taller.
 
-Método: POST
+**Método**: POST
 
-URL: /vehicles/{plate}/exit?workshopId=1
+**URL**: /vehicles/{plate}/exit?workshopId=1
 
+---
 Transferir Propiedad (Venta)
 
 Cambia el dueño del vehículo. Requiere validación del dueño actual.
 
-Método: POST
+**Método**: POST
 
-URL: /vehicles/{plate}/transfer
+**URL**: /vehicles/{plate}/transfer
 
 Params: ?currentOwnerId=1234A&newOwnerId=5678B
 
 ⚠️ Tabla de Errores Comunes
 
-| Código | Significado | Causa Probable | Solución |
-| 403 | Forbidden | Token inválido / No enviado / Login fallido | Revisa la cabecera Authorization o credenciales. |
-| 404 | Not Found | ID o Matrícula no existen | Verifica que el recurso existe en BD. |
-| 409 | Conflict | Vehículo en otro taller / Matrícula duplicada | Realiza Check-out antes de Check-in. |
-| 500 | Server Error | Error de lógica de negocio | Intentar editar una orden cerrada (COMPLETED). |
+| Código | Significado | Causa Probable                                |                   Solución                       |
+| 403    | Forbidden   | Token inválido / No enviado / Login fallido   | Revisa la cabecera Authorization o credenciales. |
+| 404    | Not Found   | ID o Matrícula no existen                     | Verifica que el recurso existe en BD.            |
+| 409    | Conflict    | Vehículo en otro taller / Matrícula duplicada | Realiza Check-out antes de Check-in.             |
+| 500    | Server Error| Error de lógica de negocio                    | 

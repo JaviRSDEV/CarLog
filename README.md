@@ -225,8 +225,9 @@ Params: ?currentOwnerId=1234A&newOwnerId=5678B
 
 ⚠️ Tabla de Errores Comunes
 
-| Código | Significado | Causa Probable                                |                   Solución                       |
-| 403    | Forbidden   | Token inválido / No enviado / Login fallido   | Revisa la cabecera Authorization o credenciales. |
-| 404    | Not Found   | ID o Matrícula no existen                     | Verifica que el recurso existe en BD.            |
-| 409    | Conflict    | Vehículo en otro taller / Matrícula duplicada | Realiza Check-out antes de Check-in.             |
-| 500    | Server Error| Error de lógica de negocio                    | 
+| Código | Significado  | Causa probable                                | Solución                                        |
+|--------|--------------|-----------------------------------------------|-------------------------------------------------|
+| 403    | Forbidden    | Token inválido / No enviado / Login fallido   | Revisa la cabecera Authorization o credenciales |
+| 404    | Not Found    | ID o Matrícula no existen                     | Verifica que el recurso existe en BD.           |
+| 409    | Conflict     | Vehículo en otro taller / Matrícula duplicada | Realiza Check-out antes de Check-in             |
+| 500    | Server Error | Error de lógica de negocio                    |                                                 |

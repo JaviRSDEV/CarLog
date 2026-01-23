@@ -49,7 +49,8 @@ URL: /auth/register
 
 Body:
 
-```json{
+```json
+{
   "dni": "12345678Z",
   "name": "Pepe",
   "lastname": "Mecánico",
@@ -74,7 +75,8 @@ URL: /auth/authenticate
 
 Body:
 
-```json{
+```json
+{
   "email": "pepe@carlog.com",
   "password": "securePass123"
 }
@@ -84,7 +86,8 @@ Body:
 
 Respuesta Exitosa:
 
-```json{
+```json
+{
   "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOi..."
 }
 ```
@@ -109,7 +112,8 @@ Vehicle-plate: 1234-BBB (Matrícula del coche a reparar)
 
 Body:
 
-```json{
+```json
+{
   "description": "El cliente reporta ruido en los frenos y solicita cambio de aceite."
 }
 ```
@@ -133,7 +137,8 @@ URL: /workorders/{id}
 
 Body:
 
-```json{
+```json
+{
   "status": "COMPLETED",
   "mechanicNotes": "Reparación finalizada con éxito. Vehículo probado."
 }
@@ -155,7 +160,8 @@ URL: /workorders/{orderId}/lines
 
 Body:
 
-```json{
+```json
+{
   "concept": "Juego de Pastillas de Freno",
   "quantity": 1.0,
   "pricePerUnit": 100.0,
@@ -183,7 +189,8 @@ URL: /vehicles
 
 Body:
 
-```json{
+```json
+{
   "plate": "9999-ZZZ",
   "brand": "Toyota",
   "model": "Corolla",

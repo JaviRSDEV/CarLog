@@ -15,9 +15,7 @@ Cabecera Obligatoria: Content-Type: application/json
 
 Seguridad: JWT (JSON Web Token).
 
-Todas las peticiones (salvo /auth) requieren la cabecera:
-
-Authorization: Bearer <tu_token_aqui>
+Todas las peticiones (salvo /auth) requieren la cabecera: Authorization: Bearer <tu_token_aqui>
 
 ---
 

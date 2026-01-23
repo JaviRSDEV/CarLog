@@ -1,19 +1,21 @@
-# CarLog
-CarLog: Plataforma Full Stack para la gestión integral de talleres mecánicos. Tech Stack usado: Angular (Frontend), Java &amp; Spring Boot (Backend API), MySQL y Docker. Arquitectura RESTful robusta y escalable.
+# 🚗 CarLog
+> **Plataforma Full Stack para la gestión integral de talleres mecánicos.** > Arquitectura RESTful robusta y escalable.
 
+![Angular](https://img.shields.io/badge/Frontend-Angular-dd0031?style=flat&logo=angular)
+![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring)
+![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql)
+![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker)
 ## 📘 CarLog API - Guía de Referencia y Uso
 
 Esta documentación describe los endpoints, formatos de datos y flujos de seguridad de la API REST de CarLog (Sistema de Gestión de Talleres).
 
 ## ⚙️ Configuración General
 
-URL Base (Local): http://localhost:8081/api
-
-Formato de Datos: JSON
-
-Cabecera Obligatoria: Content-Type: application/json
-
-Seguridad: JWT (JSON Web Token).
+| Configuración | Valor |
+| :--- | :--- |
+| **URL Base (Local)** | `http://localhost:8081/api` |
+| **Formato** | JSON |
+| **Seguridad** | JWT (JSON Web Token) |
 
 Todas las peticiones (salvo /auth) requieren la cabecera: Authorization: Bearer <tu_token_aqui>
 

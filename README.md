@@ -17,8 +17,12 @@ Esta documentación describe los endpoints, formatos de datos y flujos de seguri
 | **Formato** | JSON |
 | **Seguridad** | JWT (JSON Web Token) |
 
-Todas las peticiones (salvo /auth) requieren la cabecera: Authorization: Bearer <tu_token_aqui>
-
+**Cabeceras Requeridas:**
+Todas las peticiones (excepto Auth) requieren:
+```http
+Content-Type: application/json
+Authorization: Bearer <tu_token_aqui>
+```
 ---
 
 ## 🔁 Flujo de Trabajo Típico (Workflow)

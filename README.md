@@ -1,15 +1,15 @@
-# 🚗 CarLog
+# CarLog
 > **Plataforma Full Stack para la gestión integral de talleres mecánicos.** > Arquitectura RESTful robusta y escalable.
 
 ![Angular](https://img.shields.io/badge/Frontend-Angular-dd0031?style=flat&logo=angular)
 ![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring)
 ![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql)
 ![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker)
-## 📘 CarLog API - Guía de Referencia y Uso
+## CarLog API - Guía de Referencia y Uso
 
 Esta documentación describe los endpoints, formatos de datos y flujos de seguridad de la API REST de CarLog (Sistema de Gestión de Talleres).
 
-## ⚙️ Configuración General
+## Configuración General
 
 | Configuración | Valor |
 | :--- | :--- |
@@ -25,7 +25,7 @@ Authorization: Bearer <tu_token_aqui>
 ```
 ---
 
-## 🔁 Flujo de Trabajo Típico (Workflow)
+## Flujo de Trabajo Típico (Workflow)
 
 Registrarse en **/auth/register** {POST} (Obtienes Token).
 
@@ -41,7 +41,7 @@ Añadir Líneas en **/workorders/{id}/lines** {POST} (Añades piezas y mano de o
 
 Cerrar Orden en **/workorders/{id}** {POST} (Cambias estado a COMPLETED y se cierra la ficha de reparación).
 
-## 🔐 1. Autenticación (Auth)
+## 1. Autenticación (Auth)
 
 Accesible públicamente.
 
@@ -95,7 +95,7 @@ Obtiene el token de acceso.
 ```
 
 
-## 📋 2. Gestión de Órdenes (WorkOrders)
+## 2. Gestión de Órdenes (WorkOrders)
 
 Requiere Auth Token.
 
@@ -147,7 +147,7 @@ Actualiza el estado o las notas. Si se pasa a COMPLETED, se genera fecha de cier
 (Estados: PENDING, IN_PROGRESS, COMPLETED, CANCELLED)
 
 ---
-### 🛠️ 3. Facturación (Líneas de Orden)
+### 3. Facturación (Líneas de Orden)
 
 El sistema calcula automáticamente: (Cantidad * Precio) + IVA - Descuento.
 
@@ -178,7 +178,7 @@ Borrar Línea
 
 **URL**: /workorders/{orderId}/lines/{lineId}
 
-### 🚗 4. Vehículos (Vehicles)
+### 4. Vehículos (Vehicles)
 
 Registrar Vehículo
 
@@ -227,7 +227,7 @@ Cambia el dueño del vehículo. Requiere validación del dueño actual.
 
 Params: ?currentOwnerId=1234A&newOwnerId=5678B
 
-⚠️ Tabla de Errores Comunes
+Tabla de Errores Comunes
 
 | Código | Significado  | Causa probable                                | Solución                                        |
 |--------|--------------|-----------------------------------------------|-------------------------------------------------|

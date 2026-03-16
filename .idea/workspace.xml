@@ -48,7 +48,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
-    &quot;Application.BackendApplication.executor&quot;: &quot;Coverage&quot;,
+    &quot;Application.BackendApplication.executor&quot;: &quot;Run&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
@@ -107,7 +107,10 @@
       <updated>1767975137248</updated>
       <workItem from="1772699815208" duration="6473000" />
       <workItem from="1772782683764" duration="2496000" />
-      <workItem from="1772789600393" duration="3068000" />
+      <workItem from="1772789600393" duration="3687000" />
+      <workItem from="1773320206420" duration="772000" />
+      <workItem from="1773393507344" duration="824000" />
+      <workItem from="1773647843064" duration="2095000" />
     </task>
     <task id="LOCAL-00001" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
       <option name="closed" value="true" />
@@ -117,7 +120,15 @@
       <option name="project" value="LOCAL" />
       <updated>1772707281693</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
+      <option name="closed" value="true" />
+      <created>1772803686418</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1772803686418</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -139,7 +150,7 @@
     <option name="LAST_COMMIT_MESSAGE" value="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1772796445503" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.carlog.backend.*</FILTER>
     </SUITE>
   </component>

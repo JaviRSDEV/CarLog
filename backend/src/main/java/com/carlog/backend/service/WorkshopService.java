@@ -1,12 +1,16 @@
 package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewWorkshopDTO;
+import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.WorkshopNotFoundException;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
+import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +20,7 @@ import java.util.List;
 public class WorkshopService {
 
     private final WorkshopJpaRepository workshopJpaRepository;
+    private final UserJpaRepository userJpaRepository;
 
     public List<Workshop> getAll(){
         var result = workshopJpaRepository.findAll();
@@ -31,12 +36,34 @@ public class WorkshopService {
     public NewWorkshopDTO add(NewWorkshopDTO dto){
         var result = workshopJpaRepository.findByWorkshopName(dto.workshopName());
         if(result.isPresent()) throw new RuntimeException("Ya existe un taller con ese nombre " + dto.workshopName());
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String loggedUserEmail;
+
+        if(principal instanceof UserDetails){
+            loggedUserEmail = ((UserDetails) principal).getUsername();
+        }else{
+            loggedUserEmail = principal.toString();
+        }
+
+        User workshopOwner = userJpaRepository.findByEmail(loggedUserEmail).orElseThrow(() -> new UserNotFoundException());
+
         var newWorkshop = Workshop.builder().workshopName(dto.workshopName()).address(dto.address()).workshopPhone(dto.workshopPhone()).workshopEmail(dto.workshopEmail()).icon(dto.icon()).build();
+
+        userJpaRepository.save(workshopOwner);
+        workshopOwner.setWorkshop(newWorkshop);
         return NewWorkshopDTO.of(workshopJpaRepository.save(newWorkshop));
     }
 
     public NewWorkshopDTO edit(NewWorkshopDTO dto, String name){
         return workshopJpaRepository.findByWorkshopName(name).map(workshop -> {
+            if(!workshop.getWorkshopName().equalsIgnoreCase(dto.workshopName())){
+                var existingWorkshop = workshopJpaRepository.findByWorkshopName(dto.workshopName());
+                if(existingWorkshop.isPresent()){
+                    throw new RuntimeException("Error: ya existe otro taller registrado con ese nombre");
+                }
+            }
+
             workshop.setWorkshopName(dto.workshopName());
             workshop.setAddress(dto.address());
             workshop.setWorkshopPhone(dto.workshopPhone());
@@ -52,11 +79,5 @@ public class WorkshopService {
         if(result.isEmpty()) throw new WorkshopNotFoundException(name);
         workshopJpaRepository.deleteByWorkshopName(name);
         return NewWorkshopDTO.of(result.get());
-    }
-
-    public List<User> getEmployeesByWorkshopId(Long id){
-        if(!workshopJpaRepository.existsById(id)) throw new WorkshopNotFoundException(id);
-        var result = workshopJpaRepository.findUserByWorkshopId(id);
-        return result;
     }
 }

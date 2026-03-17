@@ -115,4 +115,10 @@ public class UserService {
         employee.setWorkshop(manager.getWorkshop());
         return NewUserDTO.of(userJpaRepository.save(employee));
     }
+
+    public List<User> getEmployeesByWorkshopId(Long id){
+        if(!workshopJpaRepository.existsById(id)) throw new WorkshopNotFoundException(id);
+        var result = workshopJpaRepository.findUserByWorkshopId(id);
+        return result;
+    }
 }

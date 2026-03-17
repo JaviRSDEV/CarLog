@@ -38,7 +38,7 @@ public class Workshop {
     private String icon;
 
     @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
-    @JsonIgnore // ¡IMPORTANTE! Para que al pedir un taller no te devuelva los usuarios, y los usuarios el taller...
+    @JsonIgnore
     private List<User> employees;
 
     @OneToMany(mappedBy = "workshop")

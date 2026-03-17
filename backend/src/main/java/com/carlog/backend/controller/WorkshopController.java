@@ -3,6 +3,7 @@ package com.carlog.backend.controller;
 import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
+import com.carlog.backend.service.UserService;
 import com.carlog.backend.service.WorkshopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.List;
 public class WorkshopController {
 
     private final WorkshopService workshopService;
+    private final UserService userService;
 
     @GetMapping
     public List<Workshop> index(){
@@ -30,8 +32,8 @@ public class WorkshopController {
     }
 
     @GetMapping("/{ID}/employees")
-    public List<User> showEmployees(@PathVariable Long id){
-        return workshopService.getEmployeesByWorkshopId(id);
+    public List<User> showEmployees(@PathVariable Long ID){
+        return userService.getEmployeesByWorkshopId(ID);
     }
 
     @PostMapping

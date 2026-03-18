@@ -32,6 +32,8 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .role(user.getRole().name())
+                .workShop(null)
                 .build();
     }
 
@@ -44,10 +46,17 @@ public class AuthenticationService {
         );
 
         var user = userJpaRepository.findByEmail(authenticationRequest.getEmail()).orElseThrow();
-
         var jwtToken = jwtService.generateToken(user);
+
+        String workShopName = null;
+        if(user.getWorkshop() != null){
+            workShopName = user.getWorkshop().getWorkshopName();
+        }
+
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .role(user.getRole().name())
+                .workShop(workShopName)
                 .build();
     }
 }

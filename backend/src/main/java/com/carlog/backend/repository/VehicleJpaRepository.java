@@ -1,5 +1,6 @@
 package com.carlog.backend.repository;
 
+import com.carlog.backend.dto.NewVehicleDTO;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Vehicle;
 import jakarta.transaction.Transactional;
@@ -25,7 +26,11 @@ public interface VehicleJpaRepository extends JpaRepository<Vehicle, Long> {
     //Lista de vehiculos que actualmente estan dentro del taller
     List<Vehicle> findByWorkshop_WorkshopId(Long workshopId);
 
+    List<Vehicle> findByOwner_Dni(String dni);
+
     //Listado de clientes del taller, sacados a partir del campo de dueños de los vehiculos
-    @Query("SELECT DISTINCT v.owner FROM Vehicle v WHERE v.workshop.id = :workshopId")
+    @Query("SELECT DISTINCT v.owner FROM Vehicle v WHERE v.workshop.workshopId = :workshopId")
     List<User> findClientsByWorkshopId(@Param("workshopId") Long workshopId);
+
+    String owner(User owner);
 }

@@ -1,11 +1,13 @@
 package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewVehicleDTO;
+import com.carlog.backend.model.User;
 import com.carlog.backend.model.Vehicle;
 import com.carlog.backend.service.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,21 +21,26 @@ public class VehicleController {
     private final VehicleService vehicleService;
 
     @GetMapping
-    public ResponseEntity<List<Vehicle>> index(@RequestParam(required = false) Long workshopId){
+    public ResponseEntity<List<NewVehicleDTO>> index(@RequestParam(required = false) Long workshopId, @RequestParam(required = false) String ownerId){
         if(workshopId != null){
             return ResponseEntity.ok(vehicleService.getByWorkshop(workshopId));
+        }
+
+        if(ownerId != null){
+            return ResponseEntity.ok(vehicleService.getByOwner(ownerId));
         }
         return ResponseEntity.ok(vehicleService.getAll());
     }
 
     @GetMapping("/{plate}")
-    public ResponseEntity<Vehicle> showByPlate(@PathVariable String plate){
+    public ResponseEntity<NewVehicleDTO> showByPlate(@PathVariable String plate){
         return ResponseEntity.ok(vehicleService.getByPlate(plate));
     }
 
     @PostMapping
-    public ResponseEntity<NewVehicleDTO> store(@RequestBody NewVehicleDTO vehicle, @RequestHeader("User-Dni") String connectedUser){
-        return ResponseEntity.status(HttpStatus.CREATED).body(vehicleService.add(vehicle, connectedUser));
+    public ResponseEntity<NewVehicleDTO> store(@RequestBody NewVehicleDTO vehicle){
+        User connectedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.status(HttpStatus.CREATED).body(vehicleService.add(vehicle, connectedUser.getDni()));
     }
 
     @PutMapping("/{plate}")

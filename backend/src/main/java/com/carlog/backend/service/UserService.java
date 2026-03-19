@@ -20,22 +20,23 @@ public class UserService {
     private final UserJpaRepository userJpaRepository;
     private final WorkshopJpaRepository workshopJpaRepository;
 
-    public List<User> getAll(){
+    public List<NewUserDTO> getAll(){
         var result = userJpaRepository.findAll();
         if(result.isEmpty()) throw new UserNotFoundException();
-        return result;
+        return result.stream().map(NewUserDTO::of).toList();
     }
 
-    public User getByDni(String dni){
-        return userJpaRepository.findByDni(dni).orElseThrow(() -> new UserNotFoundException(dni));
+    public NewUserDTO getByDni(String dni){
+        User user = userJpaRepository.findByDni(dni).orElseThrow(() -> new UserNotFoundException(dni));
+        return NewUserDTO.of(user);
     }
 
-    public List<User> getByName(String name){
+    public List<NewUserDTO> getByName(String name){
         List<User> results = userJpaRepository.findByNameContainingIgnoreCase(name);
         if(results.isEmpty())
             throw new UserNotFoundException();
 
-        return results;
+        return results.stream().map(NewUserDTO::of).toList();
     }
 
     public NewUserDTO add(NewUserDTO dto){
@@ -59,7 +60,7 @@ public class UserService {
                     .orElseThrow(() -> new WorkshopNotFoundException(dto.workShopId()));
         }
 
-        var newUser = User.builder().dni(dto.dni()).name(dto.name()).email(dto.email()).phone(dto.phone()).password(dto.password()).role(dto.role()).mustChangePsswd(dto.mustChangePassword()).workshop(workshop).build();
+        var newUser = User.builder().dni(dto.dni()).name(dto.name()).email(dto.email()).phone(dto.phone()).role(dto.role()).mustChangePsswd(dto.mustChangePassword()).workshop(workshop).build();
         return NewUserDTO.of(userJpaRepository.save(newUser));
     }
 
@@ -69,7 +70,6 @@ public class UserService {
             user.setName(dto.name());
             user.setEmail(dto.email());
             user.setPhone(dto.phone());
-            user.setPassword(dto.password());
             user.setRole(dto.role());
             user.setMustChangePsswd(dto.mustChangePassword());
 
@@ -116,9 +116,9 @@ public class UserService {
         return NewUserDTO.of(userJpaRepository.save(employee));
     }
 
-    public List<User> getEmployeesByWorkshopId(Long id){
+    public List<NewUserDTO> getEmployeesByWorkshopId(Long id){
         if(!workshopJpaRepository.existsById(id)) throw new WorkshopNotFoundException(id);
         var result = workshopJpaRepository.findUserByWorkshopId(id);
-        return result;
+        return result.stream().map(NewUserDTO::of).toList();
     }
 }

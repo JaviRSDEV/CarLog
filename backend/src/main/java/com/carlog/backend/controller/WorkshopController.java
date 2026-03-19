@@ -1,5 +1,6 @@
 package com.carlog.backend.controller;
 
+import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
@@ -22,17 +23,17 @@ public class WorkshopController {
     private final UserService userService;
 
     @GetMapping
-    public List<Workshop> index(){
+    public List<NewWorkshopDTO> index(){
         return workshopService.getAll();
     }
 
     @GetMapping("/{name}")
-    public Workshop show(@PathVariable String name){
+    public NewWorkshopDTO show(@PathVariable String name){
         return workshopService.getByWorkshopName(name);
     }
 
     @GetMapping("/{ID}/employees")
-    public List<User> showEmployees(@PathVariable Long ID){
+    public List<NewUserDTO> showEmployees(@PathVariable Long ID){
         return userService.getEmployeesByWorkshopId(ID);
     }
 

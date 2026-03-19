@@ -25,20 +25,30 @@ public class VehicleService {
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
 
-    public List<Vehicle> getAll(){
+    public List<NewVehicleDTO> getAll(){
         var result = vehicleJpaRepository.findAll();
         if (result.isEmpty()) throw new VehicleNotFoundException();
-        return result;
+        return result.stream().map(NewVehicleDTO::of).toList();
     }
 
-    public List<Vehicle> getByWorkshop(Long workshopId){
+    public List<NewVehicleDTO> getByWorkshop(Long workshopId){
         var result = vehicleJpaRepository.findByWorkshop_WorkshopId(workshopId);
         if(result.isEmpty()) throw new VehicleNotFoundException();
-        return result;
+        return result.stream().map(NewVehicleDTO::of).toList();
     }
 
-    public Vehicle getByPlate(String plate){
-        return vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
+    public NewVehicleDTO getByPlate(String plate){
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
+
+        return NewVehicleDTO.of(vehicle);
+    }
+
+    public List<NewVehicleDTO> getByOwner(String ownerDni){
+        var result = vehicleJpaRepository.findByOwner_Dni(ownerDni);
+
+        if(result.isEmpty()) throw new VehicleNotFoundException();
+
+        return result.stream().map(NewVehicleDTO::of).toList();
     }
 
     public NewVehicleDTO add(NewVehicleDTO dto, String userDni){

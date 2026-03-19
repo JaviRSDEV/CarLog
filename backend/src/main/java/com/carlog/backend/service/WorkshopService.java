@@ -22,15 +22,17 @@ public class WorkshopService {
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
 
-    public List<Workshop> getAll(){
+    public List<NewWorkshopDTO> getAll(){
         var result = workshopJpaRepository.findAll();
         if(result.isEmpty())
             throw new WorkshopNotFoundException();
-        return result;
+        return result.stream().map(NewWorkshopDTO::of).toList();
     }
 
-    public Workshop getByWorkshopName(String name){
-        return workshopJpaRepository.findByWorkshopName(name).orElseThrow(() -> new WorkshopNotFoundException(name));
+    public NewWorkshopDTO getByWorkshopName(String name){
+        Workshop workshop = workshopJpaRepository.findByWorkshopName(name).orElseThrow(() -> new WorkshopNotFoundException(name));
+
+        return NewWorkshopDTO.of(workshop);
     }
 
     public NewWorkshopDTO add(NewWorkshopDTO dto){

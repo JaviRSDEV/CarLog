@@ -19,17 +19,17 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public List<User> index() {
+    public List<NewUserDTO> index() {
         return userService.getAll();
     }
 
     @GetMapping("/{DNI}")
-    public User show(@PathVariable String DNI){
+    public NewUserDTO show(@PathVariable String DNI){
         return userService.getByDni(DNI);
     }
 
     @GetMapping("/search/{name}")
-    public List<User> searchByName(@PathVariable String name){
+    public List<NewUserDTO> searchByName(@PathVariable String name){
         return userService.getByName(name);
     }
 

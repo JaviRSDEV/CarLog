@@ -114,7 +114,6 @@ public class VehicleService {
             if (vehicle.getWorkshop().getWorkshopId() == workshopId)
                 return NewVehicleDTO.of(vehicle);
 
-
             throw new VehicleOcuppiedException("El vehiculo esta registrado actualmente en el taller: " + vehicle.getWorkshop().getWorkshopName() +
                     " El cliente debe solicitar al taller que lo dé de baja primero");
 

@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Refactorizada la respuesta del login y registro">
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Refactorizados los servicios y controladores para devolver la respuesta mediante dto y solventar el problema de seguridad de devolver el objeto entero">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/GlobalExceptionHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/VehicleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/VehicleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/WorkshopController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/WorkshopController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NewUserDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NewUserDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/VehicleJpaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/VehicleJpaRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkshopService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkshopService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,7 +118,7 @@
       <workItem from="1773667402512" duration="3420000" />
       <workItem from="1773731890728" duration="5921000" />
       <workItem from="1773817556138" duration="6412000" />
-      <workItem from="1773906122639" duration="6854000" />
+      <workItem from="1773906122639" duration="9729000" />
     </task>
     <task id="LOCAL-00001" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
       <option name="closed" value="true" />
@@ -158,7 +152,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773852206480</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Refactorizados los servicios y controladores para devolver la respuesta mediante dto y solventar el problema de seguridad de devolver el objeto entero">
+      <option name="closed" value="true" />
+      <created>1773918843735</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1773918843735</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -179,7 +181,8 @@
     <MESSAGE value="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo" />
     <MESSAGE value="Refactorizados los servicios de usuario y taller (movido de sitio un metodo que correspondia al servicio de usuario) y añadida asignacion automatica de taller" />
     <MESSAGE value="Refactorizada la respuesta del login y registro" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactorizada la respuesta del login y registro" />
+    <MESSAGE value="Refactorizados los servicios y controladores para devolver la respuesta mediante dto y solventar el problema de seguridad de devolver el objeto entero" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactorizados los servicios y controladores para devolver la respuesta mediante dto y solventar el problema de seguridad de devolver el objeto entero" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

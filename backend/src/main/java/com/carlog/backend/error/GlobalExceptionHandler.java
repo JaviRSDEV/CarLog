@@ -34,4 +34,20 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
+
+    @ExceptionHandler(WorkOrderNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleWorkOrderNotFound(WorkOrderNotFoundException ex){
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(WorkshopNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleWorkshopNotFound(WorkshopNotFoundException ex){
+        Map<String, String> response = new HashMap<>();
+        response.put("error", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
 }

@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Añadidos métodos al controlador de excepciones">
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Refactorizado el dto del login para que devuelva el id del taller y el dni de la persona">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/auth/AuthenticationResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/auth/AuthenticationResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/auth/AuthenticationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/auth/AuthenticationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BBDD_CARLOG/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/BBDD_CARLOG/docker-compose.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,7 +119,7 @@
       <workItem from="1773817556138" duration="6412000" />
       <workItem from="1773906122639" duration="10021000" />
       <workItem from="1773991697573" duration="3340000" />
-      <workItem from="1774249950006" duration="2981000" />
+      <workItem from="1774249950006" duration="9353000" />
     </task>
     <task id="LOCAL-00001" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
       <option name="closed" value="true" />
@@ -178,7 +177,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773993075353</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Refactorizado el dto del login para que devuelva el id del taller y el dni de la persona">
+      <option name="closed" value="true" />
+      <created>1774266806982</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1774266806982</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -202,7 +209,8 @@
     <MESSAGE value="Refactorizados los servicios y controladores para devolver la respuesta mediante dto y solventar el problema de seguridad de devolver el objeto entero" />
     <MESSAGE value="Añadidor controlador global de excepciones" />
     <MESSAGE value="Añadidos métodos al controlador de excepciones" />
-    <option name="LAST_COMMIT_MESSAGE" value="Añadidos métodos al controlador de excepciones" />
+    <MESSAGE value="Refactorizado el dto del login para que devuelva el id del taller y el dni de la persona" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactorizado el dto del login para que devuelva el id del taller y el dni de la persona" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

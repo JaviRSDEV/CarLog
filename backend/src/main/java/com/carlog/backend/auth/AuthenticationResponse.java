@@ -15,4 +15,6 @@ public class AuthenticationResponse {
     private String role;
     private String workShop;
 
+    private String userId;
+    private Long workshopId;
 }

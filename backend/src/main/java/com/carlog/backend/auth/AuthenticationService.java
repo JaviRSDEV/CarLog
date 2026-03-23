@@ -33,6 +33,8 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .role(user.getRole().name())
+                .userId(user.getDni())
+                .workshopId(null)
                 .workShop(null)
                 .build();
     }
@@ -49,13 +51,17 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user);
 
         String workShopName = null;
+        Long workshopId = null;
         if(user.getWorkshop() != null){
             workShopName = user.getWorkshop().getWorkshopName();
+            workshopId = user.getWorkshop().getWorkshopId();
         }
 
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .role(user.getRole().name())
+                .userId(user.getDni())
+                .workshopId(workshopId)
                 .workShop(workShopName)
                 .build();
     }

@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Añadidor controlador global de excepciones">
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Añadidos métodos al controlador de excepciones">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/auth/AuthenticationResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/auth/AuthenticationResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/auth/AuthenticationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/auth/AuthenticationService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +119,8 @@
       <workItem from="1773731890728" duration="5921000" />
       <workItem from="1773817556138" duration="6412000" />
       <workItem from="1773906122639" duration="10021000" />
-      <workItem from="1773991697573" duration="1115000" />
+      <workItem from="1773991697573" duration="3340000" />
+      <workItem from="1774249950006" duration="2981000" />
     </task>
     <task id="LOCAL-00001" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
       <option name="closed" value="true" />
@@ -168,7 +170,15 @@
       <option name="project" value="LOCAL" />
       <updated>1773928819057</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Añadidos métodos al controlador de excepciones">
+      <option name="closed" value="true" />
+      <created>1773993075353</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1773993075353</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -191,7 +201,8 @@
     <MESSAGE value="Refactorizada la respuesta del login y registro" />
     <MESSAGE value="Refactorizados los servicios y controladores para devolver la respuesta mediante dto y solventar el problema de seguridad de devolver el objeto entero" />
     <MESSAGE value="Añadidor controlador global de excepciones" />
-    <option name="LAST_COMMIT_MESSAGE" value="Añadidor controlador global de excepciones" />
+    <MESSAGE value="Añadidos métodos al controlador de excepciones" />
+    <option name="LAST_COMMIT_MESSAGE" value="Añadidos métodos al controlador de excepciones" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

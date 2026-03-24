@@ -42,6 +42,7 @@ public class Vehicle {
     @Column(name = "Tires")
     private String tires;
 
+    @Lob
     @Column(name = "Image")
     private String image;
 

@@ -15,6 +15,11 @@ import com.carlog.backend.repository.WorkshopJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -56,6 +61,12 @@ public class VehicleService {
         User owner;
         Workshop currentWorkshop;
 
+        String finalImageRoute = dto.image();
+
+        if(dto.image() != null && dto.image().startsWith("data:image")){
+            finalImageRoute = saveImageOnDisk(dto.image(), dto.plate());
+        }
+
         //Comprueba si es un mecanico el que esta registrando el vehiculo o si es un cliente
         boolean isWorker = connectedUser.getRole() == Role.MECHANIC || connectedUser.getRole() == Role.MANAGER || connectedUser.getRole() == Role.CO_MANAGER || connectedUser.getRole() == Role.DIY;
         if(isWorker){
@@ -77,8 +88,43 @@ public class VehicleService {
         if(vehicleJpaRepository.findByPlate(dto.plate()).isPresent())
             throw new RuntimeException("Ya existe un vehiculo con la matricula " + dto.plate());
 
-        var newVehicle = Vehicle.builder().plate(dto.plate()).brand(dto.brand()).model(dto.model()).kilometers(dto.kilometers()).engine(dto.engine()).horsePower(dto.horsePower()).torque(dto.torque()).tires(dto.tires()).image(dto.image()).lastMaintenance(dto.lastMaintenance()).owner(owner).workshop(currentWorkshop).build();
+        var newVehicle = Vehicle.builder().plate(dto.plate()).brand(dto.brand()).model(dto.model()).kilometers(dto.kilometers()).engine(dto.engine()).horsePower(dto.horsePower()).torque(dto.torque()).tires(dto.tires()).image(finalImageRoute).lastMaintenance(dto.lastMaintenance()).owner(owner).workshop(currentWorkshop).build();
         return NewVehicleDTO.of(vehicleJpaRepository.save(newVehicle));
+    }
+
+    private String saveImageOnDisk(String base64Image, String plate){
+        try{
+            String extension = ".jpeg";
+            if(base64Image.contains("data:image/png")) extension = ".png";
+            else if (base64Image.contains("data:image/webp")) extension = ".webp";
+            else if (base64Image.contains("data:image/gif")) extension = ".gif";
+
+            String[] parts = base64Image.split(",");
+            String originalImage = parts.length > 1 ? parts[1] : parts[0];
+            byte[] imageBytes = Base64.getDecoder().decode(originalImage);
+
+            Path directory = Paths.get("uploads");
+            if(!Files.exists(directory)){
+                Files.createDirectories(directory);
+            }
+
+            String fileName = plate + extension;
+            Path absolutePath = directory.resolve(fileName);
+            int cont = 1;
+
+            while(Files.exists(absolutePath)){
+                fileName = plate + "(" + cont + ")" + extension;
+                absolutePath = directory.resolve(fileName);
+                cont++;
+            }
+
+            Files.write(absolutePath, imageBytes);
+
+            return "http://localhost:8081/uploads/" + fileName;
+        }catch (IOException e){
+            System.err.println("Error al guardar la imagen: " + e.getMessage());
+            return null;
+        }
     }
 
     public NewVehicleDTO edit(NewVehicleDTO dto, String plate){

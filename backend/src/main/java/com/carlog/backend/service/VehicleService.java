@@ -143,12 +143,26 @@ public class VehicleService {
         }
     }
 
+    private void deleteImageFromDisk(String imageUrl){
+        if(imageUrl == null || !imageUrl.contains("/uploads/")) return;
+
+        try{
+            String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+            Path filePath = Paths.get("uploads").resolve(fileName);
+
+            Files.deleteIfExists(filePath);
+        }catch (IOException e){
+            System.err.println(e.getMessage());
+        }
+    }
+
     public NewVehicleDTO edit(NewVehicleDTO dto, String plate){
         return vehicleJpaRepository.findByPlate(plate).map(vehicle -> {
             if(!dto.plate().equals(vehicle.getPlate()) && vehicleJpaRepository.findByPlate(dto.plate()).isPresent()){
                 throw new RuntimeException("La matrícula " + dto.plate() + " ya está en uso");
             }
 
+            List<String> oldImages = vehicle.getImages() != null ? new ArrayList<>(vehicle.getImages()) : new ArrayList<>();
             List<String> updatedImagesRoutes = new ArrayList<>();
             if(dto.images() != null && !dto.images().isEmpty()) {
                 for(int i = 0; i < dto.images().size(); i++){
@@ -161,6 +175,12 @@ public class VehicleService {
                         String savedRoute = saveImageOnDisk(img, dto.plate() + "_" + UUID.randomUUID().toString().substring(0,8));
                         if(savedRoute != null) updatedImagesRoutes.add(savedRoute);
                     }
+                }
+            }
+
+            for(String oldImageUrl : oldImages){
+                if(!updatedImagesRoutes.contains(oldImageUrl)){
+                    deleteImageFromDisk(oldImageUrl);
                 }
             }
 
@@ -226,8 +246,14 @@ public class VehicleService {
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
 
         NewVehicleDTO deletedVehicle = NewVehicleDTO.of(vehicle);
-        vehicleJpaRepository.delete(vehicle);
 
+        if(vehicle.getImages() != null){
+            for(String imageUrl : vehicle.getImages()){
+                deleteImageFromDisk(imageUrl);
+            }
+        }
+
+        vehicleJpaRepository.delete(vehicle);
         return deletedVehicle;
     }
 }

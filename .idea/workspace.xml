@@ -4,10 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Refactorizado el dto del login para que devuelva el id del taller y el dni de la persona">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/WebConfig.java" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Añadida gestión de imagenes con nombres de archivo dinamicos en funcion de la matricula del vehiculo al que pertenecen">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NewVehicleDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NewVehicleDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Vehicle.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Vehicle.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
     </list>
@@ -123,7 +122,8 @@
       <workItem from="1773906122639" duration="10021000" />
       <workItem from="1773991697573" duration="3340000" />
       <workItem from="1774249950006" duration="9353000" />
-      <workItem from="1774336452737" duration="4069000" />
+      <workItem from="1774336452737" duration="7726000" />
+      <workItem from="1774425762153" duration="7481000" />
     </task>
     <task id="LOCAL-00001" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
       <option name="closed" value="true" />
@@ -189,7 +189,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774266806982</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Añadida gestión de imagenes con nombres de archivo dinamicos en funcion de la matricula del vehiculo al que pertenecen">
+      <option name="closed" value="true" />
+      <created>1774343158160</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1774343158160</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -214,7 +222,8 @@
     <MESSAGE value="Añadidor controlador global de excepciones" />
     <MESSAGE value="Añadidos métodos al controlador de excepciones" />
     <MESSAGE value="Refactorizado el dto del login para que devuelva el id del taller y el dni de la persona" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactorizado el dto del login para que devuelva el id del taller y el dni de la persona" />
+    <MESSAGE value="Añadida gestión de imagenes con nombres de archivo dinamicos en funcion de la matricula del vehiculo al que pertenecen" />
+    <option name="LAST_COMMIT_MESSAGE" value="Añadida gestión de imagenes con nombres de archivo dinamicos en funcion de la matricula del vehiculo al que pertenecen" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

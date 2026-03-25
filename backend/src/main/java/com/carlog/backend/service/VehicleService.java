@@ -12,6 +12,7 @@ import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +20,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -61,10 +64,16 @@ public class VehicleService {
         User owner;
         Workshop currentWorkshop;
 
-        String finalImageRoute = dto.image();
+        List<String> finalImageRoutes = new ArrayList<>();
 
-        if(dto.image() != null && dto.image().startsWith("data:image")){
-            finalImageRoute = saveImageOnDisk(dto.image(), dto.plate());
+        if(dto.images() != null && !dto.images().isEmpty()){
+            for(int i = 0; i < dto.images().size(); i++){
+                String img = dto.images().get(i);
+                if(img != null && img.startsWith("data:image")){
+                    String savedRoute = saveImageOnDisk(img, dto.plate() + "_" + i);
+                    if(savedRoute != null) finalImageRoutes.add(savedRoute);
+                }
+            }
         }
 
         //Comprueba si es un mecanico el que esta registrando el vehiculo o si es un cliente
@@ -88,7 +97,21 @@ public class VehicleService {
         if(vehicleJpaRepository.findByPlate(dto.plate()).isPresent())
             throw new RuntimeException("Ya existe un vehiculo con la matricula " + dto.plate());
 
-        var newVehicle = Vehicle.builder().plate(dto.plate()).brand(dto.brand()).model(dto.model()).kilometers(dto.kilometers()).engine(dto.engine()).horsePower(dto.horsePower()).torque(dto.torque()).tires(dto.tires()).image(finalImageRoute).lastMaintenance(dto.lastMaintenance()).owner(owner).workshop(currentWorkshop).build();
+        var newVehicle = Vehicle.builder()
+                .plate(dto.plate())
+                .brand(dto.brand())
+                .model(dto.model())
+                .kilometers(dto.kilometers())
+                .engine(dto.engine())
+                .horsePower(dto.horsePower())
+                .torque(dto.torque())
+                .tires(dto.tires())
+                .images(finalImageRoutes)
+                .lastMaintenance(dto.lastMaintenance())
+                .owner(owner)
+                .workshop(currentWorkshop)
+                .build();
+
         return NewVehicleDTO.of(vehicleJpaRepository.save(newVehicle));
     }
 
@@ -110,13 +133,6 @@ public class VehicleService {
 
             String fileName = plate + extension;
             Path absolutePath = directory.resolve(fileName);
-            int cont = 1;
-
-            while(Files.exists(absolutePath)){
-                fileName = plate + "(" + cont + ")" + extension;
-                absolutePath = directory.resolve(fileName);
-                cont++;
-            }
 
             Files.write(absolutePath, imageBytes);
 
@@ -132,6 +148,22 @@ public class VehicleService {
             if(!dto.plate().equals(vehicle.getPlate()) && vehicleJpaRepository.findByPlate(dto.plate()).isPresent()){
                 throw new RuntimeException("La matrícula " + dto.plate() + " ya está en uso");
             }
+
+            List<String> updatedImagesRoutes = new ArrayList<>();
+            if(dto.images() != null && !dto.images().isEmpty()) {
+                for(int i = 0; i < dto.images().size(); i++){
+                    String img = dto.images().get(i);
+
+                    if(img.startsWith("http://") || img.startsWith("https://")){
+                        updatedImagesRoutes.add(img);
+                    }
+                    else if(img.startsWith("data:image")){
+                        String savedRoute = saveImageOnDisk(img, dto.plate() + "_" + UUID.randomUUID().toString().substring(0,8));
+                        if(savedRoute != null) updatedImagesRoutes.add(savedRoute);
+                    }
+                }
+            }
+
             vehicle.setPlate(dto.plate());
             vehicle.setBrand(dto.brand());
             vehicle.setModel(dto.model());
@@ -140,7 +172,7 @@ public class VehicleService {
             vehicle.setHorsePower(dto.horsePower());
             vehicle.setTorque(dto.torque());
             vehicle.setTires(dto.tires());
-            vehicle.setImage(dto.image());
+            vehicle.setImages(updatedImagesRoutes);
             vehicle.setLastMaintenance(dto.lastMaintenance());
             if(dto.ownerId() != null){
                 User u = userJpaRepository.findByDni(dto.ownerId()).orElseThrow(() -> new UserNotFoundException(dto.ownerId()));
@@ -189,10 +221,13 @@ public class VehicleService {
         return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
     }
 
+    @Transactional
     public NewVehicleDTO delete(String plate){
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
+
+        NewVehicleDTO deletedVehicle = NewVehicleDTO.of(vehicle);
         vehicleJpaRepository.delete(vehicle);
 
-        return NewVehicleDTO.of(vehicle);
+        return deletedVehicle;
     }
 }

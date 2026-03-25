@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -42,9 +44,13 @@ public class Vehicle {
     @Column(name = "Tires")
     private String tires;
 
-    @Lob
+    @ElementCollection
+    @CollectionTable(
+            name = "vehicle_images",
+            joinColumns = @JoinColumn(name = "vehicle_id")
+    )
     @Column(name = "Image")
-    private String image;
+    private List<String> images = new ArrayList<>();
 
     @Column(name = "LastMaintenance")
     LocalDate lastMaintenance;

@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Añadida funcionalidad de añadir varias imagenes, crearlas en la carpeta upload y poner un nombre dinamico">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Añadida la funcionalidad de eliminar imagenes en caso de borrarlas en el front, evitando así la basura residual">
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +120,7 @@
       <workItem from="1773991697573" duration="3340000" />
       <workItem from="1774249950006" duration="9353000" />
       <workItem from="1774336452737" duration="7726000" />
-      <workItem from="1774425762153" duration="8721000" />
+      <workItem from="1774425762153" duration="9025000" />
     </task>
     <task id="LOCAL-00001" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
       <option name="closed" value="true" />
@@ -203,7 +202,15 @@
       <option name="project" value="LOCAL" />
       <updated>1774454219553</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Añadida la funcionalidad de eliminar imagenes en caso de borrarlas en el front, evitando así la basura residual">
+      <option name="closed" value="true" />
+      <created>1774455630672</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1774455630672</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -230,7 +237,8 @@
     <MESSAGE value="Refactorizado el dto del login para que devuelva el id del taller y el dni de la persona" />
     <MESSAGE value="Añadida gestión de imagenes con nombres de archivo dinamicos en funcion de la matricula del vehiculo al que pertenecen" />
     <MESSAGE value="Añadida funcionalidad de añadir varias imagenes, crearlas en la carpeta upload y poner un nombre dinamico" />
-    <option name="LAST_COMMIT_MESSAGE" value="Añadida funcionalidad de añadir varias imagenes, crearlas en la carpeta upload y poner un nombre dinamico" />
+    <MESSAGE value="Añadida la funcionalidad de eliminar imagenes en caso de borrarlas en el front, evitando así la basura residual" />
+    <option name="LAST_COMMIT_MESSAGE" value="Añadida la funcionalidad de eliminar imagenes en caso de borrarlas en el front, evitando así la basura residual" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

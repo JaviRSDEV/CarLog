@@ -29,6 +29,8 @@ out-tsc/
 bazel-out/
 .angular/
 .vscode/
+uploads/
+*.webp
 npm-debug.log
 yarn-error.log
 package-lock.json # Opcional: Hay gente que lo sube y gente que no. Yo suelo subirlo.

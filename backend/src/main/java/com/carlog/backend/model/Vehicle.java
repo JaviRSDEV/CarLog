@@ -49,6 +49,7 @@ public class Vehicle {
             name = "vehicle_images",
             joinColumns = @JoinColumn(name = "vehicle_id")
     )
+
     @Column(name = "Image")
     private List<String> images = new ArrayList<>();
 

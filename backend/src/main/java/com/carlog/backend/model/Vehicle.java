@@ -65,4 +65,11 @@ public class Vehicle {
     @JoinColumn(name = "owner_id")
     @JsonIgnoreProperties({"vehicles", "workshop", "hibernateLazyInitializer", "handler"})
     private User owner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pending_workshop_id")
+    @JsonIgnoreProperties({"vehicles", "hibernateLazyInitializer", "handler"})
+    private Workshop pendingWorkshop;
+
+
 }

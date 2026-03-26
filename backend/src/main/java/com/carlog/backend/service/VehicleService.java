@@ -35,13 +35,13 @@ public class VehicleService {
 
     public List<NewVehicleDTO> getAll(){
         var result = vehicleJpaRepository.findAll();
-        if (result.isEmpty()) throw new VehicleNotFoundException();
+
         return result.stream().map(NewVehicleDTO::of).toList();
     }
 
     public List<NewVehicleDTO> getByWorkshop(Long workshopId){
         var result = vehicleJpaRepository.findByWorkshop_WorkshopId(workshopId);
-        if(result.isEmpty()) throw new VehicleNotFoundException();
+
         return result.stream().map(NewVehicleDTO::of).toList();
     }
 
@@ -53,8 +53,6 @@ public class VehicleService {
 
     public List<NewVehicleDTO> getByOwner(String ownerDni){
         var result = vehicleJpaRepository.findByOwner_Dni(ownerDni);
-
-        if(result.isEmpty()) throw new VehicleNotFoundException();
 
         return result.stream().map(NewVehicleDTO::of).toList();
     }
@@ -204,7 +202,7 @@ public class VehicleService {
     }
 
     //Metodo que evita que un taller pueda robarle el vehiculo a otro taller
-    public NewVehicleDTO registerEntry(String plate, Long workshopId){
+    /*public NewVehicleDTO registerEntry(String plate, Long workshopId){
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
         Workshop newWorkshop = workshopJpaRepository.findById(workshopId).orElseThrow(() -> new WorkshopNotFoundException(workshopId));
 
@@ -217,6 +215,57 @@ public class VehicleService {
 
         }
         vehicle.setWorkshop(newWorkshop);
+        return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
+    }*/
+
+    public NewVehicleDTO requestEntry(String plate, Long workshopId){
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+
+        Workshop requestingWorkshop = workshopJpaRepository.findById(workshopId)
+                .orElseThrow(() -> new WorkshopNotFoundException(workshopId));
+
+        if(vehicle.getWorkshop() != null){
+            throw new VehicleOcuppiedException("El vehículo ya está en el taller: " + vehicle.getWorkshop().getWorkshopName());
+        }
+
+        vehicle.setPendingWorkshop(requestingWorkshop);
+        return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
+    }
+
+    public NewVehicleDTO approveEntry(String plate, String email){
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        if(!vehicle.getOwner().getDni().equals(currentUser.getDni())) {
+            throw new RuntimeException("No tienes permiso para aprobar el ingreso de este vehículo");
+        }
+
+        if(vehicle.getPendingWorkshop() == null){
+            throw new RuntimeException("Este vehículo no tiene ninguna solicitud pendiente");
+        }
+
+        vehicle.setWorkshop(vehicle.getPendingWorkshop());
+        vehicle.setPendingWorkshop(null);
+
+        return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
+    }
+
+    public NewVehicleDTO rejectEntry(String plate, String email){
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException());
+
+        if(!vehicle.getOwner().getDni().equals(currentUser.getDni())){
+            throw new RuntimeException("No tienes permiso para rechazar el ingreso de este vehículo");
+        }
+
+        vehicle.setPendingWorkshop(null);
         return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
     }
 

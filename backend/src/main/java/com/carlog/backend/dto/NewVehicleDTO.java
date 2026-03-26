@@ -17,7 +17,8 @@ public record NewVehicleDTO(String plate,
                             List<String> images,
                             LocalDate lastMaintenance,
                             Long workshopId,
-                            String ownerId) {
+                            String ownerId,
+                            Long pendingWorkshopId) {
 
     public static NewVehicleDTO of(Vehicle v){
         return new NewVehicleDTO(
@@ -32,7 +33,8 @@ public record NewVehicleDTO(String plate,
                 v.getImages() != null ? new ArrayList<>(v.getImages()) : new ArrayList<>(),
                 v.getLastMaintenance(),
                 v.getWorkshop() != null ? v.getWorkshop().getWorkshopId(): null,
-                v.getOwner() != null ? v.getOwner().getDni(): null
+                v.getOwner() != null ? v.getOwner().getDni(): null,
+                v.getPendingWorkshop() != null ? v.getPendingWorkshop().getWorkshopId(): null
         );
     }
 }

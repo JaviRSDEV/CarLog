@@ -46,19 +46,14 @@ public class VehicleController {
     }
 
     @PutMapping("/{plate}")
-    public NewVehicleDTO update(@RequestBody NewVehicleDTO vehicleData, @PathVariable String plate){
-        return vehicleService.edit(vehicleData, plate);
+    public NewVehicleDTO update(@RequestBody NewVehicleDTO vehicleData, @PathVariable String plate, Principal principal){
+        return vehicleService.edit(vehicleData, plate, principal.getName());
     }
 
     @DeleteMapping("/{plate}")
-    public NewVehicleDTO destroy(@PathVariable String plate){
-        return vehicleService.delete(plate);
+    public NewVehicleDTO destroy(@PathVariable String plate, Principal principal){
+        return vehicleService.delete(plate, principal.getName());
     }
-
-    /*@PostMapping("/{plate}/entry")
-    public ResponseEntity<NewVehicleDTO> registerEntry(@PathVariable String plate, @RequestParam Long workshopId){
-        return ResponseEntity.ok(vehicleService.registerEntry(plate, workshopId));
-    }*/
 
     @PostMapping("/{plate}/exit/{workshopId}")
     public ResponseEntity<NewVehicleDTO> registerExit(@PathVariable String plate, @PathVariable Long workshopId){

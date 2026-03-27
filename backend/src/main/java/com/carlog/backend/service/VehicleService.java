@@ -154,8 +154,16 @@ public class VehicleService {
         }
     }
 
-    public NewVehicleDTO edit(NewVehicleDTO dto, String plate){
+    public NewVehicleDTO edit(NewVehicleDTO dto, String plate, String email){
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException());
+
         return vehicleJpaRepository.findByPlate(plate).map(vehicle -> {
+
+            if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
+                throw new RuntimeException("Acceso denegado: No tienes permiso para editar el vehículo");
+            }
+
             if(!dto.plate().equals(vehicle.getPlate()) && vehicleJpaRepository.findByPlate(dto.plate()).isPresent()){
                 throw new RuntimeException("La matrícula " + dto.plate() + " ya está en uso");
             }
@@ -200,23 +208,6 @@ public class VehicleService {
             return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
         }).orElseThrow(() -> new VehicleNotFoundException(plate));
     }
-
-    //Metodo que evita que un taller pueda robarle el vehiculo a otro taller
-    /*public NewVehicleDTO registerEntry(String plate, Long workshopId){
-        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
-        Workshop newWorkshop = workshopJpaRepository.findById(workshopId).orElseThrow(() -> new WorkshopNotFoundException(workshopId));
-
-        if(vehicle.getWorkshop() != null) {
-            if (vehicle.getWorkshop().getWorkshopId() == workshopId)
-                return NewVehicleDTO.of(vehicle);
-
-            throw new VehicleOcuppiedException("El vehiculo esta registrado actualmente en el taller: " + vehicle.getWorkshop().getWorkshopName() +
-                    " El cliente debe solicitar al taller que lo dé de baja primero");
-
-        }
-        vehicle.setWorkshop(newWorkshop);
-        return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
-    }*/
 
     public NewVehicleDTO requestEntry(String plate, Long workshopId){
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
@@ -291,9 +282,14 @@ public class VehicleService {
     }
 
     @Transactional
-    public NewVehicleDTO delete(String plate){
+    public NewVehicleDTO delete(String plate, String email){
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException());
 
+        if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
+            throw new RuntimeException("Acceso denegado: No tienes permiso para eliminar el vehículo");
+        }
         NewVehicleDTO deletedVehicle = NewVehicleDTO.of(vehicle);
 
         if(vehicle.getImages() != null){

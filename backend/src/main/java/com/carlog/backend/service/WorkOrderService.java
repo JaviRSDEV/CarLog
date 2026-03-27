@@ -1,9 +1,6 @@
 package com.carlog.backend.service;
 
-import com.carlog.backend.dto.NewWorkOrderDTO;
-import com.carlog.backend.dto.NewWorkOrderLineDTO;
-import com.carlog.backend.dto.NewWorkOrderResponseDTO;
-import com.carlog.backend.dto.UpdateWorkOrderDTO;
+import com.carlog.backend.dto.*;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.VehicleNotFoundException;
 import com.carlog.backend.error.WorkOrderNotFoundException;
@@ -26,22 +23,22 @@ public class WorkOrderService {
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final WorkOrderLineJpaRepository workOrderLineJpaRepository;
 
-    public List<WorkOrder> getAll(){
+    public List<NewWorkOrderResponseDTO> getAll(){
         var result = workOrderJpaRepository.findAll();
         if(result.isEmpty()) throw new WorkOrderNotFoundException();
-        return result;
+        return result.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 
-    public List<WorkOrder> getByEmployee(String dni){
+    public List<NewWorkOrderResponseDTO> getByEmployee(String dni){
         List<WorkOrder> workOrders = workOrderJpaRepository.findByMechanic_Dni(dni);
         if(workOrders.isEmpty()) throw new WorkOrderNotFoundException();
-        return workOrders;
+        return workOrders.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 
-    public List<WorkOrder> getByVehicle(String plate){
+    public List<NewWorkOrderResponseDTO> getByVehicle(String plate){
         List<WorkOrder> workOrders = workOrderJpaRepository.findByVehicle_Plate(plate);
         if(workOrders.isEmpty()) throw new WorkOrderNotFoundException();
-        return workOrders;
+        return workOrders.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 
     public NewWorkOrderResponseDTO add(NewWorkOrderDTO dto, String userEmail, String vehiclePlate){

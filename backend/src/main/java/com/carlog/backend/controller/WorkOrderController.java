@@ -23,7 +23,7 @@ public class WorkOrderController {
     private final WorkOrderService workOrderService;
 
     @GetMapping
-    public ResponseEntity<List<WorkOrder>> index(@RequestParam(required = false) String mechanicDni){
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> index(@RequestParam(required = false) String mechanicDni){
         if(mechanicDni != null)
             return ResponseEntity.ok(workOrderService.getByEmployee(mechanicDni));
 
@@ -31,12 +31,12 @@ public class WorkOrderController {
     }
 
     @GetMapping("/vehicle/{plate}")
-    public ResponseEntity<List<WorkOrder>> showByVehicle(@PathVariable String plate){
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByVehicle(@PathVariable String plate){
         return ResponseEntity.ok(workOrderService.getByVehicle(plate));
     }
 
     @GetMapping("/mechanic/{Dni}")
-    public ResponseEntity<List<WorkOrder>> showByMechanic(@PathVariable String dni){
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByMechanic(@PathVariable String dni){
         return ResponseEntity.ok(workOrderService.getByEmployee(dni));
     }
 

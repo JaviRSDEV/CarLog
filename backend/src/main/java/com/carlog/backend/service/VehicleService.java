@@ -5,12 +5,10 @@ import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.VehicleNotFoundException;
 import com.carlog.backend.error.VehicleOcuppiedException;
 import com.carlog.backend.error.WorkshopNotFoundException;
-import com.carlog.backend.model.Role;
-import com.carlog.backend.model.User;
-import com.carlog.backend.model.Vehicle;
-import com.carlog.backend.model.Workshop;
+import com.carlog.backend.model.*;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
+import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +30,7 @@ public class VehicleService {
     private final VehicleJpaRepository vehicleJpaRepository;
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final WorkOrderJpaRepository workOrderJpaRepository;
 
     public List<NewVehicleDTO> getAll(){
         var result = vehicleJpaRepository.findAll();
@@ -55,6 +54,16 @@ public class VehicleService {
         var result = vehicleJpaRepository.findByOwner_Dni(ownerDni);
 
         return result.stream().map(NewVehicleDTO::of).toList();
+    }
+
+    public List<NewVehicleDTO> getVehiclesAssignedToMechanic(String mechanicDni){
+        List<WorkOrder> workOrders = workOrderJpaRepository.findByMechanic_Dni(mechanicDni);
+
+        return workOrders.stream()
+                .map(WorkOrder::getVehicle)
+                .distinct()
+                .map(NewVehicleDTO::of)
+                .toList();
     }
 
     public NewVehicleDTO add(NewVehicleDTO dto, String userDni){

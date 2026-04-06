@@ -3,6 +3,7 @@ package com.carlog.backend.repository;
 import com.carlog.backend.model.WorkOrder;
 import com.carlog.backend.model.WorkOrderStatus;
 import jakarta.transaction.Transactional;
+import org.hibernate.jdbc.Work;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -35,6 +35,11 @@ public class WorkOrderService {
         return workOrders.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 
+    public NewWorkOrderResponseDTO getById(Long id){
+        WorkOrder workOrder = workOrderJpaRepository.findById(id).orElseThrow(() -> new WorkOrderNotFoundException());
+        return NewWorkOrderResponseDTO.of(workOrder);
+    }
+
     public List<NewWorkOrderResponseDTO> getByVehicle(String plate){
         List<WorkOrder> workOrders = workOrderJpaRepository.findByVehicle_Plate(plate);
         if(workOrders.isEmpty()) throw new WorkOrderNotFoundException();

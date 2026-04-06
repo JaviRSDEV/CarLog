@@ -40,6 +40,11 @@ public class WorkOrderController {
         return ResponseEntity.ok(workOrderService.getByEmployee(dni));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<NewWorkOrderResponseDTO> show(@PathVariable Long id){
+        return ResponseEntity.ok(workOrderService.getById(id));
+    }
+
     @PostMapping
     public ResponseEntity<NewWorkOrderResponseDTO> store(@RequestBody NewWorkOrderDTO workOrder, Principal principal){
         String userEmail = principal.getName();

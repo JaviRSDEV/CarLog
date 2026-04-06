@@ -22,9 +22,12 @@ public record NewWorkOrderResponseDTO(Long id,
     public static NewWorkOrderResponseDTO of(WorkOrder wo){
 
         List<NewWorkOrderLineResponseDTO> linesDto = wo.getLines().stream().map(line -> new NewWorkOrderLineResponseDTO(
+                line.getId(),
                 line.getConcept(),
                 line.getQuantity(),
                 line.getPricePerUnit(),
+                line.getIVA(),
+                line.getDiscount(),
                 line.getSubTotal()
         )).toList();
 

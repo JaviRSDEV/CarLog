@@ -5,6 +5,7 @@ import com.carlog.backend.dto.NewWorkOrderLineDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.UpdateWorkOrderDTO;
 import com.carlog.backend.model.WorkOrder;
+import com.carlog.backend.model.WorkOrderLine;
 import com.carlog.backend.service.WorkOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -69,6 +70,11 @@ public class WorkOrderController {
     @DeleteMapping("/{orderId}/lines/{lineId}")
     public ResponseEntity<NewWorkOrderResponseDTO> deleteLine(@PathVariable Long orderId, @PathVariable Long lineId){
         return ResponseEntity.ok(workOrderService.deleteLine(orderId, lineId));
+    }
+
+    @PutMapping("/{orderId}/lines/{lineId}")
+    public ResponseEntity<NewWorkOrderResponseDTO> updateWorkOrderLine(@PathVariable Long orderId, @PathVariable Long lineId, @RequestBody NewWorkOrderLineDTO lineData){
+        return ResponseEntity.ok(workOrderService.updateWorkOrderLine(orderId, lineId, lineData));
     }
 
 }

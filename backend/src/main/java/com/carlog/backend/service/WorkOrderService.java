@@ -132,4 +132,37 @@ public class WorkOrderService {
     }
 
 
+    public NewWorkOrderResponseDTO updateWorkOrderLine(Long orderId, Long lineId, NewWorkOrderLineDTO lineData) {
+        WorkOrderLine line = workOrderLineJpaRepository.findById(lineId)
+                .orElseThrow(() -> new RuntimeException("Linea no encontrada"));
+
+        if(!line.getWorkOrder().getId().equals(orderId)){
+            throw new RuntimeException("Error: la línea " + lineId + " no pertenece a la orden " + orderId);
+        }
+
+        WorkOrder order = line.getWorkOrder();
+
+        if(order.getStatus() == WorkOrderStatus.COMPLETED){
+            throw new RuntimeException("No se pueden editar líneas de una orden cerrada");
+        }
+
+        line.setConcept(lineData.concept());
+        line.setQuantity(lineData.quantity());
+        line.setPricePerUnit(lineData.pricePerUnit());
+        line.setIVA(lineData.IVA());
+        line.setDiscount(lineData.discount());
+
+        line.calculateSubTotal();
+
+        double newTotalAmount = order.getLines().stream()
+                .mapToDouble(WorkOrderLine::getSubTotal)
+                .sum();
+
+        newTotalAmount = Math.round(newTotalAmount * 100.0) /100.0;
+        order.setTotalAmount(newTotalAmount);
+
+        WorkOrder updatedOrder = workOrderJpaRepository.save(order);
+
+        return NewWorkOrderResponseDTO.of(updatedOrder);
+    }
 }

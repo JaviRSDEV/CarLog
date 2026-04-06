@@ -7,7 +7,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record NewWorkOrderResponseDTO(String description,
+public record NewWorkOrderResponseDTO(Long id,
+                                      String description,
                                       String mechanicNotes,
                                       WorkOrderStatus status,
                                       LocalDateTime createdAt,
@@ -28,6 +29,7 @@ public record NewWorkOrderResponseDTO(String description,
         )).toList();
 
         return new NewWorkOrderResponseDTO(
+                wo.getId(),
                 wo.getDescription(),
                 wo.getMechanicNotes(),
                 wo.getStatus(),

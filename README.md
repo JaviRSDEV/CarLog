@@ -6,7 +6,7 @@
 
 ## Descripción del Proyecto
 
-CarLog es una plataforma **Full Stack** para la gestión integral de talleres mecánicos, diseñada con una arquitectura RESTful robusta y escalable [1](#0-0) . El sistema facilita el ciclo completo de vida de vehículos, desde su entrada en taller hasta la facturación final.
+CarLog es una plataforma **Full Stack** para la gestión integral de talleres mecánicos, diseñada con una arquitectura RESTful robusta y escalable. El sistema facilita el ciclo completo de vida de vehículos, desde su entrada en taller hasta la facturación final.
 
 ## Stack Tecnológico
 

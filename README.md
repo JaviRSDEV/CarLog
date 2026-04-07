@@ -1,231 +1,156 @@
-# CarLog
-> **Plataforma Full Stack para la gestión integral de talleres mecánicos.** > Arquitectura RESTful robusta y escalable.
-
+# CarLog - README Principal
 ![Angular](https://img.shields.io/badge/Frontend-Angular-dd0031?style=flat&logo=angular)
 ![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring)
 ![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql)
 ![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker)
-## CarLog API - Guía de Referencia y Uso
 
-Esta documentación describe los endpoints, formatos de datos y flujos de seguridad de la API REST de CarLog (Sistema de Gestión de Talleres).
+## Descripción del Proyecto
 
-## Configuración General
+CarLog es una plataforma **Full Stack** para la gestión integral de talleres mecánicos, diseñada con una arquitectura RESTful robusta y escalable [1](#0-0) . El sistema facilita el ciclo completo de vida de vehículos, desde su entrada en taller hasta la facturación final.
 
-| Configuración | Valor |
-| :--- | :--- |
-| **URL Base (Local)** | `http://localhost:8081/api` |
-| **Formato** | JSON |
-| **Seguridad** | JWT (JSON Web Token) |
+## Stack Tecnológico
 
-**Cabeceras Requeridas:**
-Todas las peticiones (excepto Auth) requieren:
-```http
-Content-Type: application/json
-Authorization: Bearer <tu_token_aqui>
+| Componente | Tecnología |
+|------------|------------|
+| **Frontend** | Angular [2](#0-1)  |
+| **Backend** | Spring Boot [3](#0-2)  |
+| **Base de Datos** | MySQL [4](#0-3)  |
+| **Seguridad** | JWT (JSON Web Token) [5](#0-4)  |
+| **Despliegue** | Docker [6](#0-5)  |
+
+## Estructura del Proyecto
+
 ```
+CarLog/
+├── backend/                 # Aplicación Spring Boot
+│   └── src/main/java/com/carlog/backend/
+│       └── BackendApplication.java
+├── frontend/               # Aplicación Angular
+├── docker-compose.yml      # Configuración Docker
+└── README.md              # Esta documentación
+```
+
+## Inicio Rápido
+
+### Prerrequisitos
+- Docker y Docker Compose
+- Java 17+ (para desarrollo local)
+- Node.js 18+ (para desarrollo local)
+
+### Ejecución con Docker
+```bash
+# Clonar el repositorio
+git clone https://github.com/JaviRSDEV/CarLog.git
+cd CarLog
+
+# Iniciar todos los servicios
+docker-compose up -d
+```
+
+La aplicación estará disponible en:
+- Frontend: `http://localhost:4200`
+- Backend API: `http://localhost:8081/api`
+
+## Documentación
+
+- **[API Reference](./README.md)** - Documentación completa de endpoints REST
+- **[Getting Started & Deployment](wiki)** - Guía detallada de configuración
+- **[System Architecture](wiki)** - Arquitectura y patrones de diseño
+
+## Roles del Sistema
+
+CarLog soporta múltiples roles de usuario [7](#0-6) :
+- **MANAGER**: Gestión completa del taller
+- **MECHANIC**: Operaciones de reparación y diagnóstico
+- **CLIENT**: Seguimiento de sus vehículos
+- **DIY**: Entusiastas del bricolaje automotriz
+
+## Flujo de Autenticación
+
+1. **Registro**: `POST /api/auth/register` [8](#0-7) 
+2. **Login**: `POST /api/auth/authenticate` [9](#0-8) 
+3. **Uso**: Incluir token JWT en cabecera `Authorization: Bearer <token>` [10](#0-9) 
+
+## Flujo de Trabajo Principal
+
+```mermaid
+graph LR
+    A[Registro Vehículo] --> B[Entrada Taller]
+    B --> C[Crear Orden]
+    C --> D[Añadir Líneas]
+    D --> E[Cerrar Orden]
+    E --> F[Facturación]
+```
+
+## Licencia
+
+Este proyecto está bajo licencia MIT - ver archivo [LICENSE](LICENSE) para detalles.
+
 ---
 
-## Flujo de Trabajo Típico (Workflow)
+## Notes
 
-Registrarse en **/auth/register** {POST} (Obtienes Token).
+Este README sirve como punto de entrada principal al proyecto CarLog. Para documentación técnica detallada de la API, endpoints específicos y ejemplos de uso, consulta el archivo [README.md](README.md) existente que contiene la referencia completa de la API REST del sistema.
 
-Login en **/auth/authenticate** {POST} (Si necesitas renovar el Token).
+Wiki pages you might want to explore:
+- [CarLog Overview (JaviRSDEV/CarLog)](/wiki/JaviRSDEV/CarLog#1)
 
-Registrar Vehículo en **/vehicles** {POST} (Opcional si ya existe).
+### Citations
 
-Entrada a Taller en **/vehicles/{plate}/entry** {POST} (El mecánico registra la entrada del coche al taller).
+**File:** README.md (L1-2)
+```markdown
+# CarLog
+> **Plataforma Full Stack para la gestión integral de talleres mecánicos.** > Arquitectura RESTful robusta y escalable.
+```
 
-Crear Orden en **/workorders** {POST} (Creas la ficha de reparación).
+**File:** README.md (L4-4)
+```markdown
+![Angular](https://img.shields.io/badge/Frontend-Angular-dd0031?style=flat&logo=angular)
+```
 
-Añadir Líneas en **/workorders/{id}/lines** {POST} (Añades piezas y mano de obra).
+**File:** README.md (L5-5)
+```markdown
+![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring)
+```
 
-Cerrar Orden en **/workorders/{id}** {POST} (Cambias estado a COMPLETED y se cierra la ficha de reparación).
+**File:** README.md (L6-6)
+```markdown
+![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql)
+```
 
-## 1. Autenticación (Auth)
+**File:** README.md (L7-7)
+```markdown
+![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker)
+```
 
-Accesible públicamente.
+**File:** README.md (L18-18)
+```markdown
+| **Seguridad** | JWT (JSON Web Token) |
+```
 
-Registrar Usuario
+**File:** README.md (L24-24)
+```markdown
+Authorization: Bearer <tu_token_aqui>
+```
 
-Crea una nueva cuenta (Mecánico, Manager, Cliente, DIY).
-
-**Método**: POST
-
+**File:** README.md (L54-54)
+```markdown
 **URL**: /auth/register
+```
 
-**Body**:
-
-```json
-{
-  "dni": "12345678Z",
-  "name": "Pepe",
-  "lastname": "Mecánico",
-  "email": "pepe@carlog.com",
-  "password": "securePass123",
-  "phone": "600123456",
+**File:** README.md (L66-70)
+```markdown
   "role": "MECHANIC" 
 }
 ```
 
 (Roles disponibles: MANAGER, MECHANIC, CLIENT, DIY)
----
-### Iniciar Sesión
+```
 
-Obtiene el token de acceso.
-
-**Método**: POST
-
+**File:** README.md (L78-78)
+```markdown
 **URL**: /auth/authenticate
-
-**Body**:
-
-```json
-{
-  "email": "pepe@carlog.com",
-  "password": "securePass123"
-}
 ```
-
-**Respuesta Exitosa:**
-
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOi..."
-}
-```
-
-
-## 2. Gestión de Órdenes (WorkOrders)
-
-Requiere Auth Token.
-
-Crear Nueva Orden
-
-Abre una orden de trabajo para un vehículo específico. El sistema asigna automáticamente el mecánico logueado y su taller.
-
-**Método** POST
-
-**URL**: /workorders
-
-**Headers Específicos**:
-
-**Vehicle-plate**: 1234-BBB (Matrícula del coche a reparar)
-
-**Body**:
-
-```json
-{
-  "description": "El cliente reporta ruido en los frenos y solicita cambio de aceite."
-}
-```
----
-Listar Órdenes
-
-**Método**: GET
-
-**URL**: /workorders
-
-**Opcional**: /workorders?mechanicDni=12345678Z (Filtrar por mecánico)
----
-Cerrar Orden / Editar Notas
-
-Actualiza el estado o las notas. Si se pasa a COMPLETED, se genera fecha de cierre y se bloquea la edición de líneas.
-
-**Método**: PUT
-
-**URL**: /workorders/{id}
-
-**Body**:
-
-```json
-{
-  "status": "COMPLETED",
-  "mechanicNotes": "Reparación finalizada con éxito. Vehículo probado."
-}
-```
-
-(Estados: PENDING, IN_PROGRESS, COMPLETED, CANCELLED)
-
----
-### 3. Facturación (Líneas de Orden)
-
-El sistema calcula automáticamente: (Cantidad * Precio) + IVA - Descuento.
-
-Añadir Línea (Pieza o Mano de Obra)
-
-**Método**: POST
-
-**URL**: /workorders/{orderId}/lines
-
-**Body**:
-
-```json
-{
-  "concept": "Juego de Pastillas de Freno",
-  "quantity": 1.0,
-  "pricePerUnit": 100.0,
-  "IVA": 21.0,       // Opcional (Default: 0.0)
-  "discount": 10.0   // Opcional (Default: 0.0)
-}
-```
-
-Respuesta: Devuelve la orden completa con el totalAmount recalculado.
-
----
-Borrar Línea
-
-**Método**: DELETE
-
-**URL**: /workorders/{orderId}/lines/{lineId}
-
-### 4. Vehículos (Vehicles)
-
-Registrar Vehículo
-
-**Método**: POST
-
-**URL**: /vehicles
-
-**Body**:
-
-```json
-{
-  "plate": "9999-ZZZ",
-  "brand": "Toyota",
-  "model": "Corolla",
-  "kilometers": 15000,
-  "engine": "Híbrido",
-  "ownerId": "87654321X" // Opcional. Si se omite, se asigna al usuario logueado.
-}
-```
----
-Registrar Entrada en Taller (Check-in)
-
-Mueve el coche al taller especificado. Falla si el coche ya está en otro taller.
-
-**Método**: POST
-
-**URL**: /vehicles/{plate}/entry?workshopId=1
-
----
-Registrar Salida (Check-out)
-
-Libera el coche del taller.
-
-**Método**: POST
-
-**URL**: /vehicles/{plate}/exit?workshopId=1
-
----
-Transferir Propiedad (Venta)
-
-Cambia el dueño del vehículo. Requiere validación del dueño actual.
-
-**Método**: POST
-
-**URL**: /vehicles/{plate}/transfer
-
-Params: ?currentOwnerId=1234A&newOwnerId=5678B
 
 Tabla de Errores Comunes
 

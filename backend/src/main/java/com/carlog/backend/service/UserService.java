@@ -117,8 +117,10 @@ public class UserService {
     }
 
     public List<NewUserDTO> getEmployeesByWorkshopId(Long id){
-        if(!workshopJpaRepository.existsById(id)) throw new WorkshopNotFoundException(id);
-        var result = workshopJpaRepository.findUserByWorkshopId(id);
-        return result.stream().map(NewUserDTO::of).toList();
+        Workshop workshop = workshopJpaRepository.findById(id)
+                .orElseThrow(() -> new WorkshopNotFoundException(id));
+
+        return workshop.getEmployees().stream()
+                .map(NewUserDTO::of).toList();
     }
 }

@@ -2,7 +2,9 @@ package com.carlog.backend.dto;
 
 import com.carlog.backend.model.Workshop;
 
-public record NewWorkshopDTO(String workshopName,
+public record NewWorkshopDTO(
+                             Long workshopId,
+                             String workshopName,
                              String address,
                              String workshopPhone,
                              String workshopEmail,
@@ -10,6 +12,7 @@ public record NewWorkshopDTO(String workshopName,
 
     public static NewWorkshopDTO of(Workshop w){
         return new NewWorkshopDTO(
+                w.getWorkshopId(),
                 w.getWorkshopName(),
                 w.getAddress(),
                 w.getWorkshopPhone(),

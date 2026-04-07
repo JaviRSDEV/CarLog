@@ -77,4 +77,8 @@ public class WorkOrderController {
         return ResponseEntity.ok(workOrderService.updateWorkOrderLine(orderId, lineId, lineData));
     }
 
+    @PatchMapping("/{orderId}/reassign")
+    public ResponseEntity<NewWorkOrderResponseDTO> reassignWorkOrder(@PathVariable Long orderId, @RequestParam String newMechanicId){
+        return ResponseEntity.ok(workOrderService.reassignMechanic(orderId, newMechanicId));
+    }
 }

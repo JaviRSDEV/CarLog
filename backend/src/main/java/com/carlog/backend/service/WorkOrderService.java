@@ -165,4 +165,21 @@ public class WorkOrderService {
 
         return NewWorkOrderResponseDTO.of(updatedOrder);
     }
+
+    public NewWorkOrderResponseDTO reassignMechanic(Long orderId, String newMechanicId){
+        WorkOrder workOrder = workOrderJpaRepository.findById(orderId)
+                .orElseThrow(() -> new WorkOrderNotFoundException());
+
+        User newMechanic = userJpaRepository.findByDni(newMechanicId)
+                .orElseThrow(() -> new UserNotFoundException(newMechanicId));
+
+        if(workOrder.getWorkshop().getWorkshopId() != newMechanic.getWorkshop().getWorkshopId()){
+            throw new RuntimeException("Error: El mecánico seleccionado no pertenece a este taller");
+        }
+
+        workOrder.setMechanic(newMechanic);
+        WorkOrder updatedOrder = workOrderJpaRepository.save(workOrder);
+
+        return NewWorkOrderResponseDTO.of(updatedOrder);
+    }
 }

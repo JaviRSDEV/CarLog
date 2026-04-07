@@ -25,9 +25,9 @@ CarLog/
 ├── backend/                 # Aplicación Spring Boot
 │   └── src/main/java/com/carlog/backend/
 │       └── BackendApplication.java
-└──BBDD
-|   └──docker-compose.yml  # Configuración Docker
-└── README.md              # Esta documentación
+├── BBDD
+|    └──docker-compose.yml  # Configuración Docker
+└── README.md               # Esta documentación
 ```
 
 ## Inicio Rápido

@@ -2,6 +2,7 @@ package com.carlog.backend.dto;
 
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
+import com.carlog.backend.model.Workshop;
 
 public record NewUserDTO(String dni,
                          String name,
@@ -9,7 +10,8 @@ public record NewUserDTO(String dni,
                          String phone,
                          Role role,
                          Boolean mustChangePassword,
-                         Long workShopId) {
+                         Long workShopId,
+                         Long pendingWorkshop) {
 
     public static NewUserDTO of(User u){
         return new NewUserDTO(
@@ -19,7 +21,8 @@ public record NewUserDTO(String dni,
                 u.getPhone(),
                 u.getRole(),
                 u.isMustChangePsswd(),
-                u.getWorkshop() != null ? u.getWorkshop().getWorkshopId(): null
+                u.getWorkshop() != null ? u.getWorkshop().getWorkshopId(): null,
+                u.getPendingWorkshop() != null ? u.getPendingWorkshop().getWorkshopId(): null
         );}
     }
 

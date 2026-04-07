@@ -1,6 +1,7 @@
 package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewUserDTO;
+import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -46,5 +47,25 @@ public class UserController {
     @DeleteMapping("/{DNI}")
     public NewUserDTO destroy(@PathVariable String DNI){
         return userService.delete(DNI);
+    }
+
+    @PatchMapping("/{dni}/invite")
+    public void invite(@PathVariable String dni, @RequestParam String managerDni, @RequestParam Role newRole){
+        userService.inviteToWorkshop(managerDni, dni, newRole);
+    }
+
+    @PatchMapping("/{dni}/accept")
+    public NewUserDTO accept(@PathVariable String dni){
+        return userService.acceptInvitation(dni);
+    }
+
+    @PatchMapping("/{dni}/reject")
+    public void reject(@PathVariable String dni){
+        userService.rejectInvitation(dni);
+    }
+
+    @PatchMapping("/{dni}/fire")
+    public void fireEmployee(@PathVariable String dni){
+        userService.fireEmployee(dni);
     }
 }

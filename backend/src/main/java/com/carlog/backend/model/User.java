@@ -52,6 +52,13 @@ public class User implements UserDetails {
     @JsonIgnoreProperties("owner")
     private List<Vehicle> vehicles;
 
+    @ManyToOne
+    @JoinColumn(name = "pending_workshop_id")
+    private Workshop pendingWorkshop;
+
+    @Enumerated(EnumType.STRING)
+    private Role pendingRole;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
         return List.of(new SimpleGrantedAuthority(role.name()));

@@ -91,7 +91,7 @@ public class UserService {
         return NewUserDTO.of(result.get());
     }
 
-    public NewUserDTO promoteToWorker
+    /*public NewUserDTO promoteToWorker
 
             (String managerDni, String employeeDni, Role newRole){
 
@@ -114,7 +114,7 @@ public class UserService {
         employee.setRole(newRole);
         employee.setWorkshop(manager.getWorkshop());
         return NewUserDTO.of(userJpaRepository.save(employee));
-    }
+    }*/
 
     public List<NewUserDTO> getEmployeesByWorkshopId(Long id){
         Workshop workshop = workshopJpaRepository.findById(id)
@@ -122,5 +122,49 @@ public class UserService {
 
         return workshop.getEmployees().stream()
                 .map(NewUserDTO::of).toList();
+    }
+
+    public void inviteToWorkshop(String managerDni, String employeeDni, Role role){
+        User manager = userJpaRepository.findByDni(managerDni)
+                .orElseThrow(() -> new UserNotFoundException(managerDni));
+
+        User employee = userJpaRepository.findByDni(employeeDni)
+                .orElseThrow(() -> new UserNotFoundException(employeeDni));
+
+        if(employee.getWorkshop() != null) throw new RuntimeException("El usuario ya se encuentra trabajando en un taller");
+
+        employee.setPendingWorkshop(manager.getWorkshop());
+        employee.setPendingRole(role);
+        userJpaRepository.save(employee);
+    }
+
+    public NewUserDTO acceptInvitation(String dni){
+        User user = userJpaRepository.findByDni(dni).orElseThrow();
+        if(user.getPendingWorkshop() == null) throw new RuntimeException("No hay ninguna invitación");
+
+        user.setWorkshop(user.getPendingWorkshop());
+        user.setRole(user.getPendingRole());
+
+        user.setPendingWorkshop(null);
+        user.setPendingRole(null);
+
+        return NewUserDTO.of(userJpaRepository.save(user));
+    }
+
+    public void rejectInvitation(String dni){
+        User user = userJpaRepository.findByDni(dni)
+                .orElseThrow(() -> new UserNotFoundException(dni));
+        user.setPendingWorkshop(null);
+        user.setPendingRole(null);
+        userJpaRepository.save(user);
+    }
+
+    public void fireEmployee(String dni){
+        User user = userJpaRepository.findByDni(dni)
+                .orElseThrow(() -> new UserNotFoundException(dni));
+
+        user.setWorkshop(null);
+        user.setRole(Role.CLIENT);
+        userJpaRepository.save(user);
     }
 }

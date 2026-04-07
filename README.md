@@ -1,231 +1,92 @@
-# CarLog
-> **Plataforma Full Stack para la gestión integral de talleres mecánicos.** > Arquitectura RESTful robusta y escalable.
+# CarLog API - README Principal
+## Descripción del Proyecto
 
-![Angular](https://img.shields.io/badge/Frontend-Angular-dd0031?style=flat&logo=angular)
-![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring)
-![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql)
-![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker)
-## CarLog API - Guía de Referencia y Uso
+CarLog es una plataforma **Full Stack** para la gestión integral de talleres mecánicos, diseñada con una arquitectura RESTful robusta y escalable. El sistema facilita el ciclo completo de vida de vehículos, desde su entrada en taller hasta la facturación final.
 
-Esta documentación describe los endpoints, formatos de datos y flujos de seguridad de la API REST de CarLog (Sistema de Gestión de Talleres).
+## Stack Tecnológico
 
-## Configuración General
-
-| Configuración | Valor |
-| :--- | :--- |
-| **URL Base (Local)** | `http://localhost:8081/api` |
-| **Formato** | JSON |
+| Componente | Tecnología |
+|------------|------------|
+| **Backend** | ![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring) |
+| **Base de Datos** | ![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql) |
 | **Seguridad** | JWT (JSON Web Token) |
+| **Despliegue** | ![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker) |
 
-**Cabeceras Requeridas:**
-Todas las peticiones (excepto Auth) requieren:
-```http
-Content-Type: application/json
-Authorization: Bearer <tu_token_aqui>
+## Estructura del Proyecto
+
 ```
----
-
-## Flujo de Trabajo Típico (Workflow)
-
-Registrarse en **/auth/register** {POST} (Obtienes Token).
-
-Login en **/auth/authenticate** {POST} (Si necesitas renovar el Token).
-
-Registrar Vehículo en **/vehicles** {POST} (Opcional si ya existe).
-
-Entrada a Taller en **/vehicles/{plate}/entry** {POST} (El mecánico registra la entrada del coche al taller).
-
-Crear Orden en **/workorders** {POST} (Creas la ficha de reparación).
-
-Añadir Líneas en **/workorders/{id}/lines** {POST} (Añades piezas y mano de obra).
-
-Cerrar Orden en **/workorders/{id}** {POST} (Cambias estado a COMPLETED y se cierra la ficha de reparación).
-
-## 1. Autenticación (Auth)
-
-Accesible públicamente.
-
-Registrar Usuario
-
-Crea una nueva cuenta (Mecánico, Manager, Cliente, DIY).
-
-**Método**: POST
-
-**URL**: /auth/register
-
-**Body**:
-
-```json
-{
-  "dni": "12345678Z",
-  "name": "Pepe",
-  "lastname": "Mecánico",
-  "email": "pepe@carlog.com",
-  "password": "securePass123",
-  "phone": "600123456",
-  "role": "MECHANIC" 
-}
+CarLog/
+├── backend/                 # Aplicación Spring Boot
+│   └── src/main/java/com/carlog/backend/
+│       └── BackendApplication.java
+├── BBDD
+|    └──docker-compose.yml  # Configuración Docker
+└── README.md               # Esta documentación
 ```
 
-(Roles disponibles: MANAGER, MECHANIC, CLIENT, DIY)
----
-### Iniciar Sesión
+## Inicio Rápido
 
-Obtiene el token de acceso.
+### Prerrequisitos
+- Docker y Docker Compose
+- Java 17+ (para desarrollo local)
 
-**Método**: POST
+### Ejecución con Docker
+```bash
+# Clonar el repositorio
+git clone https://github.com/JaviRSDEV/CarLog.git
+cd CarLog
 
-**URL**: /auth/authenticate
-
-**Body**:
-
-```json
-{
-  "email": "pepe@carlog.com",
-  "password": "securePass123"
-}
+# Iniciar todos los servicios
+docker-compose up -d
 ```
 
-**Respuesta Exitosa:**
+La aplicación estará disponible en:
+- Frontend: `http://localhost:4200`
+- Backend API: `http://localhost:8081/api`
 
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOi..."
-}
+## Documentación
+
+- **[API Reference](./README.md)** - Documentación completa de endpoints REST
+- **[Getting Started & Deployment](wiki)** - Guía detallada de configuración
+- **[System Architecture](wiki)** - Arquitectura y patrones de diseño
+
+## Roles del Sistema
+
+CarLog soporta múltiples roles de usuario [7](#0-6) :
+- **MANAGER**: Gestión completa del taller
+- **MECHANIC**: Operaciones de reparación y diagnóstico
+- **CLIENT**: Seguimiento de sus vehículos
+- **DIY**: Entusiastas del bricolaje automotriz
+
+## Flujo de Autenticación
+
+1. **Registro**: `POST /api/auth/register` [8](#0-7) 
+2. **Login**: `POST /api/auth/authenticate` [9](#0-8) 
+3. **Uso**: Incluir token JWT en cabecera `Authorization: Bearer <token>` [10](#0-9) 
+
+## Flujo de Trabajo Principal
+
+```mermaid
+graph LR
+    A[Registro Vehículo] --> B[Entrada Taller]
+    B --> C[Crear Orden]
+    C --> D[Añadir Líneas]
+    D --> E[Cerrar Orden]
+    E --> F[Facturación]
 ```
 
+## Licencia
 
-## 2. Gestión de Órdenes (WorkOrders)
-
-Requiere Auth Token.
-
-Crear Nueva Orden
-
-Abre una orden de trabajo para un vehículo específico. El sistema asigna automáticamente el mecánico logueado y su taller.
-
-**Método** POST
-
-**URL**: /workorders
-
-**Headers Específicos**:
-
-**Vehicle-plate**: 1234-BBB (Matrícula del coche a reparar)
-
-**Body**:
-
-```json
-{
-  "description": "El cliente reporta ruido en los frenos y solicita cambio de aceite."
-}
-```
----
-Listar Órdenes
-
-**Método**: GET
-
-**URL**: /workorders
-
-**Opcional**: /workorders?mechanicDni=12345678Z (Filtrar por mecánico)
----
-Cerrar Orden / Editar Notas
-
-Actualiza el estado o las notas. Si se pasa a COMPLETED, se genera fecha de cierre y se bloquea la edición de líneas.
-
-**Método**: PUT
-
-**URL**: /workorders/{id}
-
-**Body**:
-
-```json
-{
-  "status": "COMPLETED",
-  "mechanicNotes": "Reparación finalizada con éxito. Vehículo probado."
-}
-```
-
-(Estados: PENDING, IN_PROGRESS, COMPLETED, CANCELLED)
+Este proyecto está bajo licencia MIT - ver archivo [LICENSE](LICENSE) para detalles.
 
 ---
-### 3. Facturación (Líneas de Orden)
 
-El sistema calcula automáticamente: (Cantidad * Precio) + IVA - Descuento.
+## Notes
 
-Añadir Línea (Pieza o Mano de Obra)
+Este README sirve como punto de entrada principal al proyecto CarLog. Para documentación técnica detallada de la API, endpoints específicos y ejemplos de uso, consulta el archivo [README.md](README.md) existente que contiene la referencia completa de la API REST del sistema.
 
-**Método**: POST
-
-**URL**: /workorders/{orderId}/lines
-
-**Body**:
-
-```json
-{
-  "concept": "Juego de Pastillas de Freno",
-  "quantity": 1.0,
-  "pricePerUnit": 100.0,
-  "IVA": 21.0,       // Opcional (Default: 0.0)
-  "discount": 10.0   // Opcional (Default: 0.0)
-}
-```
-
-Respuesta: Devuelve la orden completa con el totalAmount recalculado.
-
----
-Borrar Línea
-
-**Método**: DELETE
-
-**URL**: /workorders/{orderId}/lines/{lineId}
-
-### 4. Vehículos (Vehicles)
-
-Registrar Vehículo
-
-**Método**: POST
-
-**URL**: /vehicles
-
-**Body**:
-
-```json
-{
-  "plate": "9999-ZZZ",
-  "brand": "Toyota",
-  "model": "Corolla",
-  "kilometers": 15000,
-  "engine": "Híbrido",
-  "ownerId": "87654321X" // Opcional. Si se omite, se asigna al usuario logueado.
-}
-```
----
-Registrar Entrada en Taller (Check-in)
-
-Mueve el coche al taller especificado. Falla si el coche ya está en otro taller.
-
-**Método**: POST
-
-**URL**: /vehicles/{plate}/entry?workshopId=1
-
----
-Registrar Salida (Check-out)
-
-Libera el coche del taller.
-
-**Método**: POST
-
-**URL**: /vehicles/{plate}/exit?workshopId=1
-
----
-Transferir Propiedad (Venta)
-
-Cambia el dueño del vehículo. Requiere validación del dueño actual.
-
-**Método**: POST
-
-**URL**: /vehicles/{plate}/transfer
-
-Params: ?currentOwnerId=1234A&newOwnerId=5678B
+Wiki pages you might want to explore:
+- [CarLog Overview (JaviRSDEV/CarLog)](/wiki/JaviRSDEV/CarLog#1)
 
 Tabla de Errores Comunes
 

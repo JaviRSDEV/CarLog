@@ -25,8 +25,8 @@ CarLog/
 ├── backend/                 # Aplicación Spring Boot
 │   └── src/main/java/com/carlog/backend/
 │       └── BackendApplication.java
-├── frontend/               # Aplicación Angular
-├── docker-compose.yml      # Configuración Docker
+└──BBDD
+|   └──docker-compose.yml  # Configuración Docker
 └── README.md              # Esta documentación
 ```
 
@@ -35,7 +35,6 @@ CarLog/
 ### Prerrequisitos
 - Docker y Docker Compose
 - Java 17+ (para desarrollo local)
-- Node.js 18+ (para desarrollo local)
 
 ### Ejecución con Docker
 ```bash

@@ -1,9 +1,4 @@
 # CarLog - README Principal
-![Angular](https://img.shields.io/badge/Frontend-Angular-dd0031?style=flat&logo=angular)
-![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring)
-![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql)
-![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker)
-
 ## Descripción del Proyecto
 
 CarLog es una plataforma **Full Stack** para la gestión integral de talleres mecánicos, diseñada con una arquitectura RESTful robusta y escalable. El sistema facilita el ciclo completo de vida de vehículos, desde su entrada en taller hasta la facturación final.
@@ -12,10 +7,10 @@ CarLog es una plataforma **Full Stack** para la gestión integral de talleres me
 
 | Componente | Tecnología |
 |------------|------------|
-| **Backend** | Spring Boot |
-| **Base de Datos** | MySQL |
+| **Backend** | Spring Boot ![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring) |
+| **Base de Datos** | MySQL ![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql) |
 | **Seguridad** | JWT (JSON Web Token) |
-| **Despliegue** | Docker |
+| **Despliegue** | Docker ![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker) |
 
 ## Estructura del Proyecto
 

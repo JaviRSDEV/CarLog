@@ -7,10 +7,10 @@ CarLog es una plataforma **Full Stack** para la gestión integral de talleres me
 
 | Componente | Tecnología |
 |------------|------------|
-| **Backend** | Spring Boot ![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring) |
-| **Base de Datos** | MySQL ![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql) |
+| **Backend** | ![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot-6db33f?style=flat&logo=spring) |
+| **Base de Datos** | ![MySQL](https://img.shields.io/badge/DB-MySQL-4479a1?style=flat&logo=mysql) |
 | **Seguridad** | JWT (JSON Web Token) |
-| **Despliegue** | Docker ![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker) |
+| **Despliegue** | ![Docker](https://img.shields.io/badge/Deploy-Docker-2496ed?style=flat&logo=docker) |
 
 ## Estructura del Proyecto
 

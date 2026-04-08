@@ -11,43 +11,41 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(VehicleNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleVehicleNotFound(VehicleNotFoundException ex){
-        Map<String, String> response = new HashMap<>();
-        response.put("error", ex.getMessage());
+    private ResponseEntity<Map<String, Object>> buildResponse(String message, HttpStatus status){
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        response.put("status", status.value());
+        response.put("timestamp", System.currentTimeMillis());
+        return ResponseEntity.status(status).body(response);
+    }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    @ExceptionHandler(VehicleNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleVehicleNotFound(VehicleNotFoundException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleUserNotFound(UserNotFoundException ex){
-        Map<String, String> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(VehicleOcuppiedException.class)
-    public ResponseEntity<Map<String, String>> handleVehicleOccupied(VehicleOcuppiedException ex){
-        Map<String, String> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    public ResponseEntity<Map<String, Object>> handleVehicleOccupied(VehicleOcuppiedException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(WorkOrderNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleWorkOrderNotFound(WorkOrderNotFoundException ex){
-        Map<String, String> response = new HashMap<>();
-        response.put("error", ex.getMessage());
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    public ResponseEntity<Map<String, Object>> handleWorkOrderNotFound(WorkOrderNotFoundException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(WorkshopNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleWorkshopNotFound(WorkshopNotFoundException ex){
-        Map<String, String> response = new HashMap<>();
-        response.put("error", ex.getMessage());
+    public ResponseEntity<Map<String, Object>> handleWorkshopNotFound(WorkshopNotFoundException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleAllErrors(Exception ex){
+        return buildResponse("Error interno: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -24,13 +24,18 @@ public class WorkshopService {
 
     public List<NewWorkshopDTO> getAll(){
         var result = workshopJpaRepository.findAll();
-        if(result.isEmpty())
-            throw new WorkshopNotFoundException();
         return result.stream().map(NewWorkshopDTO::of).toList();
     }
 
     public NewWorkshopDTO getByWorkshopName(String name){
         Workshop workshop = workshopJpaRepository.findByWorkshopName(name).orElseThrow(() -> new WorkshopNotFoundException(name));
+
+        return NewWorkshopDTO.of(workshop);
+    }
+
+    public NewWorkshopDTO getWorkshopById(Long id){
+        Workshop workshop = workshopJpaRepository.findById(id)
+                .orElseThrow(() -> new WorkshopNotFoundException(id));
 
         return NewWorkshopDTO.of(workshop);
     }

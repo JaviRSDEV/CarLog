@@ -25,13 +25,12 @@ public class WorkOrderService {
 
     public List<NewWorkOrderResponseDTO> getAll(){
         var result = workOrderJpaRepository.findAll();
-        if(result.isEmpty()) throw new WorkOrderNotFoundException();
+
         return result.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 
     public List<NewWorkOrderResponseDTO> getByEmployee(String dni){
         List<WorkOrder> workOrders = workOrderJpaRepository.findByMechanic_Dni(dni);
-        if(workOrders.isEmpty()) throw new WorkOrderNotFoundException();
         return workOrders.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 

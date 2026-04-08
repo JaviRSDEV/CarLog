@@ -32,6 +32,11 @@ public class WorkshopController {
         return workshopService.getByWorkshopName(name);
     }
 
+    @GetMapping("/details/{id}")
+    public NewWorkshopDTO showById(@PathVariable Long id){
+        return workshopService.getWorkshopById(id);
+    }
+
     @GetMapping("/{ID}/employees")
     public List<NewUserDTO> showEmployees(@PathVariable Long ID){
         return userService.getEmployeesByWorkshopId(ID);

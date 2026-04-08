@@ -51,7 +51,7 @@ public class UserController {
 
     @PatchMapping("/{dni}/invite")
     public void invite(@PathVariable String dni, @RequestParam String managerDni, @RequestParam Role newRole){
-        userService.inviteToWorkshop(managerDni, dni, newRole);
+        userService.inviteToWorkshop(managerDni, dni,  newRole);
     }
 
     @PatchMapping("/{dni}/accept")

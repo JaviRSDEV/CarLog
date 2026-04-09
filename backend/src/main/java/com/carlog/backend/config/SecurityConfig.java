@@ -32,10 +32,9 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**")
-                        .permitAll()
-                        .requestMatchers("/api/auth/**", "/uploads/**", "/error")
-                        .permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/uploads/**", "/error").permitAll()
+                        .requestMatchers("/ws-carlog/**").permitAll()
                         .anyRequest()
                         .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

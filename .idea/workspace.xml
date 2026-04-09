@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Modificada la gestion global de errores y refactorizados metodos">
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Añadida dependencia para websockets">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/WebSocketConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NotificationDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/UserController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -44,6 +46,9 @@
   &quot;associatedIndex&quot;: 0
 }</component>
   <component name="ProjectId" id="381lpAQhByJH2ppCo7LjuoGKS8u" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -302,7 +307,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775646711661</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Añadida dependencia para websockets">
+      <option name="closed" value="true" />
+      <created>1775653179716</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1775653179716</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -341,7 +354,8 @@
     <MESSAGE value="refactorizados metodos para la reasigancion de ordenes de trabajo a otro mecanicos" />
     <MESSAGE value="Refactorizada funcionalidad para contrataciones y solucionada redundancia con el cors" />
     <MESSAGE value="Modificada la gestion global de errores y refactorizados metodos" />
-    <option name="LAST_COMMIT_MESSAGE" value="Modificada la gestion global de errores y refactorizados metodos" />
+    <MESSAGE value="Añadida dependencia para websockets" />
+    <option name="LAST_COMMIT_MESSAGE" value="Añadida dependencia para websockets" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

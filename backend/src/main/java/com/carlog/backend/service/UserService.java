@@ -1,6 +1,7 @@
 package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewUserDTO;
+import com.carlog.backend.dto.NotificationDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.WorkshopNotFoundException;
 import com.carlog.backend.model.Role;
@@ -9,6 +10,7 @@ import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +21,7 @@ public class UserService {
 
     private final UserJpaRepository userJpaRepository;
     private final WorkshopJpaRepository workshopJpaRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public List<NewUserDTO> getAll(){
         var result = userJpaRepository.findAll();
@@ -91,31 +94,6 @@ public class UserService {
         return NewUserDTO.of(result.get());
     }
 
-    /*public NewUserDTO promoteToWorker
-
-            (String managerDni, String employeeDni, Role newRole){
-
-        User manager = userJpaRepository.findByDni(managerDni).orElseThrow(() -> new UserNotFoundException(managerDni));
-        //comprobamos que el que va a realizar la contratación es un manager
-        if(manager.getRole() != Role.MANAGER || manager.getWorkshop() == null){
-            throw new RuntimeException("Solo un manager con taller puede realiza contrataciones");
-        }
-        //Buscamos el trabajador en la base de datos con el dni proporcionado
-        User employee = userJpaRepository.findByDni(employeeDni).orElseThrow(() -> new UserNotFoundException(employeeDni));
-        //Comprobamos que el usuario no trabaje en otro taller
-        if(employee.getWorkshop() != null){
-            throw new RuntimeException("Este usuario ya trabaja en otro taller");
-        }
-        //Comprobamos que el rol para la contratación o es mechanic o co_manager
-        if(newRole != Role.MECHANIC && newRole != Role.CO_MANAGER){
-            throw new RuntimeException("Rol inválido para contratación");
-        }
-
-        employee.setRole(newRole);
-        employee.setWorkshop(manager.getWorkshop());
-        return NewUserDTO.of(userJpaRepository.save(employee));
-    }*/
-
     public List<NewUserDTO> getEmployeesByWorkshopId(Long id){
         Workshop workshop = workshopJpaRepository.findById(id)
                 .orElseThrow(() -> new WorkshopNotFoundException(id));
@@ -136,6 +114,14 @@ public class UserService {
         employee.setPendingWorkshop(manager.getWorkshop());
         employee.setPendingRole(role);
         userJpaRepository.save(employee);
+
+        NotificationDTO notif = NotificationDTO.builder()
+                .type("INVITE")
+                .title("¡Nueva oferta de empleo!")
+                .message("El taller " + manager.getWorkshop().getWorkshopName() + " quiere contratarte")
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/notificaciones/" + employeeDni, notif);
     }
 
     public NewUserDTO acceptInvitation(String dni){
@@ -166,5 +152,13 @@ public class UserService {
         user.setWorkshop(null);
         user.setRole(Role.CLIENT);
         userJpaRepository.save(user);
+
+        NotificationDTO notif = NotificationDTO.builder()
+                .type("FIRE")
+                .title("Permisos revocados")
+                .message("Has sido despedido del taller.")
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/despidos/" + dni, notif);
     }
 }

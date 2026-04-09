@@ -1,10 +1,9 @@
 package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewVehicleDTO;
+import com.carlog.backend.dto.NotificationDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.VehicleNotFoundException;
-import com.carlog.backend.error.VehicleOcuppiedException;
-import com.carlog.backend.error.WorkshopNotFoundException;
 import com.carlog.backend.model.*;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
@@ -12,6 +11,7 @@ import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,6 +31,7 @@ public class VehicleService {
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
     private final WorkOrderJpaRepository workOrderJpaRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public List<NewVehicleDTO> getAll(){
         var result = vehicleJpaRepository.findAll();
@@ -218,19 +219,24 @@ public class VehicleService {
         }).orElseThrow(() -> new VehicleNotFoundException(plate));
     }
 
-    public NewVehicleDTO requestEntry(String plate, Long workshopId){
-        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
-                .orElseThrow(() -> new VehicleNotFoundException(plate));
+    public NewVehicleDTO requestEntry(String plate, Long workshopId) {
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow();
+        Workshop workshop = workshopJpaRepository.findById(workshopId).orElseThrow();
 
-        Workshop requestingWorkshop = workshopJpaRepository.findById(workshopId)
-                .orElseThrow(() -> new WorkshopNotFoundException(workshopId));
+        vehicle.setPendingWorkshop(workshop);
+        Vehicle savedVehicle = vehicleJpaRepository.save(vehicle);
 
-        if(vehicle.getWorkshop() != null){
-            throw new VehicleOcuppiedException("El vehículo ya está en el taller: " + vehicle.getWorkshop().getWorkshopName());
-        }
+        String ownerDni = vehicle.getOwner().getDni();
 
-        vehicle.setPendingWorkshop(requestingWorkshop);
-        return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
+        NotificationDTO notif = NotificationDTO.builder()
+                .type("VEHICLE_REQUEST")
+                .title("Solicitud de Ingreso")
+                .message("El taller " + workshop.getWorkshopName() + " solicita el ingreso de tu vehículo " + plate)
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/notificaciones/" + ownerDni, notif);
+
+        return NewVehicleDTO.of(savedVehicle);
     }
 
     public NewVehicleDTO approveEntry(String plate, String email){

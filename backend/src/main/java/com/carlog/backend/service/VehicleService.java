@@ -254,10 +254,30 @@ public class VehicleService {
             throw new RuntimeException("Este vehículo no tiene ninguna solicitud pendiente");
         }
 
+        Workshop workshop = vehicle.getPendingWorkshop();
+
         vehicle.setWorkshop(vehicle.getPendingWorkshop());
         vehicle.setPendingWorkshop(null);
 
-        return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
+        Vehicle savedVehicle = vehicleJpaRepository.save(vehicle);
+
+        try{
+            User manager = userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER).orElse(null);
+            System.out.println(manager);
+            if(manager != null){
+                NotificationDTO alert = NotificationDTO.builder()
+                        .type("NEW_FLEET_VEHICLE")
+                        .title("¡Nuevo vehiculo ingresado!")
+                        .message("El cliente ha autorizado el ingreso de la matricula " + plate.toUpperCase())
+                        .extraData(plate)
+                        .build();
+
+                messagingTemplate.convertAndSend("/topic/notificaciones/" + manager.getDni(), alert);
+            }
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+        return NewVehicleDTO.of(savedVehicle);
     }
 
     public NewVehicleDTO rejectEntry(String plate, String email){

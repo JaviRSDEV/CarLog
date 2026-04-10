@@ -58,16 +58,22 @@ public class Vehicle {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workshop_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonIgnoreProperties({"vehicles", "workshop", "hibernateLazyInitializer", "handler"})
     private Workshop workshop;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     @JsonIgnoreProperties({"vehicles", "workshop", "hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User owner;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pending_workshop_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @JsonIgnoreProperties({"vehicles", "hibernateLazyInitializer", "handler"})
     private Workshop pendingWorkshop;
 

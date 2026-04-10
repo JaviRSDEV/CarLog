@@ -2,10 +2,7 @@ package com.carlog.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -46,6 +43,8 @@ public class User implements UserDetails {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workshop_id")
     @JsonIgnoreProperties({"employees", "hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Workshop workshop;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -54,6 +53,8 @@ public class User implements UserDetails {
 
     @ManyToOne
     @JoinColumn(name = "pending_workshop_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Workshop pendingWorkshop;
 
     @Enumerated(EnumType.STRING)

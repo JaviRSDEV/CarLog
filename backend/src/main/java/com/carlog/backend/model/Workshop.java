@@ -3,10 +3,7 @@ package com.carlog.backend.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -39,9 +36,13 @@ public class Workshop {
 
     @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<User> employees;
 
     @OneToMany(mappedBy = "workshop")
     @JsonIgnoreProperties("workshop")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Vehicle> vehicles;
 }

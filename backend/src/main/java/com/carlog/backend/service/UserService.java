@@ -128,13 +128,33 @@ public class UserService {
         User user = userJpaRepository.findByDni(dni).orElseThrow();
         if(user.getPendingWorkshop() == null) throw new RuntimeException("No hay ninguna invitación");
 
+        Workshop workshop = user.getPendingWorkshop();
+
         user.setWorkshop(user.getPendingWorkshop());
         user.setRole(user.getPendingRole());
 
         user.setPendingWorkshop(null);
         user.setPendingRole(null);
 
-        return NewUserDTO.of(userJpaRepository.save(user));
+        User savedUser = userJpaRepository.save(user);
+        try{
+            User manager = userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER).orElse(null);
+
+            if(manager != null){
+                NotificationDTO alert = NotificationDTO.builder()
+                        .type("NEW_EMPLOYEE")
+                        .title("¡Nuevo empleado en el taller!")
+                        .message("Un nuevo mecánico acepto la invitación para trabajar")
+                        .extraData(savedUser.getDni())
+                        .build();
+
+                messagingTemplate.convertAndSend("/topic/notificaciones/" + manager.getDni(), alert);
+            }
+        }catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+
+        return NewUserDTO.of(savedUser);
     }
 
     public void rejectInvitation(String dni){
@@ -159,6 +179,6 @@ public class UserService {
                 .message("Has sido despedido del taller.")
                 .build();
 
-        messagingTemplate.convertAndSend("/topic/despidos/" + dni, notif);
+        messagingTemplate.convertAndSend("/topic/notificaciones/" + dni, notif);
     }
 }

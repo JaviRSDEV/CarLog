@@ -1,6 +1,8 @@
 package com.carlog.backend.repository;
 
+import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
+import com.carlog.backend.model.Workshop;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,4 +16,5 @@ public interface UserJpaRepository extends JpaRepository<User, Long> {
     void deleteByDni(String dni);
     Optional<User> findByEmail(String email);
     List<User> findByNameContainingIgnoreCase(String name);
+    Optional<User> findFirstByWorkshopAndRole(Workshop workshop, Role role);
 }

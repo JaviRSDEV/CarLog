@@ -1,6 +1,7 @@
 package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewVehicleDTO;
+import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Vehicle;
 import com.carlog.backend.service.VehicleService;
@@ -89,5 +90,10 @@ public class VehicleController {
     @PostMapping("/{plate}/transfer")
     public ResponseEntity<NewVehicleDTO> transferVehicle(@PathVariable String plate, @RequestParam String currentOwnerId, @RequestParam String newOwnerId){
         return ResponseEntity.ok(vehicleService.changeOwner(plate, currentOwnerId, newOwnerId));
+    }
+
+    @GetMapping("/{plate}/history")
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> getVehicleHistory(@PathVariable String plate){
+        return ResponseEntity.ok(vehicleService.getVehicleHistory(plate));
     }
 }

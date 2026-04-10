@@ -1,6 +1,7 @@
 package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewVehicleDTO;
+import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.NotificationDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.VehicleNotFoundException;
@@ -318,7 +319,9 @@ public class VehicleService {
 
     @Transactional
     public NewVehicleDTO delete(String plate, String email){
-        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException());
 
@@ -335,5 +338,14 @@ public class VehicleService {
 
         vehicleJpaRepository.delete(vehicle);
         return deletedVehicle;
+    }
+
+    public List<NewWorkOrderResponseDTO> getVehicleHistory(String plate){
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+
+        var result = workOrderJpaRepository.findByVehicle_Plate(plate);
+
+        return result.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 }

@@ -388,24 +388,26 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
+        if (vehicle.getOwner() != null && vehicle.getOwner().getDni().equals(currentUser.getDni())) {
+            return;
+        }
+
         boolean isWorker = currentUser.getRole() == Role.MANAGER ||
                 currentUser.getRole() == Role.CO_MANAGER ||
                 currentUser.getRole() == Role.MECHANIC;
 
         if (isWorker) {
-            boolean inWorkshop = vehicle.getWorkshop() != null &&
+            boolean inWorkshop = vehicle.getWorkshop() != null && currentUser.getWorkshop() != null &&
                     vehicle.getWorkshop().getWorkshopId() == (currentUser.getWorkshop().getWorkshopId());
 
-            boolean pendingWorkshop = vehicle.getPendingWorkshop() != null &&
-                    vehicle.getPendingWorkshop().getWorkshopId() ==(currentUser.getWorkshop().getWorkshopId());
+            boolean pendingWorkshop = vehicle.getPendingWorkshop() != null && currentUser.getWorkshop() != null &&
+                    vehicle.getPendingWorkshop().getWorkshopId() == (currentUser.getWorkshop().getWorkshopId());
 
             if (!inWorkshop && !pendingWorkshop) {
                 throw new RuntimeException("Acceso denegado: El vehículo no se encuentra en tu taller.");
             }
         } else {
-            if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
-                throw new RuntimeException("Acceso denegado: Este vehículo no es tuyo.");
-            }
+            throw new RuntimeException("Acceso denegado: Este vehículo no es tuyo.");
         }
     }
 }

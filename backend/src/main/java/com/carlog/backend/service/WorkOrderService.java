@@ -80,6 +80,13 @@ public class WorkOrderService {
             throw new RuntimeException("Error: El mecanico o manager no dispone de un taller asignado");
         }
 
+        if (connectedUser.getRole() != Role.DIY) {
+            if (referedVehicle.getWorkshop() == null ||
+                    referedVehicle.getWorkshop().getWorkshopId() != connectedUser.getWorkshop().getWorkshopId()) {
+                throw new RuntimeException("Error: No puedes abrir una nueva orden. El vehículo ya no se encuentra ingresado en tu taller.");
+            }
+        }
+
         var newWorkOrder = WorkOrder.builder().description(dto.description()).mechanicNotes(null).status(WorkOrderStatus.PENDING).vehicle(referedVehicle).mechanic(connectedUser).workshop(connectedUser.getWorkshop()).totalAmount(0.0).build();
         return NewWorkOrderResponseDTO.of(workOrderJpaRepository.save(newWorkOrder));
     }
@@ -253,8 +260,16 @@ public class WorkOrderService {
         }
 
         if (workOrder.getWorkshop() == null || currentUser.getWorkshop() == null ||
-                workOrder.getWorkshop().getWorkshopId() != (currentUser.getWorkshop().getWorkshopId())) {
+                workOrder.getWorkshop().getWorkshopId() != currentUser.getWorkshop().getWorkshopId()) {
             throw new RuntimeException("Acceso denegado: No puedes modificar órdenes de otro taller.");
+        }
+
+        Vehicle vehicle = workOrder.getVehicle();
+        if (vehicle != null) {
+            if (vehicle.getWorkshop() == null ||
+                    vehicle.getWorkshop().getWorkshopId() != workOrder.getWorkshop().getWorkshopId()) {
+                throw new RuntimeException("Acceso denegado: El vehículo ya no está en el taller. Sus órdenes están bloqueadas en modo 'solo lectura'.");
+            }
         }
     }
 }

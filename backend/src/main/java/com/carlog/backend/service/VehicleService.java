@@ -435,7 +435,8 @@ public class VehicleService {
                     .map(WorkOrder::getVehicle)
                     .distinct()
                     .filter(v -> v.getPlate().toLowerCase().contains(text) ||
-                            (v.getBrand() != null && v.getBrand().toLowerCase().contains(text)))
+                            (v.getBrand() != null && v.getBrand().toLowerCase().contains(text)) ||
+                            (v.getModel() != null && v.getModel().toLowerCase().contains(text))) // 🔥 Nueva condición
                     .map(NewVehicleDTO::of)
                     .toList();
 

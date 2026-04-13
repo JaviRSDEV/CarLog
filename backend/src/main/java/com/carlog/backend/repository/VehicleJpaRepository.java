@@ -34,13 +34,17 @@ public interface VehicleJpaRepository extends JpaRepository<Vehicle, Long> {
 
     String owner(User owner);
 
-    @Query("SELECT v FROM Vehicle v WHERE v.workshop.workshopId = :workshopId " +
-            "AND (LOWER(v.plate) LIKE LOWER(CONCAT('%', :text, '%')) " +
-            "OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :text, '%')))")
-    List<Vehicle> searchByWorkshopAndText(@Param("workshopId") Long workshopId, @Param("text") String text);
-
+    // Búsqueda para el cliente (Mis coches)
     @Query("SELECT v FROM Vehicle v WHERE v.owner.dni = :ownerDni " +
             "AND (LOWER(v.plate) LIKE LOWER(CONCAT('%', :text, '%')) " +
-            "OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :text, '%')))")
+            "OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :text, '%')) " +
+            "OR LOWER(v.model) LIKE LOWER(CONCAT('%', :text, '%')))")
     List<Vehicle> searchByOwnerAndText(@Param("ownerDni") String ownerDni, @Param("text") String text);
+
+    // Búsqueda para la Flota del taller
+    @Query("SELECT v FROM Vehicle v WHERE v.workshop.workshopId = :workshopId " +
+            "AND (LOWER(v.plate) LIKE LOWER(CONCAT('%', :text, '%')) " +
+            "OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :text, '%')) " +
+            "OR LOWER(v.model) LIKE LOWER(CONCAT('%', :text, '%')))")
+    List<Vehicle> searchByWorkshopAndText(@Param("workshopId") Long workshopId, @Param("text") String text);
 }

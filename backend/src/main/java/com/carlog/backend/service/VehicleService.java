@@ -410,4 +410,43 @@ public class VehicleService {
             throw new RuntimeException("Acceso denegado: Este vehículo no es tuyo.");
         }
     }
+
+    public List<NewVehicleDTO> searchVehicles(String searchText, Long workshopId, String type, String email) {
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        // Si borran el texto, devolvemos la lista por defecto
+        if (searchText == null || searchText.trim().isEmpty()) {
+            if ("OWNER".equalsIgnoreCase(type)) return getByOwner(currentUser.getDni(), email);
+            if ("ASSIGNED".equalsIgnoreCase(type)) return getVehiclesAssignedToMechanic(currentUser.getDni(), email);
+            if ("WORKSHOP".equalsIgnoreCase(type)) return getByWorkshop(workshopId, email);
+        }
+
+        String text = searchText.toLowerCase();
+
+        if ("OWNER".equalsIgnoreCase(type)) {
+            var result = vehicleJpaRepository.searchByOwnerAndText(currentUser.getDni(), text);
+            return result.stream().map(NewVehicleDTO::of).toList();
+
+        } else if ("ASSIGNED".equalsIgnoreCase(type)) {
+            List<WorkOrder> workOrders = workOrderJpaRepository.findByMechanic_Dni(currentUser.getDni());
+            return workOrders.stream()
+                    .filter(w -> w.getStatus() != null && !w.getStatus().toString().equals("COMPLETED"))
+                    .map(WorkOrder::getVehicle)
+                    .distinct()
+                    .filter(v -> v.getPlate().toLowerCase().contains(text) ||
+                            (v.getBrand() != null && v.getBrand().toLowerCase().contains(text)))
+                    .map(NewVehicleDTO::of)
+                    .toList();
+
+        } else if ("WORKSHOP".equalsIgnoreCase(type)) {
+            if (currentUser.getWorkshop() == null || currentUser.getWorkshop().getWorkshopId() != (workshopId)) {
+                throw new RuntimeException("Acceso denegado: No perteneces a este taller.");
+            }
+            var result = vehicleJpaRepository.searchByWorkshopAndText(workshopId, text);
+            return result.stream().map(NewVehicleDTO::of).toList();
+        }
+
+        throw new RuntimeException("Tipo de búsqueda no válido");
+    }
 }

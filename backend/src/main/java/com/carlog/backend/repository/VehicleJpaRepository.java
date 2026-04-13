@@ -33,4 +33,14 @@ public interface VehicleJpaRepository extends JpaRepository<Vehicle, Long> {
     List<User> findClientsByWorkshopId(@Param("workshopId") Long workshopId);
 
     String owner(User owner);
+
+    @Query("SELECT v FROM Vehicle v WHERE v.workshop.workshopId = :workshopId " +
+            "AND (LOWER(v.plate) LIKE LOWER(CONCAT('%', :text, '%')) " +
+            "OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :text, '%')))")
+    List<Vehicle> searchByWorkshopAndText(@Param("workshopId") Long workshopId, @Param("text") String text);
+
+    @Query("SELECT v FROM Vehicle v WHERE v.owner.dni = :ownerDni " +
+            "AND (LOWER(v.plate) LIKE LOWER(CONCAT('%', :text, '%')) " +
+            "OR LOWER(v.brand) LIKE LOWER(CONCAT('%', :text, '%')))")
+    List<Vehicle> searchByOwnerAndText(@Param("ownerDni") String ownerDni, @Param("text") String text);
 }

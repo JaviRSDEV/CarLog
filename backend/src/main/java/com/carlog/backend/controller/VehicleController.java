@@ -5,6 +5,7 @@ import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.model.User;
 import com.carlog.backend.service.VehicleService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -88,5 +89,11 @@ public class VehicleController {
     @GetMapping("/{plate}/history")
     public ResponseEntity<List<NewWorkOrderResponseDTO>> getVehicleHistory(@PathVariable String plate, Principal principal){
         return ResponseEntity.ok(vehicleService.getVehicleHistory(plate, principal.getName()));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<NewVehicleDTO>> search(@RequestParam String q, @RequestParam Long workshopId, @RequestParam String type, Principal principal) {
+
+        return ResponseEntity.ok(vehicleService.searchVehicles(q, workshopId, type, principal.getName()));
     }
 }

@@ -14,5 +14,5 @@ public interface WorkOrderJpaRepository extends JpaRepository<WorkOrder, Long> {
     List<WorkOrder> findByMechanic_Dni(String dni);
 
     Optional<WorkOrder> findByStatus(WorkOrderStatus status);
-    Optional<WorkOrder> findByWorkshop_workshopId(Long workshopId);
+    List<WorkOrder> findByWorkshop_workshopId(Long workshopId);
 }

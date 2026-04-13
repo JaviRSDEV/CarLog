@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal; // 🔥 Asegúrate de tener este import
 import java.util.List;
 
 @RestController
@@ -43,17 +44,17 @@ public class WorkshopController {
     }
 
     @PostMapping
-    public ResponseEntity<NewWorkshopDTO> store(@RequestBody NewWorkshopDTO workshop){
-        return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop));
+    public ResponseEntity<NewWorkshopDTO> store(@RequestBody NewWorkshopDTO workshop, Principal principal){
+        return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop, principal.getName()));
     }
 
     @PutMapping("/{name}")
-    public NewWorkshopDTO update(@RequestBody NewWorkshopDTO workshopData, @PathVariable String name){
-        return workshopService.edit(workshopData, name);
+    public NewWorkshopDTO update(@RequestBody NewWorkshopDTO workshopData, @PathVariable String name, Principal principal){
+        return workshopService.edit(workshopData, name, principal.getName());
     }
 
     @DeleteMapping("/{name}")
-    public NewWorkshopDTO destroy(@PathVariable String name){
-        return workshopService.delete(name);
+    public NewWorkshopDTO destroy(@PathVariable String name, Principal principal){
+        return workshopService.delete(name, principal.getName());
     }
 }

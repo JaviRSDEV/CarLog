@@ -4,8 +4,6 @@ import com.carlog.backend.dto.NewWorkOrderDTO;
 import com.carlog.backend.dto.NewWorkOrderLineDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.UpdateWorkOrderDTO;
-import com.carlog.backend.model.WorkOrder;
-import com.carlog.backend.model.WorkOrderLine;
 import com.carlog.backend.service.WorkOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,9 +29,14 @@ public class WorkOrderController {
         return ResponseEntity.ok(workOrderService.getAll());
     }
 
+    @GetMapping("/workshop/{id}")
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByWorkshop(@PathVariable Long id){
+        return ResponseEntity.ok(workOrderService.getWorkOrderByWorkshop(id));
+    }
+
     @GetMapping("/vehicle/{plate}")
-    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByVehicle(@PathVariable String plate){
-        return ResponseEntity.ok(workOrderService.getByVehicle(plate));
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByVehicle(@PathVariable String plate, Principal principal){
+        return ResponseEntity.ok(workOrderService.getByVehicle(plate, principal.getName()));
     }
 
     @GetMapping("/mechanic/{dni}")
@@ -42,8 +45,8 @@ public class WorkOrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<NewWorkOrderResponseDTO> show(@PathVariable Long id){
-        return ResponseEntity.ok(workOrderService.getById(id));
+    public ResponseEntity<NewWorkOrderResponseDTO> show(@PathVariable Long id, Principal principal){
+        return ResponseEntity.ok(workOrderService.getById(id, principal.getName()));
     }
 
     @PostMapping
@@ -53,32 +56,32 @@ public class WorkOrderController {
     }
 
     @PutMapping("/{workOrderId}")
-    public ResponseEntity<NewWorkOrderResponseDTO> update(@RequestBody UpdateWorkOrderDTO workOrderData, @PathVariable Long workOrderId){
-        return ResponseEntity.ok(workOrderService.edit(workOrderData, workOrderId));
+    public ResponseEntity<NewWorkOrderResponseDTO> update(@RequestBody UpdateWorkOrderDTO workOrderData, @PathVariable Long workOrderId, Principal principal){
+        return ResponseEntity.ok(workOrderService.edit(workOrderData, workOrderId, principal.getName()));
     }
 
     @PostMapping("/{id}/lines")
-    public ResponseEntity<NewWorkOrderResponseDTO> addLine(@PathVariable Long id, @RequestBody NewWorkOrderLineDTO line){
-        return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.addLine(id, line));
+    public ResponseEntity<NewWorkOrderResponseDTO> addLine(@PathVariable Long id, @RequestBody NewWorkOrderLineDTO line, Principal principal){
+        return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.addLine(id, line, principal.getName()));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<NewWorkOrderResponseDTO> destroy(@PathVariable Long id){
-        return ResponseEntity.ok(workOrderService.delete(id));
+    public ResponseEntity<NewWorkOrderResponseDTO> destroy(@PathVariable Long id, Principal principal){
+        return ResponseEntity.ok(workOrderService.delete(id, principal.getName()));
     }
 
     @DeleteMapping("/{orderId}/lines/{lineId}")
-    public ResponseEntity<NewWorkOrderResponseDTO> deleteLine(@PathVariable Long orderId, @PathVariable Long lineId){
-        return ResponseEntity.ok(workOrderService.deleteLine(orderId, lineId));
+    public ResponseEntity<NewWorkOrderResponseDTO> deleteLine(@PathVariable Long orderId, @PathVariable Long lineId, Principal principal){
+        return ResponseEntity.ok(workOrderService.deleteLine(orderId, lineId, principal.getName()));
     }
 
     @PutMapping("/{orderId}/lines/{lineId}")
-    public ResponseEntity<NewWorkOrderResponseDTO> updateWorkOrderLine(@PathVariable Long orderId, @PathVariable Long lineId, @RequestBody NewWorkOrderLineDTO lineData){
-        return ResponseEntity.ok(workOrderService.updateWorkOrderLine(orderId, lineId, lineData));
+    public ResponseEntity<NewWorkOrderResponseDTO> updateWorkOrderLine(@PathVariable Long orderId, @PathVariable Long lineId, @RequestBody NewWorkOrderLineDTO lineData, Principal principal){
+        return ResponseEntity.ok(workOrderService.updateWorkOrderLine(orderId, lineId, lineData, principal.getName()));
     }
 
     @PatchMapping("/{orderId}/reassign")
-    public ResponseEntity<NewWorkOrderResponseDTO> reassignWorkOrder(@PathVariable Long orderId, @RequestParam String newMechanicId){
-        return ResponseEntity.ok(workOrderService.reassignMechanic(orderId, newMechanicId));
+    public ResponseEntity<NewWorkOrderResponseDTO> reassignWorkOrder(@PathVariable Long orderId, @RequestParam String newMechanicId, Principal principal){
+        return ResponseEntity.ok(workOrderService.reassignMechanic(orderId, newMechanicId, principal.getName()));
     }
 }

@@ -3,14 +3,13 @@ package com.carlog.backend.service;
 import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.error.UserNotFoundException;
 import com.carlog.backend.error.WorkshopNotFoundException;
+import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,42 +27,46 @@ public class WorkshopService {
     }
 
     public NewWorkshopDTO getByWorkshopName(String name){
-        Workshop workshop = workshopJpaRepository.findByWorkshopName(name).orElseThrow(() -> new WorkshopNotFoundException(name));
-
+        Workshop workshop = workshopJpaRepository.findByWorkshopName(name)
+                .orElseThrow(() -> new WorkshopNotFoundException(name));
         return NewWorkshopDTO.of(workshop);
     }
 
     public NewWorkshopDTO getWorkshopById(Long id){
         Workshop workshop = workshopJpaRepository.findById(id)
                 .orElseThrow(() -> new WorkshopNotFoundException(id));
-
         return NewWorkshopDTO.of(workshop);
     }
 
-    public NewWorkshopDTO add(NewWorkshopDTO dto){
+    @Transactional
+    public NewWorkshopDTO add(NewWorkshopDTO dto, String email){
         var result = workshopJpaRepository.findByWorkshopName(dto.workshopName());
         if(result.isPresent()) throw new RuntimeException("Ya existe un taller con ese nombre " + dto.workshopName());
 
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String loggedUserEmail;
+        User workshopOwner = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
 
-        if(principal instanceof UserDetails){
-            loggedUserEmail = ((UserDetails) principal).getUsername();
-        }else{
-            loggedUserEmail = principal.toString();
-        }
+        var newWorkshop = Workshop.builder()
+                .workshopName(dto.workshopName())
+                .address(dto.address())
+                .workshopPhone(dto.workshopPhone())
+                .workshopEmail(dto.workshopEmail())
+                .icon(dto.icon())
+                .build();
 
-        User workshopOwner = userJpaRepository.findByEmail(loggedUserEmail).orElseThrow(() -> new UserNotFoundException());
+        newWorkshop = workshopJpaRepository.save(newWorkshop);
 
-        var newWorkshop = Workshop.builder().workshopName(dto.workshopName()).address(dto.address()).workshopPhone(dto.workshopPhone()).workshopEmail(dto.workshopEmail()).icon(dto.icon()).build();
-
-        userJpaRepository.save(workshopOwner);
         workshopOwner.setWorkshop(newWorkshop);
-        return NewWorkshopDTO.of(workshopJpaRepository.save(newWorkshop));
+        userJpaRepository.save(workshopOwner);
+
+        return NewWorkshopDTO.of(newWorkshop);
     }
 
-    public NewWorkshopDTO edit(NewWorkshopDTO dto, String name){
+    public NewWorkshopDTO edit(NewWorkshopDTO dto, String name, String email){
         return workshopJpaRepository.findByWorkshopName(name).map(workshop -> {
+
+            verifyWorkshopManagerAccess(workshop, email);
+
             if(!workshop.getWorkshopName().equalsIgnoreCase(dto.workshopName())){
                 var existingWorkshop = workshopJpaRepository.findByWorkshopName(dto.workshopName());
                 if(existingWorkshop.isPresent()){
@@ -76,15 +79,36 @@ public class WorkshopService {
             workshop.setWorkshopPhone(dto.workshopPhone());
             workshop.setWorkshopEmail(dto.workshopEmail());
             workshop.setIcon(dto.icon());
+
             return NewWorkshopDTO.of(workshopJpaRepository.save(workshop));
         }).orElseThrow(() -> new WorkshopNotFoundException(name));
     }
 
     @Transactional
-    public NewWorkshopDTO delete(String name){
-        var result = workshopJpaRepository.findByWorkshopName(name);
-        if(result.isEmpty()) throw new WorkshopNotFoundException(name);
+    public NewWorkshopDTO delete(String name, String email){
+        Workshop workshop = workshopJpaRepository.findByWorkshopName(name)
+                .orElseThrow(() -> new WorkshopNotFoundException(name));
+
+        verifyWorkshopManagerAccess(workshop, email);
+
         workshopJpaRepository.deleteByWorkshopName(name);
-        return NewWorkshopDTO.of(result.get());
+        return NewWorkshopDTO.of(workshop);
+    }
+
+    private void verifyWorkshopManagerAccess(Workshop workshop, String email) {
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        boolean isManagerOrCoManager = currentUser.getRole() == Role.MANAGER ||
+                currentUser.getRole() == Role.CO_MANAGER;
+
+        if (!isManagerOrCoManager) {
+            throw new RuntimeException("Acceso denegado: Solo los administradores del taller pueden modificarlo.");
+        }
+
+        if (currentUser.getWorkshop() == null ||
+                currentUser.getWorkshop().getWorkshopId() != (workshop.getWorkshopId())) {
+            throw new RuntimeException("Acceso denegado: No tienes permiso para administrar este taller.");
+        }
     }
 }

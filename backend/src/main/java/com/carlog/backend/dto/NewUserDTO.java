@@ -11,7 +11,8 @@ public record NewUserDTO(String dni,
                          Role role,
                          Boolean mustChangePassword,
                          Long workShopId,
-                         Long pendingWorkshop) {
+                         Long pendingWorkshop,
+                         String pendingWorkshopName) {
 
     public static NewUserDTO of(User u){
         return new NewUserDTO(
@@ -22,7 +23,8 @@ public record NewUserDTO(String dni,
                 u.getRole(),
                 u.isMustChangePsswd(),
                 u.getWorkshop() != null ? u.getWorkshop().getWorkshopId(): null,
-                u.getPendingWorkshop() != null ? u.getPendingWorkshop().getWorkshopId(): null
+                u.getPendingWorkshop() != null ? u.getPendingWorkshop().getWorkshopId(): null,
+                u.getPendingWorkshop() != null ? u.getPendingWorkshop().getWorkshopName(): null
         );}
     }
 

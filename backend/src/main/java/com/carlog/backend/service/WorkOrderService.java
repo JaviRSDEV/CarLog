@@ -29,7 +29,22 @@ public class WorkOrderService {
         return result.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 
-    public List<NewWorkOrderResponseDTO> getByEmployee(String dni){
+    public List<NewWorkOrderResponseDTO> getByEmployee(String dni, String email){
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        User mechanic = userJpaRepository.findByDni(dni)
+                .orElseThrow(() -> new UserNotFoundException(dni));
+
+        boolean isSelf = currentUser.getDni().equals(dni);
+        boolean isManagerOfSameWorkshop = currentUser.getRole() == Role.MANAGER &&
+                currentUser.getWorkshop() != null && mechanic.getWorkshop() != null &&
+                currentUser.getWorkshop().getWorkshopId() == mechanic.getWorkshop().getWorkshopId();
+
+        if (!isSelf && !isManagerOfSameWorkshop) {
+            throw new RuntimeException("Acceso denegado: No puedes ver las órdenes de otro mecánico.");
+        }
+
         List<WorkOrder> workOrders = workOrderJpaRepository.findByMechanic_Dni(dni);
         return workOrders.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
@@ -216,7 +231,19 @@ public class WorkOrderService {
         return NewWorkOrderResponseDTO.of(updatedOrder);
     }
 
-    public List<NewWorkOrderResponseDTO> getWorkOrderByWorkshop(Long workshopId){
+    public List<NewWorkOrderResponseDTO> getWorkOrderByWorkshop(Long workshopId, String email){
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        boolean isWorker = currentUser.getRole() == Role.MANAGER ||
+                currentUser.getRole() == Role.CO_MANAGER ||
+                currentUser.getRole() == Role.MECHANIC;
+
+        if (!isWorker || currentUser.getWorkshop() == null ||
+                currentUser.getWorkshop().getWorkshopId() != workshopId) {
+            throw new RuntimeException("Acceso denegado: No perteneces a este taller.");
+        }
+
         List<WorkOrder> workOrders = workOrderJpaRepository.findByWorkshop_workshopId(workshopId);
         return workOrders.stream().map(NewWorkOrderResponseDTO::of).toList();
     }

@@ -22,16 +22,16 @@ public class WorkOrderController {
     private final WorkOrderService workOrderService;
 
     @GetMapping
-    public ResponseEntity<List<NewWorkOrderResponseDTO>> index(@RequestParam(required = false) String mechanicDni){
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> index(@RequestParam(required = false) String mechanicDni, Principal principal){
         if(mechanicDni != null)
-            return ResponseEntity.ok(workOrderService.getByEmployee(mechanicDni));
+            return ResponseEntity.ok(workOrderService.getByEmployee(mechanicDni, principal.getName()));
 
         return ResponseEntity.ok(workOrderService.getAll());
     }
 
     @GetMapping("/workshop/{id}")
-    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByWorkshop(@PathVariable Long id){
-        return ResponseEntity.ok(workOrderService.getWorkOrderByWorkshop(id));
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByWorkshop(@PathVariable Long id, Principal principal){
+        return ResponseEntity.ok(workOrderService.getWorkOrderByWorkshop(id, principal.getName()));
     }
 
     @GetMapping("/vehicle/{plate}")
@@ -40,8 +40,8 @@ public class WorkOrderController {
     }
 
     @GetMapping("/mechanic/{dni}")
-    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByMechanic(@PathVariable String dni){
-        return ResponseEntity.ok(workOrderService.getByEmployee(dni));
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByMechanic(@PathVariable String dni, Principal principal){
+        return ResponseEntity.ok(workOrderService.getByEmployee(dni, principal.getName()));
     }
 
     @GetMapping("/{id}")

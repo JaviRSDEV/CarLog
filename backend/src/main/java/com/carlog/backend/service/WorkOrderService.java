@@ -37,7 +37,7 @@ public class WorkOrderService {
                 .orElseThrow(() -> new UserNotFoundException(dni));
 
         boolean isSelf = currentUser.getDni().equals(dni);
-        boolean isManagerOfSameWorkshop = currentUser.getRole() == Role.MANAGER &&
+        boolean isManagerOfSameWorkshop = (currentUser.getRole() == Role.MANAGER || currentUser.getRole() == Role.CO_MANAGER) &&
                 currentUser.getWorkshop() != null && mechanic.getWorkshop() != null &&
                 currentUser.getWorkshop().getWorkshopId() == mechanic.getWorkshop().getWorkshopId();
 

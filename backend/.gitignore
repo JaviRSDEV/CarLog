@@ -21,7 +21,7 @@ mvnw.cmd
 *.war
 
 ##############################
-# ANGULAR / NODE (Frontend) - ¡MUY IMPORTANTE!
+# ANGULAR / NODE (Frontend)
 ##############################
 node_modules/
 dist/

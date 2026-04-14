@@ -285,7 +285,7 @@ public class VehicleService {
 
         try{
             User manager = userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER).orElse(null);
-            System.out.println(manager);
+
             if(manager != null){
                 NotificationDTO alert = NotificationDTO.builder()
                         .type("NEW_FLEET_VEHICLE")

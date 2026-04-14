@@ -230,11 +230,6 @@ public class WorkOrderService {
                 currentUser.getRole() == Role.MECHANIC;
 
         if (isWorker) {
-            System.out.println("==== DEBUG SEGURIDAD ====");
-            System.out.println("Email usuario: " + email);
-            System.out.println("ID Taller del Usuario: " + (currentUser.getWorkshop() != null ? currentUser.getWorkshop().getWorkshopId() : "NULL"));
-            System.out.println("ID Taller de la Orden: " + (workOrder.getWorkshop() != null ? workOrder.getWorkshop().getWorkshopId() : "NULL"));
-            System.out.println("=========================");
             if (workOrder.getWorkshop() == null || currentUser.getWorkshop() == null ||
                     workOrder.getWorkshop().getWorkshopId() != (currentUser.getWorkshop().getWorkshopId())) {
                 throw new RuntimeException("Acceso denegado: Esta orden pertenece a otro taller.");

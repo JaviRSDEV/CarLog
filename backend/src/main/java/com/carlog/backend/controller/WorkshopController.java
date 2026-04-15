@@ -2,16 +2,17 @@ package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.dto.NewWorkshopDTO;
-import com.carlog.backend.model.User;
-import com.carlog.backend.model.Workshop;
 import com.carlog.backend.service.UserService;
 import com.carlog.backend.service.WorkshopService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.security.Principal; // 🔥 Asegúrate de tener este import
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -26,11 +27,6 @@ public class WorkshopController {
     @GetMapping
     public List<NewWorkshopDTO> index(){
         return workshopService.getAll();
-    }
-
-    @GetMapping("/{name}")
-    public NewWorkshopDTO show(@PathVariable String name){
-        return workshopService.getByWorkshopName(name);
     }
 
     @GetMapping("/details/{id}")
@@ -48,13 +44,21 @@ public class WorkshopController {
         return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop, principal.getName()));
     }
 
-    @PutMapping("/{name}")
-    public NewWorkshopDTO update(@RequestBody NewWorkshopDTO workshopData, @PathVariable String name, Principal principal){
-        return workshopService.edit(workshopData, name, principal.getName());
+    @PutMapping(value = "/details/{id}", consumes = { "multipart/form-data" })
+    public NewWorkshopDTO update(
+            @PathVariable Long id,
+            @RequestPart("workshopData") String workshopDataJson,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            Principal principal) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        NewWorkshopDTO dto = objectMapper.readValue(workshopDataJson, NewWorkshopDTO.class);
+
+        return workshopService.edit(dto, id, file, principal.getName());
     }
 
-    @DeleteMapping("/{name}")
-    public NewWorkshopDTO destroy(@PathVariable String name, Principal principal){
-        return workshopService.delete(name, principal.getName());
+    @DeleteMapping("/details/{id}")
+    public NewWorkshopDTO destroy(@PathVariable Long id, Principal principal){
+        return workshopService.delete(id, principal.getName());
     }
 }

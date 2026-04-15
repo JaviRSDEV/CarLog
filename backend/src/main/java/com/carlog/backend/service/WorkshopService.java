@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,12 +35,6 @@ public class WorkshopService {
     public NewWorkshopDTO getWorkshopById(Long id){
         Workshop workshop = workshopJpaRepository.findById(id)
                 .orElseThrow(() -> new WorkshopNotFoundException(id));
-        return NewWorkshopDTO.of(workshop);
-    }
-
-    public NewWorkshopDTO getByWorkshopName(String name){
-        Workshop workshop = workshopJpaRepository.findByWorkshopName(name)
-                .orElseThrow(() -> new WorkshopNotFoundException(name));
         return NewWorkshopDTO.of(workshop);
     }
 

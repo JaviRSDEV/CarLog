@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Deleted unused method and import">
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added documentation in spanish and english">
+      <change afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +74,11 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\6003792\Desktop\Proyecto_final\CarLog\docs" />
+    </key>
+  </component>
   <component name="RunManager" selected="Application.BackendApplication">
     <configuration name="BackendApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.carlog.backend.BackendApplication" />
@@ -410,11 +418,22 @@
       <option name="project" value="LOCAL" />
       <updated>1776253744557</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Added documentation in spanish and english">
+      <option name="closed" value="true" />
+      <created>1776412712842</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1776412712843</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -428,7 +447,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Añadida la funcionalidad de eliminar imagenes en caso de borrarlas en el front, evitando así la basura residual" />
     <MESSAGE value="Actualizado el gitnignore" />
     <MESSAGE value="Cambios menores" />
     <MESSAGE value="Añadida la logica de entrada y salida de vehiculos en el taller, se refactoriza el metodo original y se añade solicitud al cliente para ello" />
@@ -453,7 +471,8 @@
     <MESSAGE value="Added pendingWorkshopName to NewUserDTO" />
     <MESSAGE value="Added icon implementation in workshops" />
     <MESSAGE value="Deleted unused method and import" />
-    <option name="LAST_COMMIT_MESSAGE" value="Deleted unused method and import" />
+    <MESSAGE value="Added documentation in spanish and english" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added documentation in spanish and english" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

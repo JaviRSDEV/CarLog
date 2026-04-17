@@ -19,6 +19,7 @@ mvnw.cmd
 *.class
 *.jar
 *.war
+.env
 
 ##############################
 # ANGULAR / NODE (Frontend)

@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/workshop")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "[*]")
+@CrossOrigin(originPatterns = "${URL_CORS}", allowCredentials = "true")
 public class WorkshopController {
 
     private final WorkshopService workshopService;

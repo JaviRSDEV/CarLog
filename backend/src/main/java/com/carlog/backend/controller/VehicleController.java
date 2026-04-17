@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/vehicles")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "[*]")
+@CrossOrigin(originPatterns = "${URL_CORS}", allowCredentials = "true")
 public class VehicleController {
 
     private final VehicleService vehicleService;

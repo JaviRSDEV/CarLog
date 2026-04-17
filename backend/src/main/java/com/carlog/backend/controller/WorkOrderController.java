@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/workorders")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "[*]")
+@CrossOrigin(originPatterns = "${URL_CORS}", allowCredentials = "true")
 public class WorkOrderController {
 
     private final WorkOrderService workOrderService;

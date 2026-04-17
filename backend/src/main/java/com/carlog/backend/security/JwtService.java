@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,11 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXoxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTA=";
+    @Value("${JWT_SECRET_KEY}")
+    private String SECRET_KEY;
+
+    @Value("${isSecure}")
+    private boolean isSecure;
 
     public ResponseCookie generateJwtCookie(String jwt, boolean rememberMe) {
         long maxAge = rememberMe ? 7 * 24 * 60 * 60 : -1;
@@ -27,7 +32,7 @@ public class JwtService {
                 .path("/")
                 .maxAge(maxAge)
                 .httpOnly(true)
-                .secure(false)
+                .secure(isSecure)
                 .sameSite("Lax")
                 .build();
     }

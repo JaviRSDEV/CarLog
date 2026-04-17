@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "[*]")
+@CrossOrigin(originPatterns = "${URL_CORS}", allowCredentials = "true")
 public class UserController {
 
     private final UserService userService;

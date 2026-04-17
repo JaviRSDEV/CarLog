@@ -388,40 +388,48 @@ docker ps
 
 ### 3. Arrancar el backend
 
+El proyecto incluye el **Maven Wrapper** (`mvnw`) para garantizar la total compatibilidad y evitar problemas de dependencias globales. No necesitas tener Maven instalado en tu máquina.
+
+**En Linux / macOS:**
 ```bash
 cd ../backend
-mvn clean install
-mvn spring-boot:run
+./mvnw clean install
+./mvnw spring-boot:run
+```
+
+**En Windows:**
+```bash
+
 ```
 
 La API estará disponible en: **`http://localhost:8081/api`**
 
 ---
 
-## Configuración
+## Configuración y Variables de Entorno
 
-El archivo `backend/src/main/resources/application.properties` contiene la configuración principal:
+Siguiendo la metodología *Twelve-Factor App*, el proyecto evita el *hardcoding* de credenciales sensibles. El archivo `application.properties` inyecta configuraciones críticas a través de **Variables de Entorno**, con valores por defecto para facilitar el desarrollo local.
 
 ```properties
 # Base de datos
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/carlog_db
-spring.datasource.username=carlog_user
-spring.datasource.password=carlog_password
-
-# JPA / Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-
+spring.datasource.url=jdbc:mysql://${DB_HOST:127.0.0.1}:3306/carlog_db
+spring.datasource.username=${DB_USER:carlog_user}
+spring.datasource.password=${DB_PASSWORD:carlog_password}
+```
 # Servidor
 server.port=8081
 
-# JWT
-application.security.jwt.secret-key=<TU_CLAVE_SECRETA>
+# Seguridad JWT
+application.security.jwt.secret-key=${JWT_SECRET_KEY:tu_clave_secreta_local_muy_larga}
 application.security.jwt.expiration=86400000   # 24 horas en ms
-```
 
 > **Nota de seguridad**: Cambia `jwt.secret-key` por una clave segura en entornos de producción. Nunca expongas credenciales reales en el repositorio.
 
+### Gestión del Esquema de Base de Datos (`ddl-auto`)
+
+Para agilizar la fase de desarrollo, la propiedad `spring.jpa.hibernate.ddl-auto` puede estar configurada en `update`. 
+
+**Para entornos de Producción:** Es estrictamente obligatorio cambiar este valor a `validate` o `none`. Dejar `update` en producción supone un riesgo crítico de pérdida o alteración accidental de datos. Las actualizaciones del esquema de la base de datos en entornos productivos deben gestionarse siempre mediante herramientas de migración automatizadas (ej. *Flyway* o *Liquibase*).
 ---
 
 ## Flujo de Trabajo Principal

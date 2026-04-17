@@ -27,12 +27,12 @@ El sistema está diseñado para dar soporte a múltiples roles de usuario, garan
 - [Roles del Sistema](#roles-del-sistema)
 - [Seguridad y Autenticación](#seguridad-y-autenticación)
 - [API REST — Referencia de Endpoints](#api-rest--referencia-de-endpoints)
+- [Flujo de Trabajo Principal](#flujo-de-trabajo-principal)
 - [Notificaciones en Tiempo Real](#notificaciones-en-tiempo-real)
 - [Manejo de Errores](#manejo-de-errores)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Inicio Rápido](#inicio-rápido)
 - [Configuración](#configuración)
-- [Flujo de Trabajo Principal](#flujo-de-trabajo-principal)
 - [Licencia](#licencia)
 
 ---

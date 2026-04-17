@@ -449,8 +449,8 @@ Este proyecto está bajo licencia **MIT**. Consulta el archivo [LICENSE](LICENSE
 
 ## Documentación
 - **[API Reference](./README.md)** - Documentación completa de endpoints REST
-- **[Technical Documentation (ESP)](./docs/CARLOG_DOCUMENTATION_ESP.pdf)
-- **[Technical Documentation (ENG)](./docs/CARLOG_DOCUMENTATION_ENG.pdf)
+- **[Documentación Técnica (ESP)](./docs/CARLOG_DOCUMENTATION_ESP.pdf)** - Documentación técnica en español
+- **[Technical Documentation (ENG)](./docs/CARLOG_DOCUMENTATION_ENG.pdf)** - Technical Documentation in english
 - **[Getting Started & Deployment](wiki)** - Guía detallada de configuración
 - **[System Architecture](wiki)** - Arquitectura y patrones de diseño
 

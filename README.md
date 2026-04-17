@@ -27,12 +27,12 @@ El sistema está diseñado para dar soporte a múltiples roles de usuario, garan
 - [Roles del Sistema](#roles-del-sistema)
 - [Seguridad y Autenticación](#seguridad-y-autenticación)
 - [API REST — Referencia de Endpoints](#api-rest--referencia-de-endpoints)
+- [Flujo de Trabajo Principal](#flujo-de-trabajo-principal)
 - [Notificaciones en Tiempo Real](#notificaciones-en-tiempo-real)
 - [Manejo de Errores](#manejo-de-errores)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Inicio Rápido](#inicio-rápido)
 - [Configuración](#configuración)
-- [Flujo de Trabajo Principal](#flujo-de-trabajo-principal)
 - [Licencia](#licencia)
 
 ---
@@ -259,6 +259,20 @@ PENDING  ──(primera línea añadida)──►  IN_PROGRESS  ──(cierre ma
 
 ---
 
+## Flujo de Trabajo Principal
+
+```mermaid
+graph LR
+    A[Registro de Vehículo] --> B[Solicitud de Entrada al Taller]
+    B --> C[Aprobación por el Cliente]
+    C --> D[Crear Orden de Trabajo]
+    D --> E[Añadir Líneas de Trabajo]
+    E --> F[Cerrar Orden - COMPLETED]
+    F --> G[Facturación con IVA y Descuentos]
+    G --> H[Salida del Taller]
+```
+---
+
 ## Notificaciones en Tiempo Real
 
 CarLog utiliza **STOMP sobre WebSocket** para enviar notificaciones push a usuarios específicos sin necesidad de polling.
@@ -388,54 +402,50 @@ docker ps
 
 ### 3. Arrancar el backend
 
+El proyecto incluye el **Maven Wrapper** (`mvnw`) para garantizar la total compatibilidad y evitar problemas de dependencias globales. No necesitas tener Maven instalado en tu máquina.
+
+**En Linux / macOS:**
 ```bash
 cd ../backend
-mvn clean install
-mvn spring-boot:run
+./mvnw clean install
+./mvnw spring-boot:run
+```
+
+**En Windows:**
+```bash
+cd ../backend
+mvnw.cmd clean install
+mvnw.cmd spring-boot:run
 ```
 
 La API estará disponible en: **`http://localhost:8081/api`**
 
 ---
 
-## Configuración
+## Configuración y Variables de Entorno
 
-El archivo `backend/src/main/resources/application.properties` contiene la configuración principal:
+Siguiendo la metodología *Twelve-Factor App*, el proyecto evita el *hardcoding* de credenciales sensibles. El archivo `application.properties` inyecta configuraciones críticas a través de **Variables de Entorno**, con valores por defecto para facilitar el desarrollo local.
 
 ```properties
 # Base de datos
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/carlog_db
-spring.datasource.username=carlog_user
-spring.datasource.password=carlog_password
-
-# JPA / Hibernate
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
-
+spring.datasource.url=jdbc:mysql://${DB_HOST:127.0.0.1}:3306/carlog_db
+spring.datasource.username=${DB_USER:carlog_user}
+spring.datasource.password=${DB_PASSWORD:carlog_password}
 # Servidor
 server.port=8081
 
-# JWT
-application.security.jwt.secret-key=<TU_CLAVE_SECRETA>
+# Seguridad JWT
+application.security.jwt.secret-key=${JWT_SECRET_KEY:tu_clave_secreta_local_muy_larga}
 application.security.jwt.expiration=86400000   # 24 horas en ms
 ```
-
 > **Nota de seguridad**: Cambia `jwt.secret-key` por una clave segura en entornos de producción. Nunca expongas credenciales reales en el repositorio.
 
+### Gestión del Esquema de Base de Datos (`ddl-auto`)
+
+Para agilizar la fase de desarrollo, la propiedad `spring.jpa.hibernate.ddl-auto` puede estar configurada en `update`. 
+
+**Para entornos de Producción:** Es estrictamente obligatorio cambiar este valor a `validate` o `none`. Dejar `update` en producción supone un riesgo crítico de pérdida o alteración accidental de datos. Las actualizaciones del esquema de la base de datos en entornos productivos deben gestionarse siempre mediante herramientas de migración automatizadas (ej. *Flyway* o *Liquibase*).
 ---
-
-## Flujo de Trabajo Principal
-
-```mermaid
-graph LR
-    A[Registro de Vehículo] --> B[Solicitud de Entrada al Taller]
-    B --> C[Aprobación por el Cliente]
-    C --> D[Crear Orden de Trabajo]
-    D --> E[Añadir Líneas de Trabajo]
-    E --> F[Cerrar Orden - COMPLETED]
-    F --> G[Facturación con IVA y Descuentos]
-    G --> H[Salida del Taller]
-```
 
 ---
 
@@ -446,13 +456,11 @@ Este proyecto está bajo licencia **MIT**. Consulta el archivo [LICENSE](LICENSE
 ---
 
 *Desarrollado por [JaviRSDEV](https://github.com/JaviRSDEV)*
-```
-
----
 
 ## Documentación
-
 - **[API Reference](./README.md)** - Documentación completa de endpoints REST
+- **[Documentación Técnica (ESP)](./docs/CARLOG_DOCUMENTATION_ESP.pdf)** - Documentación técnica en español
+- **[Technical Documentation (ENG)](./docs/CARLOG_DOCUMENTATION_ENG.pdf)** - Technical Documentation in english
 - **[Getting Started & Deployment](wiki)** - Guía detallada de configuración
 - **[System Architecture](wiki)** - Arquitectura y patrones de diseño
 

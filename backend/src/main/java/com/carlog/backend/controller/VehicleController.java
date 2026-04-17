@@ -5,7 +5,6 @@ import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.model.User;
 import com.carlog.backend.service.VehicleService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -76,7 +75,6 @@ public class VehicleController {
     @PutMapping("/{plate}/reject-entry")
     public ResponseEntity<NewVehicleDTO> rejectEntry(@PathVariable String plate, Principal principal){
         String userDni = principal.getName();
-        System.out.println(userDni);
         NewVehicleDTO updatedVehicle = vehicleService.rejectEntry(plate, userDni);
         return ResponseEntity.ok(updatedVehicle);
     }

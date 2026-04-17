@@ -399,7 +399,9 @@ cd ../backend
 
 **En Windows:**
 ```bash
-
+cd ../backend
+mvnw.cmd clean install
+mvnw.cmd spring-boot:run
 ```
 
 La API estará disponible en: **`http://localhost:8081/api`**

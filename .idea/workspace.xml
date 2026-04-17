@@ -4,13 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Fixed: Critical vulnerability">
-      <change afterPath="$PROJECT_DIR$/BBDD_CARLOG/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BBDD_CARLOG/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/BBDD_CARLOG/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Fixed: Critical vulnerability and prepared application.properties for production">
+      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -443,7 +438,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776424377702</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="Fixed: Critical vulnerability and prepared application.properties for production">
+      <option name="closed" value="true" />
+      <created>1776425836981</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1776425836981</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -464,7 +467,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cambios menores" />
     <MESSAGE value="Añadida la logica de entrada y salida de vehiculos en el taller, se refactoriza el metodo original y se añade solicitud al cliente para ello" />
     <MESSAGE value="Cambios menores en el DTO para devolver el nombre del taller solicitante del registro del vehiculo, a su vez bloqueada la eliminación y edición de vehículos a personas ajenas al mismo" />
     <MESSAGE value="Modificados los metodos de las workOrder para devolver el dto y no el objeto, a su vez en el dto devolvemos el vehiculo como objeto en vez de la matricula" />
@@ -489,7 +491,8 @@
     <MESSAGE value="Deleted unused method and import" />
     <MESSAGE value="Added documentation in spanish and english" />
     <MESSAGE value="Fixed: Critical vulnerability" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed: Critical vulnerability" />
+    <MESSAGE value="Fixed: Critical vulnerability and prepared application.properties for production" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed: Critical vulnerability and prepared application.properties for production" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

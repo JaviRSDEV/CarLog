@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/vehicles")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "${URL_CORS}", allowCredentials = "true")
 public class VehicleController {
 
     private final VehicleService vehicleService;
@@ -55,11 +55,13 @@ public class VehicleController {
         return vehicleService.delete(plate, principal.getName());
     }
 
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @PostMapping("/{plate}/exit/{workshopId}")
     public ResponseEntity<NewVehicleDTO> registerExit(@PathVariable String plate, @PathVariable Long workshopId, Principal principal){
         return ResponseEntity.ok(vehicleService.registerExit(plate, workshopId, principal.getName()));
     }
 
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @PutMapping("/{plate}/request-entry/{workshopId}")
     public ResponseEntity<NewVehicleDTO> requestEntry(@PathVariable String plate, @PathVariable Long workshopId, Principal principal){
         NewVehicleDTO updatedVehicle = vehicleService.requestEntry(plate, workshopId, principal.getName());

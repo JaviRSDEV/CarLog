@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,32 +19,30 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/workshop")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "${URL_CORS}", allowCredentials = "true")
 public class WorkshopController {
 
     private final WorkshopService workshopService;
     private final UserService userService;
 
-    @GetMapping
-    public List<NewWorkshopDTO> index(){
-        return workshopService.getAll();
-    }
-
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
     @GetMapping("/details/{id}")
     public NewWorkshopDTO showById(@PathVariable Long id){
         return workshopService.getWorkshopById(id);
     }
 
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/{ID}/employees")
     public List<NewUserDTO> showEmployees(@PathVariable Long ID){
         return userService.getEmployeesByWorkshopId(ID);
     }
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @PostMapping
     public ResponseEntity<NewWorkshopDTO> store(@RequestBody NewWorkshopDTO workshop, Principal principal){
         return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop, principal.getName()));
     }
 
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
     @PutMapping(value = "/details/{id}", consumes = { "multipart/form-data" })
     public NewWorkshopDTO update(
             @PathVariable Long id,
@@ -57,6 +56,7 @@ public class WorkshopController {
         return workshopService.edit(dto, id, file, principal.getName());
     }
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @DeleteMapping("/details/{id}")
     public NewWorkshopDTO destroy(@PathVariable Long id, Principal principal){
         return workshopService.delete(id, principal.getName());

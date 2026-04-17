@@ -7,6 +7,7 @@ import com.carlog.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@CrossOrigin(originPatterns = "${URL_CORS}", allowCredentials = "true")
 public class UserController {
 
     private final UserService userService;
@@ -49,6 +49,7 @@ public class UserController {
         return userService.delete(DNI);
     }
 
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
     @PatchMapping("/{dni}/invite")
     public void invite(@PathVariable String dni, @RequestParam String managerDni, @RequestParam Role newRole){
         userService.inviteToWorkshop(managerDni, dni,  newRole);
@@ -60,10 +61,12 @@ public class UserController {
     }
 
     @PatchMapping("/{dni}/reject")
-    public void reject(@PathVariable String dni){
+    public NewUserDTO reject(@PathVariable String dni){
         userService.rejectInvitation(dni);
+        return userService.getByDni(dni);
     }
 
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
     @PatchMapping("/{dni}/fire")
     public void fireEmployee(@PathVariable String dni){
         userService.fireEmployee(dni);

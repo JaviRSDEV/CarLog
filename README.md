@@ -446,7 +446,6 @@ Este proyecto está bajo licencia **MIT**. Consulta el archivo [LICENSE](LICENSE
 ---
 
 *Desarrollado por [JaviRSDEV](https://github.com/JaviRSDEV)*
-```
 
 ## Documentación
 - **[API Reference](./README.md)** - Documentación completa de endpoints REST

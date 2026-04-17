@@ -237,6 +237,21 @@ PENDING  ──(primera línea añadida)──►  IN_PROGRESS  ──(cierre ma
 
 ---
 
+## Flujo de Trabajo Principal
+
+```mermaid
+graph LR
+    A[Registro de Vehículo] --> B[Solicitud de Entrada al Taller]
+    B --> C[Aprobación por el Cliente]
+    C --> D[Crear Orden de Trabajo]
+    D --> E[Añadir Líneas de Trabajo]
+    E --> F[Cerrar Orden - COMPLETED]
+    F --> G[Facturación con IVA y Descuentos]
+    G --> H[Salida del Taller]
+```
+
+---
+
 ### Usuarios (`/api/users`)
 
 | Método  | Endpoint                        | Descripción                                  |
@@ -433,19 +448,6 @@ Para agilizar la fase de desarrollo, la propiedad `spring.jpa.hibernate.ddl-auto
 
 **Para entornos de Producción:** Es estrictamente obligatorio cambiar este valor a `validate` o `none`. Dejar `update` en producción supone un riesgo crítico de pérdida o alteración accidental de datos. Las actualizaciones del esquema de la base de datos en entornos productivos deben gestionarse siempre mediante herramientas de migración automatizadas (ej. *Flyway* o *Liquibase*).
 ---
-
-## Flujo de Trabajo Principal
-
-```mermaid
-graph LR
-    A[Registro de Vehículo] --> B[Solicitud de Entrada al Taller]
-    B --> C[Aprobación por el Cliente]
-    C --> D[Crear Orden de Trabajo]
-    D --> E[Añadir Líneas de Trabajo]
-    E --> F[Cerrar Orden - COMPLETED]
-    F --> G[Facturación con IVA y Descuentos]
-    G --> H[Salida del Taller]
-```
 
 ---
 

@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added documentation in spanish and english">
-      <change afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Fixed: Critical vulnerability">
+      <change afterPath="$PROJECT_DIR$/BBDD_CARLOG/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BBDD_CARLOG/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/BBDD_CARLOG/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -81,6 +83,9 @@
   </component>
   <component name="RunManager" selected="Application.BackendApplication">
     <configuration name="BackendApplication" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="envFilePaths">
+        <option value="$PROJECT_DIR$/backend/.env" />
+      </option>
       <option name="MAIN_CLASS_NAME" value="com.carlog.backend.BackendApplication" />
       <module name="backend" />
       <extension name="coverage">
@@ -100,6 +105,10 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Application.BackendApplication" />
+      <item itemvalue="Spring Boot.BackendApplication" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.BackendApplication" />
@@ -426,7 +435,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776412712843</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Fixed: Critical vulnerability">
+      <option name="closed" value="true" />
+      <created>1776424377702</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1776424377702</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -447,7 +464,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Actualizado el gitnignore" />
     <MESSAGE value="Cambios menores" />
     <MESSAGE value="Añadida la logica de entrada y salida de vehiculos en el taller, se refactoriza el metodo original y se añade solicitud al cliente para ello" />
     <MESSAGE value="Cambios menores en el DTO para devolver el nombre del taller solicitante del registro del vehiculo, a su vez bloqueada la eliminación y edición de vehículos a personas ajenas al mismo" />
@@ -472,7 +488,8 @@
     <MESSAGE value="Added icon implementation in workshops" />
     <MESSAGE value="Deleted unused method and import" />
     <MESSAGE value="Added documentation in spanish and english" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added documentation in spanish and english" />
+    <MESSAGE value="Fixed: Critical vulnerability" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed: Critical vulnerability" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

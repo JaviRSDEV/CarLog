@@ -7,27 +7,14 @@ services:
     container_name: carlog-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root        # Contraseña maestra
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}     # Contraseña maestra
       MYSQL_DATABASE: carlog_db        # Crea la BBDD automáticamente
-      MYSQL_USER: carlog_user          # Usuario específico para la App
-      MYSQL_PASSWORD: carlog_password  # Contraseña para la App
+      MYSQL_USER: ${DB_USER}         # Usuario específico para la App
+      MYSQL_PASSWORD: ${DB_PASSWORD} # Contraseña para la App
     ports:
-      - "3306:3306"                    # Expone el puerto al exterior
+      - "127.0.0.1:3306:3306"                    # Expone el puerto al exterior
     volumes:
       - mysql_data:/var/lib/mysql      # Persistencia de datos
-
-  # phpMyAdmin (Gestor visual de la BBDD)
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: carlog-admin
-    depends_on:
-      - mysqldb
-    environment:
-      PMA_HOST: mysqldb                # Conecta con el servicio de arriba
-      PMA_PORT: 3306
-      PMA_ARBITRARY: 1                 # Permite introducir cualquier servidor/user
-    ports:
-      - "8082:80"                      # Acceso en: http://localhost:8081
 
 volumes:
   mysql_data:

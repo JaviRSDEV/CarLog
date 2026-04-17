@@ -448,11 +448,10 @@ Este proyecto está bajo licencia **MIT**. Consulta el archivo [LICENSE](LICENSE
 *Desarrollado por [JaviRSDEV](https://github.com/JaviRSDEV)*
 ```
 
----
-
 ## Documentación
-
 - **[API Reference](./README.md)** - Documentación completa de endpoints REST
+- **[Technical Documentation (ESP)](./docs/CARLOG_DOCUMENTATION_ESP.pdf)
+- **[Technical Documentation (ENG)](./docs/CARLOG_DOCUMENTATION_ENG.pdf)
 - **[Getting Started & Deployment](wiki)** - Guía detallada de configuración
 - **[System Architecture](wiki)** - Arquitectura y patrones de diseño
 

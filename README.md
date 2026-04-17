@@ -237,21 +237,6 @@ PENDING  ──(primera línea añadida)──►  IN_PROGRESS  ──(cierre ma
 
 ---
 
-## Flujo de Trabajo Principal
-
-```mermaid
-graph LR
-    A[Registro de Vehículo] --> B[Solicitud de Entrada al Taller]
-    B --> C[Aprobación por el Cliente]
-    C --> D[Crear Orden de Trabajo]
-    D --> E[Añadir Líneas de Trabajo]
-    E --> F[Cerrar Orden - COMPLETED]
-    F --> G[Facturación con IVA y Descuentos]
-    G --> H[Salida del Taller]
-```
-
----
-
 ### Usuarios (`/api/users`)
 
 | Método  | Endpoint                        | Descripción                                  |
@@ -272,6 +257,20 @@ graph LR
 | `PUT`   | `/api/workshop/{id}`            | Actualizar taller (con icono multipart)      |
 | `GET`   | `/api/workshop/{id}/employees`  | Listar empleados del taller                  |
 
+---
+
+## Flujo de Trabajo Principal
+
+```mermaid
+graph LR
+    A[Registro de Vehículo] --> B[Solicitud de Entrada al Taller]
+    B --> C[Aprobación por el Cliente]
+    C --> D[Crear Orden de Trabajo]
+    D --> E[Añadir Líneas de Trabajo]
+    E --> F[Cerrar Orden - COMPLETED]
+    F --> G[Facturación con IVA y Descuentos]
+    G --> H[Salida del Taller]
+```
 ---
 
 ## Notificaciones en Tiempo Real

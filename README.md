@@ -431,14 +431,13 @@ Siguiendo la metodología *Twelve-Factor App*, el proyecto evita el *hardcoding*
 spring.datasource.url=jdbc:mysql://${DB_HOST:127.0.0.1}:3306/carlog_db
 spring.datasource.username=${DB_USER:carlog_user}
 spring.datasource.password=${DB_PASSWORD:carlog_password}
-```
 # Servidor
 server.port=8081
 
 # Seguridad JWT
 application.security.jwt.secret-key=${JWT_SECRET_KEY:tu_clave_secreta_local_muy_larga}
 application.security.jwt.expiration=86400000   # 24 horas en ms
-
+```
 > **Nota de seguridad**: Cambia `jwt.secret-key` por una clave segura en entornos de producción. Nunca expongas credenciales reales en el repositorio.
 
 ### Gestión del Esquema de Base de Datos (`ddl-auto`)

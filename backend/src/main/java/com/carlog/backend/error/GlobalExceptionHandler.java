@@ -2,6 +2,7 @@ package com.carlog.backend.error;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -37,6 +38,28 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WorkOrderNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleWorkOrderNotFound(WorkOrderNotFoundException ex){
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentialsException(BadCredentialsException ex){
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                Map.of(
+                       "message", "Bad credentials",
+                       "status", 401,
+                       "timestamp", System.currentTimeMillis()
+                )
+        );
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<Object> handleRateLimitExceededException(RateLimitExceededException ex){
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(
+                Map.of(
+                        "message", ex.getMessage(),
+                        "status", 429,
+                        "timestamp", System.currentTimeMillis()
+                )
+        );
     }
 
     @ExceptionHandler(WorkshopNotFoundException.class)

@@ -4,8 +4,6 @@ import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.service.UserService;
 import com.carlog.backend.service.WorkshopService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

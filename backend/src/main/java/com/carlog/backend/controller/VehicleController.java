@@ -2,14 +2,12 @@ package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewVehicleDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
-import com.carlog.backend.model.User;
 import com.carlog.backend.service.VehicleService;
+import jakarta.validation.Valid; // ✅ IMPORTANTE
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -27,11 +25,10 @@ public class VehicleController {
         if(workshopId != null){
             return ResponseEntity.ok(vehicleService.getByWorkshop(workshopId, principal.getName()));
         }
-
         if(ownerId != null){
             return ResponseEntity.ok(vehicleService.getByOwner(ownerId, principal.getName()));
         }
-        return ResponseEntity.ok(vehicleService.getAll());
+        return ResponseEntity.ok(vehicleService.getMyVehicles(principal.getName()));
     }
 
     @GetMapping("/{plate}")
@@ -40,13 +37,12 @@ public class VehicleController {
     }
 
     @PostMapping
-    public ResponseEntity<NewVehicleDTO> store(@RequestBody NewVehicleDTO vehicle){
-        User connectedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return ResponseEntity.status(HttpStatus.CREATED).body(vehicleService.add(vehicle, connectedUser.getDni()));
+    public ResponseEntity<NewVehicleDTO> store(@Valid @RequestBody NewVehicleDTO vehicle, Principal principal){
+        return ResponseEntity.status(HttpStatus.CREATED).body(vehicleService.add(vehicle, principal.getName()));
     }
 
     @PutMapping("/{plate}")
-    public NewVehicleDTO update(@RequestBody NewVehicleDTO vehicleData, @PathVariable String plate, Principal principal){
+    public NewVehicleDTO update(@Valid @RequestBody NewVehicleDTO vehicleData, @PathVariable String plate, Principal principal){
         return vehicleService.edit(vehicleData, plate, principal.getName());
     }
 
@@ -64,28 +60,22 @@ public class VehicleController {
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @PutMapping("/{plate}/request-entry/{workshopId}")
     public ResponseEntity<NewVehicleDTO> requestEntry(@PathVariable String plate, @PathVariable Long workshopId, Principal principal){
-        NewVehicleDTO updatedVehicle = vehicleService.requestEntry(plate, workshopId, principal.getName());
-        return ResponseEntity.ok(updatedVehicle);
+        return ResponseEntity.ok(vehicleService.requestEntry(plate, workshopId, principal.getName()));
     }
 
     @PutMapping("/{plate}/approve-entry")
     public ResponseEntity<NewVehicleDTO> approveEntry(@PathVariable String plate, Principal principal){
-        String userDni = principal.getName();
-        NewVehicleDTO updatedVehicle = vehicleService.approveEntry(plate, userDni);
-        return ResponseEntity.ok(updatedVehicle);
+        return ResponseEntity.ok(vehicleService.approveEntry(plate, principal.getName()));
     }
 
     @PutMapping("/{plate}/reject-entry")
     public ResponseEntity<NewVehicleDTO> rejectEntry(@PathVariable String plate, Principal principal){
-        String userDni = principal.getName();
-        System.out.println(userDni);
-        NewVehicleDTO updatedVehicle = vehicleService.rejectEntry(plate, userDni);
-        return ResponseEntity.ok(updatedVehicle);
+        return ResponseEntity.ok(vehicleService.rejectEntry(plate, principal.getName()));
     }
 
     @PostMapping("/{plate}/transfer")
-    public ResponseEntity<NewVehicleDTO> transferVehicle(@PathVariable String plate, @RequestParam String currentOwnerId, @RequestParam String newOwnerId, Principal principal){
-        return ResponseEntity.ok(vehicleService.changeOwner(plate, currentOwnerId, newOwnerId, principal.getName()));
+    public ResponseEntity<NewVehicleDTO> transferVehicle(@PathVariable String plate, @RequestParam String newOwnerId, Principal principal){
+        return ResponseEntity.ok(vehicleService.changeOwner(plate, newOwnerId, principal.getName()));
     }
 
     @GetMapping("/{plate}/history")
@@ -95,7 +85,6 @@ public class VehicleController {
 
     @GetMapping("/search")
     public ResponseEntity<List<NewVehicleDTO>> search(@RequestParam String q, @RequestParam Long workshopId, @RequestParam String type, Principal principal) {
-
         return ResponseEntity.ok(vehicleService.searchVehicles(q, workshopId, type, principal.getName()));
     }
 }

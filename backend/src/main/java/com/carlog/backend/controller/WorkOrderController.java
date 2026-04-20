@@ -5,6 +5,7 @@ import com.carlog.backend.dto.NewWorkOrderLineDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.UpdateWorkOrderDTO;
 import com.carlog.backend.service.WorkOrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +24,8 @@ public class WorkOrderController {
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/workshop/{id}")
-    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByWorkshop(@PathVariable Long id){
-        return ResponseEntity.ok(workOrderService.getWorkOrderByWorkshop(id));
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByWorkshop(@PathVariable Long id, Principal principal){
+        return ResponseEntity.ok(workOrderService.getWorkOrderByWorkshop(id, principal.getName()));
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
@@ -35,8 +36,8 @@ public class WorkOrderController {
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/mechanic/{dni}")
-    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByMechanic(@PathVariable String dni){
-        return ResponseEntity.ok(workOrderService.getByEmployee(dni));
+    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByMechanic(@PathVariable String dni, Principal principal){
+        return ResponseEntity.ok(workOrderService.getByEmployee(dni, principal.getName()));
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
@@ -47,20 +48,20 @@ public class WorkOrderController {
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @PostMapping
-    public ResponseEntity<NewWorkOrderResponseDTO> store(@RequestBody NewWorkOrderDTO workOrder, Principal principal){
+    public ResponseEntity<NewWorkOrderResponseDTO> store(@Valid @RequestBody NewWorkOrderDTO workOrder, Principal principal){
         String userEmail = principal.getName();
         return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.add(workOrder, userEmail, workOrder.vehiclePlate()));
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @PutMapping("/{workOrderId}")
-    public ResponseEntity<NewWorkOrderResponseDTO> update(@RequestBody UpdateWorkOrderDTO workOrderData, @PathVariable Long workOrderId, Principal principal){
+    public ResponseEntity<NewWorkOrderResponseDTO> update(@Valid @RequestBody UpdateWorkOrderDTO workOrderData, @PathVariable Long workOrderId, Principal principal){
         return ResponseEntity.ok(workOrderService.edit(workOrderData, workOrderId, principal.getName()));
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @PostMapping("/{id}/lines")
-    public ResponseEntity<NewWorkOrderResponseDTO> addLine(@PathVariable Long id, @RequestBody NewWorkOrderLineDTO line, Principal principal){
+    public ResponseEntity<NewWorkOrderResponseDTO> addLine(@Valid @PathVariable Long id, @RequestBody NewWorkOrderLineDTO line, Principal principal){
         return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.addLine(id, line, principal.getName()));
     }
 
@@ -78,7 +79,7 @@ public class WorkOrderController {
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @PutMapping("/{orderId}/lines/{lineId}")
-    public ResponseEntity<NewWorkOrderResponseDTO> updateWorkOrderLine(@PathVariable Long orderId, @PathVariable Long lineId, @RequestBody NewWorkOrderLineDTO lineData, Principal principal){
+    public ResponseEntity<NewWorkOrderResponseDTO> updateWorkOrderLine(@Valid @PathVariable Long orderId, @PathVariable Long lineId, @RequestBody NewWorkOrderLineDTO lineData, Principal principal){
         return ResponseEntity.ok(workOrderService.updateWorkOrderLine(orderId, lineId, lineData, principal.getName()));
     }
 

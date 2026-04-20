@@ -29,7 +29,18 @@ public class WorkOrderService {
         return result.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
 
-    public List<NewWorkOrderResponseDTO> getByEmployee(String dni){
+    public List<NewWorkOrderResponseDTO> getByEmployee(String dni, String email){
+        User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+        User targetMechanic = userJpaRepository.findByDni(dni).orElseThrow(() -> new UserNotFoundException(dni));
+
+        boolean isSelf = currentUser.getDni().equals(dni);
+        boolean isSameWorkshop = currentUser.getWorkshop() != null && targetMechanic.getWorkshop() != null &&
+                currentUser.getWorkshop().getWorkshopId().equals(targetMechanic.getWorkshop().getWorkshopId());
+
+        if (!isSelf && !isSameWorkshop) {
+            throw new SecurityException("Acceso denegado: No puedes ver las órdenes de un mecánico de otro taller.");
+        }
+
         List<WorkOrder> workOrders = workOrderJpaRepository.findByMechanic_Dni(dni);
         return workOrders.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
@@ -57,7 +68,7 @@ public class WorkOrderService {
                 .filter(wo -> {
                     if (isWorker) {
                         return wo.getWorkshop() != null && currentUser.getWorkshop() != null &&
-                                wo.getWorkshop().getWorkshopId() == (currentUser.getWorkshop().getWorkshopId());
+                                wo.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId());
                     } else {
                         return wo.getVehicle() != null && wo.getVehicle().getOwner() != null &&
                                 wo.getVehicle().getOwner().getDni().equals(currentUser.getDni());
@@ -82,7 +93,7 @@ public class WorkOrderService {
 
         if (connectedUser.getRole() != Role.DIY) {
             if (referedVehicle.getWorkshop() == null ||
-                    referedVehicle.getWorkshop().getWorkshopId() != connectedUser.getWorkshop().getWorkshopId()) {
+                    !referedVehicle.getWorkshop().getWorkshopId().equals(connectedUser.getWorkshop().getWorkshopId())) {
                 throw new RuntimeException("Error: No puedes abrir una nueva orden. El vehículo ya no se encuentra ingresado en tu taller.");
             }
         }
@@ -207,7 +218,7 @@ public class WorkOrderService {
         User newMechanic = userJpaRepository.findByDni(newMechanicId)
                 .orElseThrow(() -> new UserNotFoundException(newMechanicId));
 
-        if(workOrder.getWorkshop().getWorkshopId() != newMechanic.getWorkshop().getWorkshopId()){
+        if(!workOrder.getWorkshop().getWorkshopId().equals(newMechanic.getWorkshop().getWorkshopId())){
             throw new RuntimeException("Error: El mecánico seleccionado no pertenece a este taller");
         }
 
@@ -216,7 +227,13 @@ public class WorkOrderService {
         return NewWorkOrderResponseDTO.of(updatedOrder);
     }
 
-    public List<NewWorkOrderResponseDTO> getWorkOrderByWorkshop(Long workshopId){
+    public List<NewWorkOrderResponseDTO> getWorkOrderByWorkshop(Long workshopId, String email){
+        User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+
+        if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
+            throw new SecurityException("Acceso denegado: No puedes ver las órdenes de otro taller.");
+        }
+
         List<WorkOrder> workOrders = workOrderJpaRepository.findByWorkshop_workshopId(workshopId);
         return workOrders.stream().map(NewWorkOrderResponseDTO::of).toList();
     }
@@ -231,13 +248,13 @@ public class WorkOrderService {
 
         if (isWorker) {
             if (workOrder.getWorkshop() == null || currentUser.getWorkshop() == null ||
-                    workOrder.getWorkshop().getWorkshopId() != (currentUser.getWorkshop().getWorkshopId())) {
-                throw new RuntimeException("Acceso denegado: Esta orden pertenece a otro taller.");
+                    !workOrder.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
+                throw new SecurityException("Acceso denegado: Esta orden pertenece a otro taller.");
             }
         } else {
             if (workOrder.getVehicle() == null || workOrder.getVehicle().getOwner() == null ||
                     !workOrder.getVehicle().getOwner().getDni().equals(currentUser.getDni())) {
-                throw new RuntimeException("Acceso denegado: Esta orden no pertenece a tu vehículo.");
+                throw new SecurityException("Acceso denegado: Esta orden no pertenece a tu vehículo.");
             }
         }
     }
@@ -251,19 +268,19 @@ public class WorkOrderService {
                 currentUser.getRole() == Role.MECHANIC;
 
         if (!isWorker) {
-            throw new RuntimeException("Acceso denegado: Solo el personal del taller puede modificar la orden.");
+            throw new SecurityException("Acceso denegado: Solo el personal del taller puede modificar la orden.");
         }
 
         if (workOrder.getWorkshop() == null || currentUser.getWorkshop() == null ||
-                workOrder.getWorkshop().getWorkshopId() != currentUser.getWorkshop().getWorkshopId()) {
-            throw new RuntimeException("Acceso denegado: No puedes modificar órdenes de otro taller.");
+                !workOrder.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
+            throw new SecurityException("Acceso denegado: No puedes modificar órdenes de otro taller.");
         }
 
         Vehicle vehicle = workOrder.getVehicle();
         if (vehicle != null) {
             if (vehicle.getWorkshop() == null ||
-                    vehicle.getWorkshop().getWorkshopId() != workOrder.getWorkshop().getWorkshopId()) {
-                throw new RuntimeException("Acceso denegado: El vehículo ya no está en el taller. Sus órdenes están bloqueadas en modo 'solo lectura'.");
+                    !vehicle.getWorkshop().getWorkshopId().equals(workOrder.getWorkshop().getWorkshopId())) {
+                throw new SecurityException("Acceso denegado: El vehículo ya no está en el taller. Sus órdenes están bloqueadas en modo 'solo lectura'.");
             }
         }
     }

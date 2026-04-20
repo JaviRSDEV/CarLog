@@ -18,6 +18,7 @@ public class AuthenticationService {
                 .dni(registerRequest.getDni())
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
+                .phone(registerRequest.getPhone())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role(registerRequest.getRole())
                 .build();

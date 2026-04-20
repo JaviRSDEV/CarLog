@@ -14,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,8 +35,28 @@ public class VehicleService {
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    @org.springframework.beans.factory.annotation.Value("${IMG_ROUTE:http://localhost:8081/uploads/}")
+    private String imgRoute;
+
     public List<NewVehicleDTO> getAll(){
         var result = vehicleJpaRepository.findAll();
+        return result.stream().map(NewVehicleDTO::of).toList();
+    }
+
+    public List<NewVehicleDTO> getMyVehicles(String email) {
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        boolean isWorker = currentUser.getRole() == Role.MANAGER ||
+                currentUser.getRole() == Role.CO_MANAGER ||
+                currentUser.getRole() == Role.MECHANIC;
+
+        if (isWorker && currentUser.getWorkshop() != null) {
+            var result = vehicleJpaRepository.findByWorkshop_WorkshopId(currentUser.getWorkshop().getWorkshopId());
+            return result.stream().map(NewVehicleDTO::of).toList();
+        }
+
+        var result = vehicleJpaRepository.findByOwner_Dni(currentUser.getDni());
         return result.stream().map(NewVehicleDTO::of).toList();
     }
 
@@ -52,9 +73,7 @@ public class VehicleService {
 
     public NewVehicleDTO getByPlate(String plate, String email){
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
-
         verifyVehicleReadAccess(vehicle, email);
-
         return NewVehicleDTO.of(vehicle);
     }
 
@@ -84,8 +103,8 @@ public class VehicleService {
                 .toList();
     }
 
-    public NewVehicleDTO add(NewVehicleDTO dto, String userDni){
-        User connectedUser = userJpaRepository.findByDni(userDni).orElseThrow(() -> new UserNotFoundException(userDni));
+    public NewVehicleDTO add(NewVehicleDTO dto, String userEmail){
+        User connectedUser = userJpaRepository.findByEmail(userEmail).orElseThrow(() -> new UserNotFoundException(userEmail));
         User owner;
         Workshop currentWorkshop;
 
@@ -95,7 +114,7 @@ public class VehicleService {
             for(int i = 0; i < dto.images().size(); i++){
                 String img = dto.images().get(i);
                 if(img != null && img.startsWith("data:image")){
-                    String savedRoute = saveImageOnDisk(img, dto.plate() + "_" + i);
+                    String savedRoute = saveImageOnDisk(img, dto.plate());
                     if(savedRoute != null) finalImageRoutes.add(savedRoute);
                 }
             }
@@ -150,18 +169,23 @@ public class VehicleService {
             String originalImage = parts.length > 1 ? parts[1] : parts[0];
             byte[] imageBytes = Base64.getDecoder().decode(originalImage);
 
-            Path directory = Paths.get("uploads");
+            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
             if(!Files.exists(directory)){
                 Files.createDirectories(directory);
             }
 
-            String fileName = plate + extension;
-            Path absolutePath = directory.resolve(fileName);
+            String cleanPlate = StringUtils.cleanPath(plate).replaceAll("[^a-zA-Z0-9_-]", "");
+            String fileName = cleanPlate + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
+            Path absolutePath = directory.resolve(fileName).normalize();
+
+            if (!absolutePath.startsWith(directory)) {
+                throw new SecurityException("Intento de Path Traversal detectado en la subida de imagen");
+            }
 
             Files.write(absolutePath, imageBytes);
 
-            return "http://localhost:8081/uploads/" + fileName;
-        }catch (IOException e){
+            return imgRoute + fileName;
+        }catch (Exception e){
             System.err.println("Error al guardar la imagen: " + e.getMessage());
             return null;
         }
@@ -172,9 +196,13 @@ public class VehicleService {
 
         try{
             String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-            Path filePath = Paths.get("uploads").resolve(fileName);
 
-            Files.deleteIfExists(filePath);
+            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
+            Path filePath = directory.resolve(fileName).normalize();
+
+            if (filePath.startsWith(directory)) {
+                Files.deleteIfExists(filePath);
+            }
         }catch (IOException e){
             System.err.println(e.getMessage());
         }
@@ -196,15 +224,14 @@ public class VehicleService {
 
             List<String> oldImages = vehicle.getImages() != null ? new ArrayList<>(vehicle.getImages()) : new ArrayList<>();
             List<String> updatedImagesRoutes = new ArrayList<>();
-            if(dto.images() != null && !dto.images().isEmpty()) {
-                for(int i = 0; i < dto.images().size(); i++){
-                    String img = dto.images().get(i);
 
+            if(dto.images() != null && !dto.images().isEmpty()) {
+                for(String img : dto.images()){
                     if(img.startsWith("http://") || img.startsWith("https://")){
                         updatedImagesRoutes.add(img);
                     }
                     else if(img.startsWith("data:image")){
-                        String savedRoute = saveImageOnDisk(img, dto.plate() + "_" + UUID.randomUUID().toString().substring(0,8));
+                        String savedRoute = saveImageOnDisk(img, dto.plate());
                         if(savedRoute != null) updatedImagesRoutes.add(savedRoute);
                     }
                 }
@@ -226,6 +253,7 @@ public class VehicleService {
             vehicle.setTires(dto.tires());
             vehicle.setImages(updatedImagesRoutes);
             vehicle.setLastMaintenance(dto.lastMaintenance());
+
             if(dto.ownerId() != null){
                 User u = userJpaRepository.findByDni(dto.ownerId()).orElseThrow(() -> new UserNotFoundException(dto.ownerId()));
                 vehicle.setOwner(u);
@@ -333,21 +361,17 @@ public class VehicleService {
         return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
     }
 
-    public NewVehicleDTO changeOwner(String plate, String currentOwnerId, String newOwnerId, String email){
+    public NewVehicleDTO changeOwner(String plate, String newOwnerId, String email){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
 
-        if (!currentUser.getDni().equals(currentOwnerId)) {
+        if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
             throw new RuntimeException("Acceso denegado: Solo el dueño actual puede transferir el vehículo.");
         }
 
-        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
         User newOwner = userJpaRepository.findByDni(newOwnerId).orElseThrow(() -> new UserNotFoundException(newOwnerId));
+        vehicle.setOwner(newOwner);
 
-        if(vehicle.getOwner() != null && vehicle.getOwner().getDni().equals(currentOwnerId)){
-            vehicle.setOwner(newOwner);
-        }else{
-            throw new RuntimeException("Error: El DNI proporcionado no corresponde al dueño actual del vehículo.");
-        }
         return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
     }
 
@@ -415,7 +439,6 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        // Si borran el texto, devolvemos la lista por defecto
         if (searchText == null || searchText.trim().isEmpty()) {
             if ("OWNER".equalsIgnoreCase(type)) return getByOwner(currentUser.getDni(), email);
             if ("ASSIGNED".equalsIgnoreCase(type)) return getVehiclesAssignedToMechanic(currentUser.getDni(), email);
@@ -436,7 +459,7 @@ public class VehicleService {
                     .distinct()
                     .filter(v -> v.getPlate().toLowerCase().contains(text) ||
                             (v.getBrand() != null && v.getBrand().toLowerCase().contains(text)) ||
-                            (v.getModel() != null && v.getModel().toLowerCase().contains(text))) // 🔥 Nueva condición
+                            (v.getModel() != null && v.getModel().toLowerCase().contains(text)))
                     .map(NewVehicleDTO::of)
                     .toList();
 

@@ -11,6 +11,7 @@ import com.carlog.backend.repository.WorkshopJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,7 +19,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,14 +30,19 @@ public class WorkshopService {
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
 
+    @org.springframework.beans.factory.annotation.Value("${IMG_ROUTE:http://localhost:8081/uploads/}")
+    private String imgRoute;
+
     public List<NewWorkshopDTO> getAll(){
         var result = workshopJpaRepository.findAll();
         return result.stream().map(NewWorkshopDTO::of).toList();
     }
 
-    public NewWorkshopDTO getWorkshopById(Long id){
+    public NewWorkshopDTO getWorkshopById(Long id, String email){
         Workshop workshop = workshopJpaRepository.findById(id)
                 .orElseThrow(() -> new WorkshopNotFoundException(id));
+
+        verifyWorkshopReadAccess(workshop, email);
         return NewWorkshopDTO.of(workshop);
     }
 
@@ -45,6 +53,10 @@ public class WorkshopService {
 
         User workshopOwner = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
+
+        if(workshopOwner.getWorkshop() != null){
+            throw new RuntimeException("Este usuario ya es administrador de otro taller");
+        }
 
         String iconUrl = dto.icon();
         if (iconUrl != null && iconUrl.startsWith("data:image")) {
@@ -113,16 +125,42 @@ public class WorkshopService {
     }
 
     private String saveMultipartFileOnDisk(MultipartFile file) {
+        if (file.isEmpty() || file.getOriginalFilename() == null) {
+            throw new IllegalArgumentException("El archivo no puede estar vacío o sin nombre");
+        }
+
+        List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp");
+        if (!allowedTypes.contains(file.getContentType())) {
+            throw new SecurityException("Tipo de archivo no permitido: " + file.getContentType());
+        }
+
         try {
-            Path directory = Paths.get("uploads");
-            if (!Files.exists(directory)) Files.createDirectories(directory);
+            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
+            if (!Files.exists(directory)) {
+                Files.createDirectories(directory);
+            }
 
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename().replace(" ", "_");
-            Path absolutePath = directory.resolve(fileName);
+            String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+            if (originalFileName.contains("..")) {
+                throw new SecurityException("Intento de Path Traversal detectado");
+            }
 
+            String extension = "";
+            int dotIndex = originalFileName.lastIndexOf(".");
+            if (dotIndex >= 0) {
+                extension = originalFileName.substring(dotIndex);
+            }
+
+            String safeFileName = UUID.randomUUID().toString() + extension;
+            Path absolutePath = directory.resolve(safeFileName).normalize();
+
+            if (!absolutePath.startsWith(directory)) {
+                throw new SecurityException("Intento de escritura fuera del directorio permitido");
+            }
             Files.copy(file.getInputStream(), absolutePath, StandardCopyOption.REPLACE_EXISTING);
 
-            return "http://localhost:8081/uploads/" + fileName;
+            return imgRoute + safeFileName;
+
         } catch (IOException e) {
             return null;
         }
@@ -137,14 +175,21 @@ public class WorkshopService {
             String data = base64Image.split(",")[1];
             byte[] imageBytes = java.util.Base64.getDecoder().decode(data);
 
-            Path directory = Paths.get("uploads");
+            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
             if (!Files.exists(directory)) Files.createDirectories(directory);
 
-            String fileName = namePrefix + "_" + System.currentTimeMillis() + extension;
-            Path absolutePath = directory.resolve(fileName);
+            String cleanPrefix = StringUtils.cleanPath(namePrefix).replaceAll("[^a-zA-Z0-9_-]", "");
+            String safeFileName = cleanPrefix + "_" + UUID.randomUUID().toString() + extension;
+
+            Path absolutePath = directory.resolve(safeFileName).normalize();
+
+            if (!absolutePath.startsWith(directory)) {
+                throw new SecurityException("Intento de escritura fuera del directorio permitido");
+            }
+
             Files.write(absolutePath, imageBytes);
 
-            return "http://localhost:8081/uploads/" + fileName;
+            return imgRoute + safeFileName;
         } catch (IOException e) {
             return null;
         }
@@ -157,7 +202,8 @@ public class WorkshopService {
 
         try {
             String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-            Path filePath = Paths.get("uploads").resolve(fileName).toAbsolutePath();
+            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
+            Path filePath = directory.resolve(fileName).normalize();
 
             if (Files.exists(filePath)) {
                 Files.delete(filePath);
@@ -184,6 +230,16 @@ public class WorkshopService {
         if (currentUser.getWorkshop() == null ||
                 currentUser.getWorkshop().getWorkshopId() != (workshop.getWorkshopId())) {
             throw new RuntimeException("Acceso denegado: No eres el responsable de este taller.");
+        }
+    }
+
+    private void verifyWorkshopReadAccess(Workshop workshop, String email) {
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        if (currentUser.getWorkshop() == null ||
+                currentUser.getWorkshop().getWorkshopId() != workshop.getWorkshopId()) {
+            throw new SecurityException("Acceso denegado: No perteneces a este taller.");
         }
     }
 }

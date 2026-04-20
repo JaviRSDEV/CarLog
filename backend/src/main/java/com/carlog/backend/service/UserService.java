@@ -63,28 +63,35 @@ public class UserService {
                     .orElseThrow(() -> new WorkshopNotFoundException(dto.workShopId()));
         }
 
-        var newUser = User.builder().dni(dto.dni()).name(dto.name()).email(dto.email()).phone(dto.phone()).role(dto.role()).mustChangePsswd(dto.mustChangePassword()).workshop(workshop).build();
+        var newUser = User.builder().dni(dto.dni()).name(dto.name()).email(dto.email()).phone(dto.phone()).role(roleToSave).mustChangePsswd(dto.mustChangePassword()).workshop(workshop).build();
         return NewUserDTO.of(userJpaRepository.save(newUser));
     }
 
-    public NewUserDTO edit(NewUserDTO dto, String Dni){
+    public NewUserDTO edit(NewUserDTO dto, String Dni, String email){
+        User userEditing = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+
         return userJpaRepository.findByDni(Dni).map(user -> {
+            boolean isSelf = user.getDni().equals(userEditing.getDni());
+            boolean isManagerOfEmployee = userEditing.getRole() == Role.MANAGER &&
+                    userEditing.getWorkshop() != null &&
+                    userEditing.getWorkshop().equals(user.getWorkshop());
+
+            if (!isSelf && !isManagerOfEmployee) {
+                throw new SecurityException("No tienes permisos para editar a este usuario.");
+            }
+
             user.setDni(dto.dni());
             user.setName(dto.name());
             user.setEmail(dto.email());
             user.setPhone(dto.phone());
-            user.setRole(dto.role());
             user.setMustChangePsswd(dto.mustChangePassword());
 
-            if (dto.workShopId() != null) {
-               Workshop w = workshopJpaRepository.findById(dto.workShopId())
-                        .orElseThrow(() -> new WorkshopNotFoundException(dto.workShopId()));
-               user.setWorkshop(w);
-            }else{
-                user.setWorkshop(null);
+            if (isManagerOfEmployee) {
+                if (dto.role() != null) user.setRole(dto.role());
             }
+
             return NewUserDTO.of(userJpaRepository.save(user));
-        }).orElseThrow( () -> new UserNotFoundException());
+        }).orElseThrow(() -> new UserNotFoundException());
     }
 
     public NewUserDTO delete(String dni){
@@ -94,7 +101,14 @@ public class UserService {
         return NewUserDTO.of(result.get());
     }
 
-    public List<NewUserDTO> getEmployeesByWorkshopId(Long id){
+    public List<NewUserDTO> getEmployeesByWorkshopId(Long id, String email){
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        if (currentUser.getWorkshop() == null || currentUser.getWorkshop().getWorkshopId() != (id)) {
+            throw new SecurityException("Acceso denegado: No puedes ver los empleados de un taller al que no perteneces.");
+        }
+
         Workshop workshop = workshopJpaRepository.findById(id)
                 .orElseThrow(() -> new WorkshopNotFoundException(id));
 
@@ -102,9 +116,13 @@ public class UserService {
                 .map(NewUserDTO::of).toList();
     }
 
-    public void inviteToWorkshop(String managerDni, String employeeDni, Role role){
-        User manager = userJpaRepository.findByDni(managerDni)
-                .orElseThrow(() -> new UserNotFoundException(managerDni));
+    public void inviteToWorkshop(String managerEmail, String employeeDni, Role role){
+        User manager = userJpaRepository.findByEmail(managerEmail)
+                .orElseThrow(() -> new UserNotFoundException(managerEmail));
+
+        if ((manager.getRole() != Role.MANAGER && manager.getRole() != Role.CO_MANAGER) || manager.getWorkshop() == null) {
+            throw new SecurityException("Solo los administradores de un taller pueden invitar empleados.");
+        }
 
         User employee = userJpaRepository.findByDni(employeeDni)
                 .orElseThrow(() -> new UserNotFoundException(employeeDni));
@@ -124,8 +142,8 @@ public class UserService {
         messagingTemplate.convertAndSend("/topic/notificaciones/" + employeeDni, notif);
     }
 
-    public NewUserDTO acceptInvitation(String dni){
-        User user = userJpaRepository.findByDni(dni).orElseThrow();
+    public NewUserDTO acceptInvitation(String email){
+        User user = userJpaRepository.findByEmail(email).orElseThrow();
         if(user.getPendingWorkshop() == null) throw new RuntimeException("No hay ninguna invitación");
 
         Workshop workshop = user.getPendingWorkshop();
@@ -157,21 +175,28 @@ public class UserService {
         return NewUserDTO.of(savedUser);
     }
 
-    public void rejectInvitation(String dni){
-        User user = userJpaRepository.findByDni(dni)
-                .orElseThrow(() -> new UserNotFoundException(dni));
+    public void rejectInvitation(String email){
+        User user = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
         user.setPendingWorkshop(null);
         user.setPendingRole(null);
         userJpaRepository.save(user);
     }
 
-    public void fireEmployee(String dni){
-        User user = userJpaRepository.findByDni(dni)
-                .orElseThrow(() -> new UserNotFoundException(dni));
+    public void fireEmployee(String managerEmail, String employeeDni){
+        User manager = userJpaRepository.findByEmail(managerEmail)
+                .orElseThrow(() -> new UserNotFoundException(managerEmail));
 
-        user.setWorkshop(null);
-        user.setRole(Role.CLIENT);
-        userJpaRepository.save(user);
+        User employee = userJpaRepository.findByDni(employeeDni)
+                .orElseThrow(() -> new UserNotFoundException(employeeDni));
+
+        if (manager.getWorkshop() == null || !manager.getWorkshop().equals(employee.getWorkshop())) {
+            throw new SecurityException("No puedes despedir a un empleado que no pertenece a tu taller.");
+        }
+
+        employee.setWorkshop(null);
+        employee.setRole(Role.CLIENT);
+        userJpaRepository.save(employee);
 
         NotificationDTO notif = NotificationDTO.builder()
                 .type("FIRE")
@@ -179,6 +204,6 @@ public class UserService {
                 .message("Has sido despedido del taller.")
                 .build();
 
-        messagingTemplate.convertAndSend("/topic/notificaciones/" + dni, notif);
+        messagingTemplate.convertAndSend("/topic/notificaciones/" + employeeDni, notif);
     }
 }

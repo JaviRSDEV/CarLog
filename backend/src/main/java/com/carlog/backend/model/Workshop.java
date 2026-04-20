@@ -17,7 +17,7 @@ public class Workshop {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long workshopId;
+    private Long workshopId;
 
     @Column(name = "name", nullable = false)
     private String workshopName;

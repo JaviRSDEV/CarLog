@@ -6,6 +6,7 @@ import com.carlog.backend.service.UserService;
 import com.carlog.backend.service.WorkshopService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,21 +25,21 @@ public class WorkshopController {
     private final WorkshopService workshopService;
     private final UserService userService;
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/details/{id}")
-    public NewWorkshopDTO showById(@PathVariable Long id){
-        return workshopService.getWorkshopById(id);
+    public NewWorkshopDTO showById(@PathVariable Long id, Principal principal){
+        return workshopService.getWorkshopById(id, principal.getName());
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/{ID}/employees")
-    public List<NewUserDTO> showEmployees(@PathVariable Long ID){
-        return userService.getEmployeesByWorkshopId(ID);
+    public List<NewUserDTO> showEmployees(@PathVariable Long ID, Principal principal){
+        return userService.getEmployeesByWorkshopId(ID, principal.getName());
     }
 
     @PreAuthorize("hasAuthority('MANAGER')")
     @PostMapping
-    public ResponseEntity<NewWorkshopDTO> store(@RequestBody NewWorkshopDTO workshop, Principal principal){
+    public ResponseEntity<NewWorkshopDTO> store(@Valid @RequestBody NewWorkshopDTO workshop, Principal principal){
         return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop, principal.getName()));
     }
 
@@ -46,12 +47,9 @@ public class WorkshopController {
     @PutMapping(value = "/details/{id}", consumes = { "multipart/form-data" })
     public NewWorkshopDTO update(
             @PathVariable Long id,
-            @RequestPart("workshopData") String workshopDataJson,
+            @Valid @RequestPart("workshopData") NewWorkshopDTO dto,
             @RequestPart(value = "file", required = false) MultipartFile file,
-            Principal principal) throws JsonProcessingException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        NewWorkshopDTO dto = objectMapper.readValue(workshopDataJson, NewWorkshopDTO.class);
+            Principal principal) {
 
         return workshopService.edit(dto, id, file, principal.getName());
     }

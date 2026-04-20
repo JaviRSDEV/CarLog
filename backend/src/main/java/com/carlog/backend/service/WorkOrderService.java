@@ -10,6 +10,8 @@ import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkOrderLineJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,29 +55,30 @@ public class WorkOrderService {
         return NewWorkOrderResponseDTO.of(workOrder);
     }
 
-    public List<NewWorkOrderResponseDTO> getByVehicle(String plate, String email){
-        List<WorkOrder> workOrders = workOrderJpaRepository.findByVehicle_Plate(plate);
-        if(workOrders.isEmpty()) throw new WorkOrderNotFoundException();
-
+    public Page<NewWorkOrderResponseDTO> getByVehicle(String plate, String email, Pageable pageable){
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
+
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
 
         boolean isWorker = currentUser.getRole() == Role.MANAGER ||
                 currentUser.getRole() == Role.CO_MANAGER ||
                 currentUser.getRole() == Role.MECHANIC;
 
-        return workOrders.stream()
-                .filter(wo -> {
-                    if (isWorker) {
-                        return wo.getWorkshop() != null && currentUser.getWorkshop() != null &&
-                                wo.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId());
-                    } else {
-                        return wo.getVehicle() != null && wo.getVehicle().getOwner() != null &&
-                                wo.getVehicle().getOwner().getDni().equals(currentUser.getDni());
-                    }
-                })
-                .map(NewWorkOrderResponseDTO::of)
-                .collect(Collectors.toList());
+        if (isWorker) {
+            if (vehicle.getWorkshop() == null || currentUser.getWorkshop() == null ||
+                    !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
+                throw new SecurityException("Acceso denegado: Este vehículo no está en tu taller.");
+            }
+        } else {
+            if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
+                throw new SecurityException("Acceso denegado: Este vehículo no es tuyo.");
+            }
+        }
+
+        return workOrderJpaRepository.findByVehicle_Plate(plate, pageable)
+                .map(NewWorkOrderResponseDTO::of);
     }
 
     public NewWorkOrderResponseDTO add(NewWorkOrderDTO dto, String userEmail, String vehiclePlate){

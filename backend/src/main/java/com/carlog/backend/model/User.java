@@ -31,7 +31,7 @@ public class User implements UserDetails {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "phone", nullable = true)
+    @Column(name = "phone")
     private String phone;
 
     @Column(name = "password", nullable = false)
@@ -41,9 +41,6 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
-
-    @Column(name = "must_change_psswd")
-    private boolean mustChangePsswd;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workshop_id")

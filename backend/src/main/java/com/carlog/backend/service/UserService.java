@@ -24,11 +24,11 @@ public class UserService {
     private final WorkshopJpaRepository workshopJpaRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public List<NewUserDTO> getAll(){
+    /*public List<NewUserDTO> getAll(){
         var result = userJpaRepository.findAll();
         if(result.isEmpty()) throw new UserNotFoundException();
         return result.stream().map(NewUserDTO::of).toList();
-    }
+    }*/
 
     public NewUserDTO getByDni(String dni){
         User user = userJpaRepository.findByDni(dni).orElseThrow(() -> new UserNotFoundException(dni));
@@ -64,13 +64,8 @@ public class UserService {
         if(roleToSave == Role.CO_MANAGER || roleToSave == Role.MECHANIC){
             roleToSave = Role.CLIENT;
         }
-        //comprobamos que la asignación de taller sea con un taller existente
-        if (dto.workShopId() != null) {
-             workshop = workshopJpaRepository.findById(dto.workShopId())
-                    .orElseThrow(() -> new WorkshopNotFoundException(dto.workShopId()));
-        }
 
-        var newUser = User.builder().dni(dto.dni()).name(dto.name()).email(dto.email()).phone(dto.phone()).role(roleToSave).mustChangePsswd(dto.mustChangePassword()).workshop(workshop).build();
+        var newUser = User.builder().dni(dto.dni()).name(dto.name()).email(dto.email()).phone(dto.phone()).role(roleToSave).workshop(workshop).build();
         return NewUserDTO.of(userJpaRepository.save(newUser));
     }
 
@@ -91,7 +86,6 @@ public class UserService {
             user.setName(dto.name());
             user.setEmail(dto.email());
             user.setPhone(dto.phone());
-            user.setMustChangePsswd(dto.mustChangePassword());
 
             if (isManagerOfEmployee) {
                 if (dto.role() != null) user.setRole(dto.role());

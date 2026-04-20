@@ -2,13 +2,10 @@ package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.model.Role;
-import com.carlog.backend.model.User;
 import com.carlog.backend.service.UserService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -57,7 +54,7 @@ public class UserController {
     }
 
     @PatchMapping("/{dni}/accept")
-    public NewUserDTO accept(@PathVariable String dni, @Parameter(hidden = true) Principal principal){
+    public NewUserDTO accept(@Parameter(hidden = true) Principal principal){
         return userService.acceptInvitation(principal.getName());
     }
 

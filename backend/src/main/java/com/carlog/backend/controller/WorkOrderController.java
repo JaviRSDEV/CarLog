@@ -9,6 +9,9 @@ import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,8 +35,15 @@ public class WorkOrderController {
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/vehicle/{plate}")
-    public ResponseEntity<List<NewWorkOrderResponseDTO>> showByVehicle(@PathVariable String plate, @Parameter(hidden = true) Principal principal){
-        return ResponseEntity.ok(workOrderService.getByVehicle(plate, principal.getName()));
+    public ResponseEntity<Page<NewWorkOrderResponseDTO>> getByVehicle(
+            @PathVariable String plate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @Parameter(hidden = true) Principal principal) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        return ResponseEntity.ok(workOrderService.getByVehicle(plate, principal.getName(), pageable));
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")

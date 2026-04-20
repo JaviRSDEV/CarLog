@@ -1,6 +1,8 @@
 package com.carlog.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +16,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name="vehicles")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "workshopId")
 public class Vehicle {
 
     @Id
@@ -60,12 +63,10 @@ public class Vehicle {
     @JoinColumn(name = "workshop_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonIgnoreProperties({"vehicles", "workshop", "hibernateLazyInitializer", "handler"})
     private Workshop workshop;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
-    @JsonIgnoreProperties({"vehicles", "workshop", "hibernateLazyInitializer", "handler"})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private User owner;
@@ -74,7 +75,6 @@ public class Vehicle {
     @JoinColumn(name = "pending_workshop_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @JsonIgnoreProperties({"vehicles", "hibernateLazyInitializer", "handler"})
     private Workshop pendingWorkshop;
 
 

@@ -1,7 +1,9 @@
 package com.carlog.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,6 +15,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name="workshop")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "workshopId")
 public class Workshop {
 
     @Id
@@ -35,13 +38,11 @@ public class Workshop {
     private String icon;
 
     @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
-    @JsonIgnore
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<User> employees;
 
     @OneToMany(mappedBy = "workshop")
-    @JsonIgnoreProperties("workshop")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Vehicle> vehicles;

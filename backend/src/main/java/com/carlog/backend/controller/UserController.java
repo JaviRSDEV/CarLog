@@ -4,6 +4,8 @@ import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
@@ -23,7 +25,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<?> show(){
+    public ResponseEntity<NewUserDTO> show(){
         return ResponseEntity.ok(userService.getMyProfile());
     }
 
@@ -39,7 +41,7 @@ public class UserController {
     }
 
     @PutMapping("/{DNI}")
-    public NewUserDTO update(@Valid @RequestBody NewUserDTO userData, @PathVariable String DNI, Principal principal){
+    public NewUserDTO update(@Valid @RequestBody NewUserDTO userData, @PathVariable String DNI, @Parameter(hidden = true) Principal principal){
         return userService.edit(userData, DNI, principal.getName());
     }
 
@@ -50,24 +52,24 @@ public class UserController {
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
     @PatchMapping("/{dni}/invite")
-    public void invite(@PathVariable String dni, @RequestParam String managerDni, @RequestParam Role newRole, Principal principal){
+    public void invite(@PathVariable String dni, @RequestParam String managerDni, @RequestParam Role newRole, @Parameter(hidden = true) Principal principal){
         userService.inviteToWorkshop(principal.getName(), dni,  newRole);
     }
 
     @PatchMapping("/{dni}/accept")
-    public NewUserDTO accept(@PathVariable String dni, Principal principal){
+    public NewUserDTO accept(@PathVariable String dni, @Parameter(hidden = true) Principal principal){
         return userService.acceptInvitation(principal.getName());
     }
 
     @PatchMapping("/{dni}/reject")
-    public NewUserDTO reject(@PathVariable String dni, Principal principal){
+    public NewUserDTO reject(@PathVariable String dni, @Parameter(hidden = true) Principal principal){
         userService.rejectInvitation(principal.getName());
         return userService.getByDni(dni);
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
     @PatchMapping("/{dni}/fire")
-    public void fireEmployee(@PathVariable String dni, Principal principal){
+    public void fireEmployee(@PathVariable String dni, @Parameter(hidden = true) Principal principal){
         userService.fireEmployee(principal.getName(), dni);
     }
 }

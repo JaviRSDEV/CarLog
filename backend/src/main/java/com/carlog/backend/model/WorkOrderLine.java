@@ -1,6 +1,8 @@
 package com.carlog.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "workshopId")
 public class WorkOrderLine {
 
     @Id
@@ -41,7 +44,6 @@ public class WorkOrderLine {
 
     @ManyToOne
     @JoinColumn(name = "work_order_id", nullable = false)
-    @JsonIgnore
     private WorkOrder workOrder;
 
     @PreUpdate

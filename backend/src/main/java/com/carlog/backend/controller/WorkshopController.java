@@ -4,6 +4,8 @@ import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.service.UserService;
 import com.carlog.backend.service.WorkshopService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,19 +27,19 @@ public class WorkshopController {
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/details/{id}")
-    public NewWorkshopDTO showById(@PathVariable Long id, Principal principal){
+    public NewWorkshopDTO showById(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
         return workshopService.getWorkshopById(id, principal.getName());
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/{ID}/employees")
-    public List<NewUserDTO> showEmployees(@PathVariable Long ID, Principal principal){
+    public List<NewUserDTO> showEmployees(@PathVariable Long ID, @Parameter(hidden = true) Principal principal){
         return userService.getEmployeesByWorkshopId(ID, principal.getName());
     }
 
     @PreAuthorize("hasAuthority('MANAGER')")
     @PostMapping
-    public ResponseEntity<NewWorkshopDTO> store(@Valid @RequestBody NewWorkshopDTO workshop, Principal principal){
+    public ResponseEntity<NewWorkshopDTO> store(@Valid @RequestBody NewWorkshopDTO workshop, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop, principal.getName()));
     }
 
@@ -47,14 +49,14 @@ public class WorkshopController {
             @PathVariable Long id,
             @Valid @RequestPart("workshopData") NewWorkshopDTO dto,
             @RequestPart(value = "file", required = false) MultipartFile file,
-            Principal principal) {
+            @Parameter(hidden = true) Principal principal) {
 
         return workshopService.edit(dto, id, file, principal.getName());
     }
 
     @PreAuthorize("hasAuthority('MANAGER')")
     @DeleteMapping("/details/{id}")
-    public NewWorkshopDTO destroy(@PathVariable Long id, Principal principal){
+    public NewWorkshopDTO destroy(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
         return workshopService.delete(id, principal.getName());
     }
 }

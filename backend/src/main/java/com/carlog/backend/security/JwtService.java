@@ -25,6 +25,9 @@ public class JwtService {
     @Value("${isSecure}")
     private boolean isSecure;
 
+    @Value("${application.security.jwt.expiration:86400000}")
+    private long jwtExpiration;
+
     public ResponseCookie generateJwtCookie(String jwt, boolean rememberMe) {
         long maxAge = rememberMe ? 7 * 24 * 60 * 60 : -1;
 
@@ -41,6 +44,9 @@ public class JwtService {
         return ResponseCookie.from("auth_token", "")
                 .path("/")
                 .maxAge(0)
+                .httpOnly(true)
+                .secure(isSecure)
+                .sameSite("Lax")
                 .build();
     }
 
@@ -62,7 +68,7 @@ public class JwtService {
                 .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(getSignInKey())
                 .compact();
     }

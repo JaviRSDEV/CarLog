@@ -70,7 +70,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleAllErrors(Exception ex){
-        return buildResponse("Error interno: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
+        System.err.println("Error interno no controlado: " + ex.getMessage());
+        ex.printStackTrace();
+
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Error interno del servidor. Por favor, contacte con soporte técnico.");
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }

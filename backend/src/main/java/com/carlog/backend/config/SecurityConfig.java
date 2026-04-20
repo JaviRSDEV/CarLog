@@ -56,6 +56,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/uploads/**").authenticated()
                         .requestMatchers("/ws-carlog/**").authenticated()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").authenticated()
                         .anyRequest()
                         .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

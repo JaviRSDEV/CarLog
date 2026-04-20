@@ -2,6 +2,7 @@ package com.carlog.backend.service;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -24,5 +25,11 @@ public class RateLimitingService {
                 .build();
 
         return Bucket.builder().addLimit(limit).build();
+    }
+
+    @Scheduled(fixedRate = 3600000)
+    public void cleanUpOldIps() {
+        cache.clear();
+        System.out.println("RateLimitingService: Memoria caché de IPs limpiada.");
     }
 }

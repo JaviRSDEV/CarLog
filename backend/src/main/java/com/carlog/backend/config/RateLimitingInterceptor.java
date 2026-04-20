@@ -6,7 +6,6 @@ import io.github.bucket4j.Bucket;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -18,7 +17,7 @@ public class RateLimitingInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception{
-        String ip = request.getHeader("X-Forwarded-For");
+        String ip = request.getRemoteAddr();
         if(ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)){
             ip = request.getRemoteAddr();
         }

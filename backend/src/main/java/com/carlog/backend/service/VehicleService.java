@@ -12,6 +12,7 @@ import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.tika.Tika;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -34,6 +35,7 @@ public class VehicleService {
     private final UserJpaRepository userJpaRepository;
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private static final long MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
     @org.springframework.beans.factory.annotation.Value("${IMG_ROUTE:http://localhost:8081/uploads/}")
     private String imgRoute;
@@ -63,7 +65,7 @@ public class VehicleService {
     public List<NewVehicleDTO> getByWorkshop(Long workshopId, String email){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
-        if (currentUser.getWorkshop() == null || currentUser.getWorkshop().getWorkshopId() != (workshopId)) {
+        if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
             throw new RuntimeException("Acceso denegado: No perteneces a este taller.");
         }
 
@@ -158,19 +160,26 @@ public class VehicleService {
         return NewVehicleDTO.of(vehicleJpaRepository.save(newVehicle));
     }
 
-    private String saveImageOnDisk(String base64Image, String plate){
-        try{
-            String extension = ".jpeg";
-            if(base64Image.contains("data:image/png")) extension = ".png";
-            else if (base64Image.contains("data:image/webp")) extension = ".webp";
-            else if (base64Image.contains("data:image/gif")) extension = ".gif";
-
+    private String saveImageOnDisk(String base64Image, String plate) {
+        try {
             String[] parts = base64Image.split(",");
             String originalImage = parts.length > 1 ? parts[1] : parts[0];
             byte[] imageBytes = Base64.getDecoder().decode(originalImage);
 
+            if (imageBytes.length > MAX_IMAGE_SIZE) {
+                throw new SecurityException("La imagen supera el límite de 2MB");
+            }
+
+            Tika tika = new Tika();
+            String detectedType = tika.detect(imageBytes);
+            if (!detectedType.startsWith("image/")) {
+                throw new SecurityException("El archivo no es una imagen real, es: " + detectedType);
+            }
+
+            String extension = "." + detectedType.split("/")[1];
+
             Path directory = Paths.get("uploads").toAbsolutePath().normalize();
-            if(!Files.exists(directory)){
+            if (!Files.exists(directory)) {
                 Files.createDirectories(directory);
             }
 
@@ -179,14 +188,14 @@ public class VehicleService {
             Path absolutePath = directory.resolve(fileName).normalize();
 
             if (!absolutePath.startsWith(directory)) {
-                throw new SecurityException("Intento de Path Traversal detectado en la subida de imagen");
+                throw new SecurityException("Intento de Path Traversal detectado");
             }
 
             Files.write(absolutePath, imageBytes);
-
             return imgRoute + fileName;
-        }catch (Exception e){
-            System.err.println("Error al guardar la imagen: " + e.getMessage());
+
+        } catch (Exception e) {
+            System.err.println("Error de seguridad o de guardado: " + e.getMessage());
             return null;
         }
     }
@@ -348,13 +357,13 @@ public class VehicleService {
     public NewVehicleDTO registerExit(String plate, Long workshopId, String email){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
-        if (currentUser.getWorkshop() == null || currentUser.getWorkshop().getWorkshopId() != (workshopId)) {
+        if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
             throw new RuntimeException("Acceso denegado: No puedes registrar salidas de otro taller.");
         }
 
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
 
-        if(vehicle.getWorkshop() == null || vehicle.getWorkshop().getWorkshopId() != (workshopId)){
+        if(vehicle.getWorkshop() == null || !vehicle.getWorkshop().getWorkshopId().equals(workshopId)){
             throw new RuntimeException("No puedes dar salida a un coche que no esta registrado en el taller");
         }
         vehicle.setWorkshop(null);
@@ -422,10 +431,10 @@ public class VehicleService {
 
         if (isWorker) {
             boolean inWorkshop = vehicle.getWorkshop() != null && currentUser.getWorkshop() != null &&
-                    vehicle.getWorkshop().getWorkshopId() == (currentUser.getWorkshop().getWorkshopId());
+                    vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId());
 
             boolean pendingWorkshop = vehicle.getPendingWorkshop() != null && currentUser.getWorkshop() != null &&
-                    vehicle.getPendingWorkshop().getWorkshopId() == (currentUser.getWorkshop().getWorkshopId());
+                    vehicle.getPendingWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId());
 
             if (!inWorkshop && !pendingWorkshop) {
                 throw new RuntimeException("Acceso denegado: El vehículo no se encuentra en tu taller.");

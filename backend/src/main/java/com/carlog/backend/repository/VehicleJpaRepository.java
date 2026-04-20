@@ -32,8 +32,6 @@ public interface VehicleJpaRepository extends JpaRepository<Vehicle, Long> {
     @Query("SELECT DISTINCT v.owner FROM Vehicle v WHERE v.workshop.workshopId = :workshopId")
     List<User> findClientsByWorkshopId(@Param("workshopId") Long workshopId);
 
-    String owner(User owner);
-
     // Búsqueda para el cliente (Mis coches)
     @Query("SELECT v FROM Vehicle v WHERE v.owner.dni = :ownerDni " +
             "AND (LOWER(v.plate) LIKE LOWER(CONCAT('%', :text, '%')) " +

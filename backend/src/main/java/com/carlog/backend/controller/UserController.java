@@ -6,6 +6,7 @@ import com.carlog.backend.model.User;
 import com.carlog.backend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,9 +22,9 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/{DNI}")
-    public NewUserDTO show(@PathVariable String DNI){
-        return userService.getByDni(DNI);
+    @GetMapping("/me")
+    public ResponseEntity<?> show(){
+        return ResponseEntity.ok(userService.getMyProfile());
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")

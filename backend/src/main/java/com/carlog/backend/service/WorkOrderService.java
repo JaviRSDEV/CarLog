@@ -24,10 +24,10 @@ public class WorkOrderService {
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final WorkOrderLineJpaRepository workOrderLineJpaRepository;
 
-    public List<NewWorkOrderResponseDTO> getAll(){
+    /*public List<NewWorkOrderResponseDTO> getAll(){
         var result = workOrderJpaRepository.findAll();
         return result.stream().map(NewWorkOrderResponseDTO::of).toList();
-    }
+    }*/
 
     public List<NewWorkOrderResponseDTO> getByEmployee(String dni, String email){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));

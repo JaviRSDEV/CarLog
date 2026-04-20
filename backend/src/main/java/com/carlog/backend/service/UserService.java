@@ -11,6 +11,7 @@ import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +33,12 @@ public class UserService {
     public NewUserDTO getByDni(String dni){
         User user = userJpaRepository.findByDni(dni).orElseThrow(() -> new UserNotFoundException(dni));
         return NewUserDTO.of(user);
+    }
+
+    public NewUserDTO getMyProfile(){
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return getByDni(currentUser.getDni());
     }
 
     public List<NewUserDTO> getByName(String name){
@@ -105,7 +112,7 @@ public class UserService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if (currentUser.getWorkshop() == null || currentUser.getWorkshop().getWorkshopId() != (id)) {
+        if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(id)) {
             throw new SecurityException("Acceso denegado: No puedes ver los empleados de un taller al que no perteneces.");
         }
 

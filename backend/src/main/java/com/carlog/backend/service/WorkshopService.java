@@ -10,6 +10,7 @@ import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +30,8 @@ public class WorkshopService {
 
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final Tika tika = new Tika();
+    private static final long MAX_FILE_SIZE = 2 * 1024 * 1024;
 
     @org.springframework.beans.factory.annotation.Value("${IMG_ROUTE:http://localhost:8081/uploads/}")
     private String imgRoute;
@@ -126,39 +129,31 @@ public class WorkshopService {
 
     private String saveMultipartFileOnDisk(MultipartFile file) {
         if (file.isEmpty() || file.getOriginalFilename() == null) {
-            throw new IllegalArgumentException("El archivo no puede estar vacío o sin nombre");
-        }
-
-        List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp");
-        if (!allowedTypes.contains(file.getContentType())) {
-            throw new SecurityException("Tipo de archivo no permitido: " + file.getContentType());
+            throw new IllegalArgumentException("Archivo inválido");
         }
 
         try {
+            if (file.getSize() > MAX_FILE_SIZE) {
+                throw new SecurityException("El archivo excede el límite de 2MB");
+            }
+
+            String detectedType = tika.detect(file.getInputStream());
+            List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp");
+
+            if (!allowedTypes.contains(detectedType)) {
+                throw new SecurityException("Tipo real: " + detectedType);
+            }
+
             Path directory = Paths.get("uploads").toAbsolutePath().normalize();
-            if (!Files.exists(directory)) {
-                Files.createDirectories(directory);
-            }
+            if (!Files.exists(directory)) Files.createDirectories(directory);
 
-            String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
-            if (originalFileName.contains("..")) {
-                throw new SecurityException("Intento de Path Traversal detectado");
-            }
-
-            String extension = "";
-            int dotIndex = originalFileName.lastIndexOf(".");
-            if (dotIndex >= 0) {
-                extension = originalFileName.substring(dotIndex);
-            }
-
+            String extension = "." + detectedType.split("/")[1];
             String safeFileName = UUID.randomUUID().toString() + extension;
             Path absolutePath = directory.resolve(safeFileName).normalize();
 
-            if (!absolutePath.startsWith(directory)) {
-                throw new SecurityException("Intento de escritura fuera del directorio permitido");
-            }
-            Files.copy(file.getInputStream(), absolutePath, StandardCopyOption.REPLACE_EXISTING);
+            if (!absolutePath.startsWith(directory)) throw new SecurityException("Path Traversal");
 
+            Files.copy(file.getInputStream(), absolutePath, StandardCopyOption.REPLACE_EXISTING);
             return imgRoute + safeFileName;
 
         } catch (IOException e) {
@@ -168,29 +163,33 @@ public class WorkshopService {
 
     private String saveBase64ImageOnDisk(String base64Image, String namePrefix) {
         try {
-            String extension = ".webp";
-            if (base64Image.contains("data:image/png")) extension = ".png";
-            else if (base64Image.contains("data:image/jpeg")) extension = ".jpeg";
-
-            String data = base64Image.split(",")[1];
+            String[] parts = base64Image.split(",");
+            String data = parts.length > 1 ? parts[1] : parts[0];
             byte[] imageBytes = java.util.Base64.getDecoder().decode(data);
+
+            if (imageBytes.length > MAX_FILE_SIZE) {
+                throw new SecurityException("Imagen Base64 demasiado pesada");
+            }
+
+            String detectedType = tika.detect(imageBytes);
+            if (!detectedType.startsWith("image/")) {
+                throw new SecurityException("El contenido Base64 no es una imagen válida");
+            }
 
             Path directory = Paths.get("uploads").toAbsolutePath().normalize();
             if (!Files.exists(directory)) Files.createDirectories(directory);
 
+            String extension = "." + detectedType.split("/")[1];
             String cleanPrefix = StringUtils.cleanPath(namePrefix).replaceAll("[^a-zA-Z0-9_-]", "");
             String safeFileName = cleanPrefix + "_" + UUID.randomUUID().toString() + extension;
-
             Path absolutePath = directory.resolve(safeFileName).normalize();
 
-            if (!absolutePath.startsWith(directory)) {
-                throw new SecurityException("Intento de escritura fuera del directorio permitido");
-            }
+            if (!absolutePath.startsWith(directory)) throw new SecurityException("Path Traversal");
 
             Files.write(absolutePath, imageBytes);
-
             return imgRoute + safeFileName;
-        } catch (IOException e) {
+
+        } catch (Exception e) {
             return null;
         }
     }
@@ -227,8 +226,7 @@ public class WorkshopService {
             throw new RuntimeException("Acceso denegado.");
         }
 
-        if (currentUser.getWorkshop() == null ||
-                currentUser.getWorkshop().getWorkshopId() != (workshop.getWorkshopId())) {
+        if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshop.getWorkshopId())) {
             throw new RuntimeException("Acceso denegado: No eres el responsable de este taller.");
         }
     }
@@ -238,7 +236,7 @@ public class WorkshopService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         if (currentUser.getWorkshop() == null ||
-                currentUser.getWorkshop().getWorkshopId() != workshop.getWorkshopId()) {
+                !currentUser.getWorkshop().getWorkshopId().equals(workshop.getWorkshopId())) {
             throw new SecurityException("Acceso denegado: No perteneces a este taller.");
         }
     }

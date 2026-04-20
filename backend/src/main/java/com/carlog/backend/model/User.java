@@ -19,7 +19,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name="users")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "workshopId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "dni")
 public class User implements UserDetails {
 
     @Id

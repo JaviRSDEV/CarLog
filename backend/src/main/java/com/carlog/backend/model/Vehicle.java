@@ -16,7 +16,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name="vehicles")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "workshopId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Vehicle {
 
     @Id

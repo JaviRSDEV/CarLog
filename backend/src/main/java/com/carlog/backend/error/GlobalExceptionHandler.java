@@ -1,6 +1,7 @@
 package com.carlog.backend.error;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @Hidden
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     private ResponseEntity<Map<String, Object>> buildResponse(String message, HttpStatus status){
@@ -71,7 +73,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
-        System.err.println("Error interno no controlado: " + ex.getMessage());
+        log.error("Error interno no controlado: {}", ex.getMessage());
         ex.printStackTrace();
 
         Map<String, String> errorResponse = new HashMap<>();

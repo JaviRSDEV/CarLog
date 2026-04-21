@@ -10,6 +10,7 @@ import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserJpaRepository userJpaRepository;
@@ -170,7 +172,7 @@ public class UserService {
                 messagingTemplate.convertAndSend("/topic/notificaciones/" + manager.getDni(), alert);
             }
         }catch (Exception e){
-            System.err.println(e.getMessage());
+            log.error(e.getMessage());
         }
 
         return NewUserDTO.of(savedUser);

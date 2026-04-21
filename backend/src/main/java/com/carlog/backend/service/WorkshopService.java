@@ -8,33 +8,25 @@ import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.tika.Tika;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class WorkshopService {
 
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
-    private final Tika tika = new Tika();
-    private static final long MAX_FILE_SIZE = 2 * 1024 * 1024;
 
-    @org.springframework.beans.factory.annotation.Value("${IMG_ROUTE:http://localhost:8081/uploads/}")
-    private String imgRoute;
+    private final Cloudinary cloudinary;
 
     public List<NewWorkshopDTO> getAll(){
         var result = workshopJpaRepository.findAll();
@@ -63,7 +55,7 @@ public class WorkshopService {
 
         String iconUrl = dto.icon();
         if (iconUrl != null && iconUrl.startsWith("data:image")) {
-            iconUrl = saveBase64ImageOnDisk(iconUrl, dto.workshopName().replace(" ", "_"));
+            iconUrl = uploadBase64ToCloudinary(iconUrl);
         }
 
         var newWorkshop = Workshop.builder()
@@ -93,11 +85,11 @@ public class WorkshopService {
             }
 
             if (file != null && !file.isEmpty()) {
-                deleteImageFromDisk(workshop.getIcon());
-                workshop.setIcon(saveMultipartFileOnDisk(file));
+                deleteFromCloudinary(workshop.getIcon());
+                workshop.setIcon(uploadMultipartFileToCloudinary(file));
             }
             else if (dto.icon() == null || dto.icon().isEmpty()) {
-                deleteImageFromDisk(workshop.getIcon());
+                deleteFromCloudinary(workshop.getIcon());
                 workshop.setIcon(null);
             }
 
@@ -121,97 +113,57 @@ public class WorkshopService {
         workshopJpaRepository.delete(workshop);
 
         if (iconUrl != null) {
-            deleteImageFromDisk(iconUrl);
+            deleteFromCloudinary(iconUrl);
         }
 
         return NewWorkshopDTO.of(workshop);
     }
 
-    private String saveMultipartFileOnDisk(MultipartFile file) {
-        if (file.isEmpty() || file.getOriginalFilename() == null) {
-            throw new IllegalArgumentException("Archivo inválido");
-        }
-
+    private String uploadMultipartFileToCloudinary(MultipartFile file) {
         try {
-            if (file.getSize() > MAX_FILE_SIZE) {
-                throw new SecurityException("El archivo excede el límite de 2MB");
-            }
-
-            String detectedType = tika.detect(file.getInputStream());
-            List<String> allowedTypes = Arrays.asList("image/jpeg", "image/png", "image/webp");
-
-            if (!allowedTypes.contains(detectedType)) {
-                throw new SecurityException("Tipo real: " + detectedType);
-            }
-
-            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
-            if (!Files.exists(directory)) Files.createDirectories(directory);
-
-            String extension = "." + detectedType.split("/")[1];
-            String safeFileName = UUID.randomUUID().toString() + extension;
-            Path absolutePath = directory.resolve(safeFileName).normalize();
-
-            if (!absolutePath.startsWith(directory)) throw new SecurityException("Path Traversal");
-
-            Files.copy(file.getInputStream(), absolutePath, StandardCopyOption.REPLACE_EXISTING);
-            return imgRoute + safeFileName;
-
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    private String saveBase64ImageOnDisk(String base64Image, String namePrefix) {
-        try {
-            String[] parts = base64Image.split(",");
-            String data = parts.length > 1 ? parts[1] : parts[0];
-            byte[] imageBytes = java.util.Base64.getDecoder().decode(data);
-
-            if (imageBytes.length > MAX_FILE_SIZE) {
-                throw new SecurityException("Imagen Base64 demasiado pesada");
-            }
-
-            String detectedType = tika.detect(imageBytes);
-            if (!detectedType.startsWith("image/")) {
-                throw new SecurityException("El contenido Base64 no es una imagen válida");
-            }
-
-            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
-            if (!Files.exists(directory)) Files.createDirectories(directory);
-
-            String extension = "." + detectedType.split("/")[1];
-            String cleanPrefix = StringUtils.cleanPath(namePrefix).replaceAll("[^a-zA-Z0-9_-]", "");
-            String safeFileName = cleanPrefix + "_" + UUID.randomUUID().toString() + extension;
-            Path absolutePath = directory.resolve(safeFileName).normalize();
-
-            if (!absolutePath.startsWith(directory)) throw new SecurityException("Path Traversal");
-
-            Files.write(absolutePath, imageBytes);
-            return imgRoute + safeFileName;
-
+            log.info("Subiendo icono del taller (Multipart) a Cloudinary...");
+            var uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                    "folder", "carlog/workshops",
+                    "resource_type", "image"
+            ));
+            String secureUrl = (String) uploadResult.get("secure_url");
+            log.info("Icono subido con éxito: {}", secureUrl);
+            return secureUrl;
         } catch (Exception e) {
+            log.error("Error al subir archivo a Cloudinary: {}", e.getMessage());
             return null;
         }
     }
 
-    private void deleteImageFromDisk(String imageUrl) {
-        if (imageUrl == null || !imageUrl.contains("/uploads/")) {
+    private String uploadBase64ToCloudinary(String base64Image) {
+        try {
+            log.info("Subiendo icono del taller (Base64) a Cloudinary...");
+            var uploadResult = cloudinary.uploader().upload(base64Image, ObjectUtils.asMap(
+                    "folder", "carlog/workshops",
+                    "resource_type", "image"
+            ));
+
+            String secureUrl = (String) uploadResult.get("secure_url");
+            log.info("Icono subido con éxito: {}", secureUrl);
+            return secureUrl;
+        } catch (Exception e) {
+            log.error("Error al subir icono Base64 a Cloudinary: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    private void deleteFromCloudinary(String imageUrl) {
+        if (imageUrl == null || !imageUrl.contains("cloudinary")) {
             return;
         }
 
         try {
-            String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
-            Path filePath = directory.resolve(fileName).normalize();
+            String publicId = "carlog/workshops/" + imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
 
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
-                System.out.println("Archivo eliminado del disco: " + filePath);
-            } else {
-                System.out.println("El archivo no se encontró físicamente: " + filePath);
-            }
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            log.info("Icono eliminado de Cloudinary: {}", publicId);
         } catch (Exception e) {
-            System.err.println("Error al eliminar archivo físico: " + e.getMessage());
+            log.error("Error al eliminar icono físico en la nube: {}", e.getMessage());
         }
     }
 

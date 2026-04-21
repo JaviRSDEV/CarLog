@@ -2,6 +2,7 @@ package com.carlog.backend.service;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
+@Slf4j
 public class RateLimitingService {
 
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
@@ -30,6 +32,6 @@ public class RateLimitingService {
     @Scheduled(fixedRate = 3600000)
     public void cleanUpOldIps() {
         cache.clear();
-        System.out.println("RateLimitingService: Memoria caché de IPs limpiada.");
+        log.info("RateLimitingService: Memoria caché de IPs limpiada.");
     }
 }

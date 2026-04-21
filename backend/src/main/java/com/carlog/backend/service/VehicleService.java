@@ -10,26 +10,22 @@ import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.tika.Tika;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VehicleService {
 
     private final VehicleJpaRepository vehicleJpaRepository;
@@ -37,15 +33,8 @@ public class VehicleService {
     private final UserJpaRepository userJpaRepository;
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private static final long MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
-    @org.springframework.beans.factory.annotation.Value("${IMG_ROUTE:http://localhost:8081/uploads/}")
-    private String imgRoute;
-
-    /*public List<NewVehicleDTO> getAll(){
-        var result = vehicleJpaRepository.findAll();
-        return result.stream().map(NewVehicleDTO::of).toList();
-    }*/
+    private final Cloudinary cloudinary;
 
     public Page<NewVehicleDTO> getMyVehicles(String email, Pageable pageable) {
         User currentUser = userJpaRepository.findByEmail(email)
@@ -111,10 +100,9 @@ public class VehicleService {
         List<String> finalImageRoutes = new ArrayList<>();
 
         if(dto.images() != null && !dto.images().isEmpty()){
-            for(int i = 0; i < dto.images().size(); i++){
-                String img = dto.images().get(i);
+            for(String img : dto.images()){
                 if(img != null && img.startsWith("data:image")){
-                    String savedRoute = saveImageOnDisk(img, dto.plate());
+                    String savedRoute = uploadToCloudinary(img);
                     if(savedRoute != null) finalImageRoutes.add(savedRoute);
                 }
             }
@@ -158,60 +146,33 @@ public class VehicleService {
         return NewVehicleDTO.of(vehicleJpaRepository.save(newVehicle));
     }
 
-    private String saveImageOnDisk(String base64Image, String plate) {
+    private String uploadToCloudinary(String base64Image) {
         try {
-            String[] parts = base64Image.split(",");
-            String originalImage = parts.length > 1 ? parts[1] : parts[0];
-            byte[] imageBytes = Base64.getDecoder().decode(originalImage);
+            log.info("Subiendo nueva imagen a Cloudinary...");
+            var uploadResult = cloudinary.uploader().upload(base64Image, ObjectUtils.asMap(
+                    "folder", "carlog/vehicles",
+                    "resource_type", "image"
+            ));
 
-            if (imageBytes.length > MAX_IMAGE_SIZE) {
-                throw new SecurityException("La imagen supera el límite de 2MB");
-            }
-
-            Tika tika = new Tika();
-            String detectedType = tika.detect(imageBytes);
-            if (!detectedType.startsWith("image/")) {
-                throw new SecurityException("El archivo no es una imagen real, es: " + detectedType);
-            }
-
-            String extension = "." + detectedType.split("/")[1];
-
-            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
-            if (!Files.exists(directory)) {
-                Files.createDirectories(directory);
-            }
-
-            String cleanPlate = StringUtils.cleanPath(plate).replaceAll("[^a-zA-Z0-9_-]", "");
-            String fileName = cleanPlate + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
-            Path absolutePath = directory.resolve(fileName).normalize();
-
-            if (!absolutePath.startsWith(directory)) {
-                throw new SecurityException("Intento de Path Traversal detectado");
-            }
-
-            Files.write(absolutePath, imageBytes);
-            return imgRoute + fileName;
-
+            String secureUrl = (String) uploadResult.get("secure_url");
+            log.info("Imagen subida con éxito: {}", secureUrl);
+            return secureUrl;
         } catch (Exception e) {
-            System.err.println("Error de seguridad o de guardado: " + e.getMessage());
+            log.error("Error al subir imagen a Cloudinary: {}", e.getMessage());
             return null;
         }
     }
 
-    private void deleteImageFromDisk(String imageUrl){
-        if(imageUrl == null || !imageUrl.contains("/uploads/")) return;
+    private void deleteFromCloudinary(String imageUrl){
+        if(imageUrl == null || !imageUrl.contains("cloudinary")) return;
 
-        try{
-            String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+        try {
+            String publicId = "carlog/vehicles/" + imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
 
-            Path directory = Paths.get("uploads").toAbsolutePath().normalize();
-            Path filePath = directory.resolve(fileName).normalize();
-
-            if (filePath.startsWith(directory)) {
-                Files.deleteIfExists(filePath);
-            }
-        }catch (IOException e){
-            System.err.println(e.getMessage());
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            log.info("Imagen eliminada de Cloudinary: {}", publicId);
+        } catch (Exception e) {
+            log.error("No se pudo eliminar la imagen de la nube: {}", e.getMessage());
         }
     }
 
@@ -235,10 +196,11 @@ public class VehicleService {
             if(dto.images() != null && !dto.images().isEmpty()) {
                 for(String img : dto.images()){
                     if(img.startsWith("http://") || img.startsWith("https://")){
-                        updatedImagesRoutes.add(img);
+                        updatedImagesRoutes.add(img); // Ya está en la nube, se mantiene
                     }
                     else if(img.startsWith("data:image")){
-                        String savedRoute = saveImageOnDisk(img, dto.plate());
+                        // Es una imagen nueva, la subimos
+                        String savedRoute = uploadToCloudinary(img);
                         if(savedRoute != null) updatedImagesRoutes.add(savedRoute);
                     }
                 }
@@ -246,7 +208,7 @@ public class VehicleService {
 
             for(String oldImageUrl : oldImages){
                 if(!updatedImagesRoutes.contains(oldImageUrl)){
-                    deleteImageFromDisk(oldImageUrl);
+                    deleteFromCloudinary(oldImageUrl);
                 }
             }
 
@@ -332,7 +294,7 @@ public class VehicleService {
                 messagingTemplate.convertAndSend("/topic/notificaciones/" + manager.getDni(), alert);
             }
         }catch (Exception e){
-            System.err.println(e.getMessage());
+            log.error(e.getMessage());
         }
         return NewVehicleDTO.of(savedVehicle);
     }
@@ -397,7 +359,7 @@ public class VehicleService {
 
         if(vehicle.getImages() != null){
             for(String imageUrl : vehicle.getImages()){
-                deleteImageFromDisk(imageUrl);
+                deleteFromCloudinary(imageUrl);
             }
         }
 
@@ -459,7 +421,6 @@ public class VehicleService {
                     .map(NewVehicleDTO::of);
 
         } else if ("ASSIGNED".equalsIgnoreCase(type)) {
-            // Usamos la query filtrada desde Base de datos, no en Java
             return vehicleJpaRepository.searchDistinctVehiclesByMechanicDniAndText(currentUser.getDni(), text, pageable)
                     .map(NewVehicleDTO::of);
 

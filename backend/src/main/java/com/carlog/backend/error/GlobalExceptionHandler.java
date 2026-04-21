@@ -34,23 +34,60 @@ public class GlobalExceptionHandler {
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(VehicleOcuppiedException.class)
-    public ResponseEntity<Map<String, Object>> handleVehicleOccupied(VehicleOcuppiedException ex){
-        return buildResponse(ex.getMessage(), HttpStatus.CONFLICT);
-    }
-
     @ExceptionHandler(WorkOrderNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleWorkOrderNotFound(WorkOrderNotFoundException ex){
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(WorkshopNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleWorkshopNotFound(WorkshopNotFoundException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(WorkOrderLineNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleWorkOrderLineNotFound(WorkOrderLineNotFoundException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({
+            WorkshopNotAssignedException.class,
+            VehicleNotInWorkshopException.class,
+            ClosedWorkOrderException.class,
+            WorkOrderLineMismatchException.class,
+            MechanicNotInWorkshopException.class,
+            NoPendingRequestException.class,
+            InvalidSearchTypeException.class,
+            InvalidRegistrationException.class,
+            NoPendingInvitationException.class
+    })
+    public ResponseEntity<Map<String, Object>> handleBusinessRulesExceptions(RuntimeException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedActionException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedAction(UnauthorizedActionException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler({
+            VehicleOcuppiedException.class,
+            VehicleAlreadyExistsException.class,
+            UserAlreadyExistsException.class,
+            UserAlreadyInWorkshopException.class,
+            WorkshopAlreadyExistsException.class,
+            UserAlreadyHasWorkshopException.class
+    })
+    public ResponseEntity<Map<String, Object>> handleVehicleOccupied(VehicleOcuppiedException ex){
+        return buildResponse(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentialsException(BadCredentialsException ex){
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                 Map.of(
-                       "message", "Bad credentials",
-                       "status", 401,
-                       "timestamp", System.currentTimeMillis()
+                        "message", "Bad credentials",
+                        "status", 401,
+                        "timestamp", System.currentTimeMillis()
                 )
         );
     }
@@ -64,11 +101,6 @@ public class GlobalExceptionHandler {
                         "timestamp", System.currentTimeMillis()
                 )
         );
-    }
-
-    @ExceptionHandler(WorkshopNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleWorkshopNotFound(WorkshopNotFoundException ex){
-        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)

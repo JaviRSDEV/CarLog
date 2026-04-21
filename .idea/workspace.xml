@@ -4,18 +4,37 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Implemented images uploads to Cloudinary instead of local">
-      <change afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/data_source_mapping.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/db-forest-config.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sqlDataSources.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__Initial_schema.sql" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Minor changes in application properties">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/ClosedWorkOrderException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/InvalidRegistrationException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/InvalidSearchTypeException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/MechanicNotInWorkshopException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/NoPendingInvitationException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/NoPendingRequestException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/UnauthorizedActionException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/UserAlreadyExistsException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/UserAlreadyHasWorkshopException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/UserAlreadyInWorkshopException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/VehicleAlreadyExistsException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/VehicleNotInWorkshopException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/WorkOrderLineMismatchException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/WorkOrderLineNotFoundException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/WorkshopAlreadyExistsException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/WorkshopNotAssignedException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CarLog/backend/src/main/java/com/carlog/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CarLog/backend/src/main/java/com/carlog/backend/service/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CarLog/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CarLog/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CarLog/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CarLog/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CarLog/backend/src/main/java/com/carlog/backend/service/WorkshopService.java" beforeDir="false" afterPath="$PROJECT_DIR$/CarLog/backend/src/main/java/com/carlog/backend/service/WorkshopService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Role.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/WorkOrder.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/WorkOrder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkshopService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkshopService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,8 +44,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Exception" />
         <option value="Class" />
+        <option value="Exception" />
       </list>
     </option>
   </component>
@@ -161,22 +180,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00001" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
-      <option name="closed" value="true" />
-      <created>1772707281693</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1772707281693</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Refactorizado el cors y añadida configuración global de cors para evitar bloqueo">
-      <option name="closed" value="true" />
-      <created>1772803686418</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1772803686418</updated>
     </task>
     <task id="LOCAL-00003" summary="Refactorizados los servicios de usuario y taller (movido de sitio un metodo que correspondia al servicio de usuario) y añadida asignacion automatica de taller">
       <option name="closed" value="true" />
@@ -554,7 +557,23 @@
       <option name="project" value="LOCAL" />
       <updated>1776757239408</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="Implemented flyway for db migrations">
+      <option name="closed" value="true" />
+      <created>1776760346504</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1776760346505</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Minor changes in application properties">
+      <option name="closed" value="true" />
+      <created>1776760397219</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1776760397219</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -575,8 +594,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Implementado websockets" />
-    <MESSAGE value="Implementado websockets en el servicio de vehiculos para gestionar en tiempo real la entrada y salida de los mismos" />
     <MESSAGE value="Terminada implementacion de websockets para la actualización automática de listas" />
     <MESSAGE value="Añadida funcionalidad para mostrar el historial de cada coche" />
     <MESSAGE value="Added security to the critical endpoints" />
@@ -600,7 +617,9 @@
     <MESSAGE value="Added pagination in critial querys" />
     <MESSAGE value="Fixed critical vulnerabilities" />
     <MESSAGE value="Implemented images uploads to Cloudinary instead of local" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented images uploads to Cloudinary instead of local" />
+    <MESSAGE value="Implemented flyway for db migrations" />
+    <MESSAGE value="Minor changes in application properties" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor changes in application properties" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

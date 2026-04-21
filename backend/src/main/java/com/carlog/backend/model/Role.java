@@ -6,5 +6,9 @@ public enum Role {
     CO_MANAGER,
     MECHANIC,
     CLIENT,
-    DIY
+    DIY;
+
+    public boolean isWorker(){
+        return this == MANAGER || this == CO_MANAGER || this == MECHANIC;
+    }
 }

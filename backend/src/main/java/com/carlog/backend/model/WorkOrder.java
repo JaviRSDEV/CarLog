@@ -94,6 +94,6 @@ public class WorkOrder {
         if(this.totalAmount < 0)
             this.totalAmount = 0.0;
 
-        this.totalAmount = (this.totalAmount * 100)/100;
+        this.totalAmount = Math.round(this.totalAmount * 100.0)/100.0;
     }
 }

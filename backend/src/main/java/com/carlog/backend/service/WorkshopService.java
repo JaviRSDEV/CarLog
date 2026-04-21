@@ -1,8 +1,7 @@
 package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewWorkshopDTO;
-import com.carlog.backend.error.UserNotFoundException;
-import com.carlog.backend.error.WorkshopNotFoundException;
+import com.carlog.backend.error.*;
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
@@ -35,7 +34,7 @@ public class WorkshopService {
 
     public NewWorkshopDTO getWorkshopById(Long id, String email){
         Workshop workshop = workshopJpaRepository.findById(id)
-                .orElseThrow(() -> new WorkshopNotFoundException(id));
+                .orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
 
         verifyWorkshopReadAccess(workshop, email);
         return NewWorkshopDTO.of(workshop);
@@ -44,13 +43,15 @@ public class WorkshopService {
     @Transactional
     public NewWorkshopDTO add(NewWorkshopDTO dto, String email) {
         var result = workshopJpaRepository.findByWorkshopName(dto.workshopName());
-        if (result.isPresent()) throw new RuntimeException("Ya existe un taller con ese nombre " + dto.workshopName());
+        if (result.isPresent()) {
+            throw new WorkshopAlreadyExistsException("Ya existe un taller con ese nombre: " + dto.workshopName());
+        }
 
         User workshopOwner = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         if(workshopOwner.getWorkshop() != null){
-            throw new RuntimeException("Este usuario ya es administrador de otro taller");
+            throw new UserAlreadyHasWorkshopException("Este usuario ya es administrador de otro taller");
         }
 
         String iconUrl = dto.icon();
@@ -80,7 +81,7 @@ public class WorkshopService {
 
             if (!workshop.getWorkshopName().equalsIgnoreCase(dto.workshopName())) {
                 if (workshopJpaRepository.findByWorkshopName(dto.workshopName()).isPresent()) {
-                    throw new RuntimeException("Error: ya existe otro taller registrado con ese nombre");
+                    throw new WorkshopAlreadyExistsException("Error: ya existe otro taller registrado con ese nombre");
                 }
             }
 
@@ -99,13 +100,13 @@ public class WorkshopService {
             workshop.setWorkshopEmail(dto.workshopEmail());
 
             return NewWorkshopDTO.of(workshopJpaRepository.save(workshop));
-        }).orElseThrow(() -> new WorkshopNotFoundException(id));
+        }).orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
     }
 
     @Transactional
     public NewWorkshopDTO delete(Long id, String email) {
         Workshop workshop = workshopJpaRepository.findById(id)
-                .orElseThrow(() -> new WorkshopNotFoundException(id));
+                .orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
 
         verifyWorkshopManagerAccess(workshop, email);
         String iconUrl = workshop.getIcon();
@@ -175,11 +176,11 @@ public class WorkshopService {
                 currentUser.getRole() == Role.CO_MANAGER;
 
         if (!isManagerOrCoManager) {
-            throw new RuntimeException("Acceso denegado.");
+            throw new UnauthorizedActionException("Acceso denegado: Solo administradores pueden realizar esta acción.");
         }
 
         if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshop.getWorkshopId())) {
-            throw new RuntimeException("Acceso denegado: No eres el responsable de este taller.");
+            throw new UnauthorizedActionException("Acceso denegado: No eres el responsable de este taller.");
         }
     }
 
@@ -189,7 +190,7 @@ public class WorkshopService {
 
         if (currentUser.getWorkshop() == null ||
                 !currentUser.getWorkshop().getWorkshopId().equals(workshop.getWorkshopId())) {
-            throw new SecurityException("Acceso denegado: No perteneces a este taller.");
+            throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
         }
     }
 }

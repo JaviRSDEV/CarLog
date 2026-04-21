@@ -3,8 +3,7 @@ package com.carlog.backend.service;
 import com.carlog.backend.dto.NewVehicleDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.NotificationDTO;
-import com.carlog.backend.error.UserNotFoundException;
-import com.carlog.backend.error.VehicleNotFoundException;
+import com.carlog.backend.error.*;
 import com.carlog.backend.model.*;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
@@ -40,9 +39,7 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        boolean isWorker = currentUser.getRole() == Role.MANAGER ||
-                currentUser.getRole() == Role.CO_MANAGER ||
-                currentUser.getRole() == Role.MECHANIC;
+        boolean isWorker = currentUser.getRole().isWorker();
 
         if (isWorker && currentUser.getWorkshop() != null) {
             return vehicleJpaRepository.findByWorkshop_WorkshopId(currentUser.getWorkshop().getWorkshopId(), pageable)
@@ -57,7 +54,7 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
         if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
-            throw new RuntimeException("Acceso denegado: No perteneces a este taller.");
+            throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
         }
 
         return vehicleJpaRepository.findByWorkshop_WorkshopId(workshopId, pageable)
@@ -74,7 +71,7 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
         if (!currentUser.getDni().equals(ownerDni)) {
-            throw new RuntimeException("Acceso denegado: No puedes ver los vehículos de otro usuario.");
+            throw new UnauthorizedActionException("Acceso denegado: No puedes ver los vehículos de otro usuario.");
         }
 
         return vehicleJpaRepository.findByOwner_Dni(ownerDni, pageable)
@@ -85,7 +82,7 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
         if (!currentUser.getDni().equals(mechanicDni) && currentUser.getRole() != Role.MANAGER) {
-            throw new RuntimeException("Acceso denegado: No puedes ver los vehículos de otro mecánico.");
+            throw new UnauthorizedActionException("Acceso denegado: No puedes ver los vehículos de otro mecánico.");
         }
 
         return vehicleJpaRepository.findDistinctVehiclesByMechanicDni(mechanicDni, pageable)
@@ -108,8 +105,7 @@ public class VehicleService {
             }
         }
 
-        boolean isWorker = connectedUser.getRole() == Role.MECHANIC || connectedUser.getRole() == Role.MANAGER || connectedUser.getRole() == Role.CO_MANAGER || connectedUser.getRole() == Role.DIY;
-        if(isWorker){
+        if(connectedUser.getRole().isWorker()){
             if(dto.ownerId() != null && !dto.ownerId().isBlank()){
                 owner = userJpaRepository.findByDni(dto.ownerId()).orElseThrow(() -> new UserNotFoundException(dto.ownerId()));
             }else{
@@ -118,7 +114,7 @@ public class VehicleService {
 
             currentWorkshop = connectedUser.getWorkshop();
             if(currentWorkshop == null && connectedUser.getRole() != Role.DIY){
-                throw new RuntimeException("Error: El mecanico o manager no dispone de taller asignado.");
+                throw new WorkshopNotAssignedException("Error: El mecánico o manager no dispone de taller asignado.");
             }
         }else{
             owner = connectedUser;
@@ -126,7 +122,7 @@ public class VehicleService {
         }
 
         if(vehicleJpaRepository.findByPlate(dto.plate()).isPresent())
-            throw new RuntimeException("Ya existe un vehiculo con la matricula " + dto.plate());
+            throw new VehicleAlreadyExistsException("Ya existe un vehículo con la matrícula " + dto.plate());
 
         var newVehicle = Vehicle.builder()
                 .plate(dto.plate())
@@ -183,11 +179,11 @@ public class VehicleService {
         return vehicleJpaRepository.findByPlate(plate).map(vehicle -> {
 
             if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
-                throw new RuntimeException("Acceso denegado: No tienes permiso para editar el vehículo");
+                throw new UnauthorizedActionException("Acceso denegado: No tienes permiso para editar el vehículo");
             }
 
             if(!dto.plate().equals(vehicle.getPlate()) && vehicleJpaRepository.findByPlate(dto.plate()).isPresent()){
-                throw new RuntimeException("La matrícula " + dto.plate() + " ya está en uso");
+                throw new VehicleAlreadyExistsException("La matrícula " + dto.plate() + " ya está en uso");
             }
 
             List<String> oldImages = vehicle.getImages() != null ? new ArrayList<>(vehicle.getImages()) : new ArrayList<>();
@@ -235,11 +231,11 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
         if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
-            throw new RuntimeException("Acceso denegado: No perteneces a este taller.");
+            throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
         }
 
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
-        Workshop workshop = workshopJpaRepository.findById(workshopId).orElseThrow();
+        Workshop workshop = workshopJpaRepository.findById(workshopId).orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
 
         vehicle.setPendingWorkshop(workshop);
         Vehicle savedVehicle = vehicleJpaRepository.save(vehicle);
@@ -265,11 +261,11 @@ public class VehicleService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         if(!vehicle.getOwner().getDni().equals(currentUser.getDni())) {
-            throw new RuntimeException("No tienes permiso para aprobar el ingreso de este vehículo");
+            throw new UnauthorizedActionException("No tienes permiso para aprobar el ingreso de este vehículo");
         }
 
         if(vehicle.getPendingWorkshop() == null){
-            throw new RuntimeException("Este vehículo no tiene ninguna solicitud pendiente");
+            throw new NoPendingRequestException("Este vehículo no tiene ninguna solicitud pendiente");
         }
 
         Workshop workshop = vehicle.getPendingWorkshop();
@@ -306,7 +302,7 @@ public class VehicleService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         if(!vehicle.getOwner().getDni().equals(currentUser.getDni())){
-            throw new RuntimeException("No tienes permiso para rechazar el ingreso de este vehículo");
+            throw new UnauthorizedActionException("No tienes permiso para rechazar el ingreso de este vehículo");
         }
 
         vehicle.setPendingWorkshop(null);
@@ -317,13 +313,13 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
         if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
-            throw new RuntimeException("Acceso denegado: No puedes registrar salidas de otro taller.");
+            throw new UnauthorizedActionException("Acceso denegado: No puedes registrar salidas de otro taller.");
         }
 
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
 
         if(vehicle.getWorkshop() == null || !vehicle.getWorkshop().getWorkshopId().equals(workshopId)){
-            throw new RuntimeException("No puedes dar salida a un coche que no esta registrado en el taller");
+            throw new VehicleNotInWorkshopException("No puedes dar salida a un coche que no está registrado en el taller");
         }
         vehicle.setWorkshop(null);
         return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
@@ -334,7 +330,7 @@ public class VehicleService {
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
 
         if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
-            throw new RuntimeException("Acceso denegado: Solo el dueño actual puede transferir el vehículo.");
+            throw new UnauthorizedActionException("Acceso denegado: Solo el dueño actual puede transferir el vehículo.");
         }
 
         User newOwner = userJpaRepository.findByDni(newOwnerId).orElseThrow(() -> new UserNotFoundException(newOwnerId));
@@ -352,7 +348,7 @@ public class VehicleService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
-            throw new RuntimeException("Acceso denegado: No tienes permiso para eliminar el vehículo");
+            throw new UnauthorizedActionException("Acceso denegado: No tienes permiso para eliminar el vehículo");
         }
         NewVehicleDTO deletedVehicle = NewVehicleDTO.of(vehicle);
 
@@ -384,11 +380,7 @@ public class VehicleService {
             return;
         }
 
-        boolean isWorker = currentUser.getRole() == Role.MANAGER ||
-                currentUser.getRole() == Role.CO_MANAGER ||
-                currentUser.getRole() == Role.MECHANIC;
-
-        if (isWorker) {
+        if (currentUser.getRole().isWorker()) {
             boolean inWorkshop = vehicle.getWorkshop() != null && currentUser.getWorkshop() != null &&
                     vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId());
 
@@ -396,10 +388,10 @@ public class VehicleService {
                     vehicle.getPendingWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId());
 
             if (!inWorkshop && !pendingWorkshop) {
-                throw new RuntimeException("Acceso denegado: El vehículo no se encuentra en tu taller.");
+                throw new UnauthorizedActionException("Acceso denegado: El vehículo no se encuentra en tu taller.");
             }
         } else {
-            throw new RuntimeException("Acceso denegado: Este vehículo no es tuyo.");
+            throw new UnauthorizedActionException("Acceso denegado: Este vehículo no es tuyo.");
         }
     }
 
@@ -425,12 +417,12 @@ public class VehicleService {
 
         } else if ("WORKSHOP".equalsIgnoreCase(type)) {
             if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
-                throw new RuntimeException("Acceso denegado: No perteneces a este taller.");
+                throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
             }
             return vehicleJpaRepository.searchByWorkshopAndText(workshopId, text, pageable)
                     .map(NewVehicleDTO::of);
         }
 
-        throw new RuntimeException("Tipo de búsqueda no válido");
+        throw new InvalidSearchTypeException("Tipo de búsqueda no válido");
     }
 }

@@ -483,18 +483,38 @@ Todas las excepciones son capturadas por `GlobalExceptionHandler` (`@RestControl
 }
 ```
 
+Basado en el análisis del `GlobalExceptionHandler`, aquí está la tabla completa de excepciones del sistema:
+
 | Código HTTP | Excepción | Causa |
 |---|---|---|
 | `404` | `VehicleNotFoundException` | Matrícula no encontrada |
 | `404` | `UserNotFoundException` | DNI o email no encontrado |
 | `404` | `WorkOrderNotFoundException` | ID de orden no existe |
 | `404` | `WorkshopNotFoundException` | ID de taller no existe |
+| `404` | `WorkOrderLineNotFoundException` | Línea de orden no encontrada |
+| `400` | `WorkshopNotAssignedException` | El mecánico/manager no tiene taller asignado |
+| `400` | `VehicleNotInWorkshopException` | El vehículo no está en el taller especificado |
+| `400` | `ClosedWorkOrderException` | Intento de modificar orden cerrada |
+| `400` | `WorkOrderLineMismatchException` | La línea no pertenece a la orden |
+| `400` | `MechanicNotInWorkshopException` | El mecánico no pertenece al taller |
+| `400` | `NoPendingRequestException` | No hay solicitud pendiente de vehículo |
+| `400` | `InvalidSearchTypeException` | Tipo de búsqueda no válido |
+| `400` | `InvalidRegistrationException` | Registro inválido (auto-contratación) |
+| `400` | `NoPendingInvitationException` | No hay invitación pendiente |
+| `403` | `UnauthorizedActionException` | Acceso denegado por permisos |
 | `409` | `VehicleOcuppiedException` | Vehículo ya asignado a otro taller |
+| `409` | `VehicleAlreadyExistsException` | Ya existe vehículo con esa matrícula |
+| `409` | `UserAlreadyExistsException` | Ya existe usuario con ese DNI |
+| `409` | `UserAlreadyInWorkshopException` | Usuario ya pertenece a un taller |
+| `409` | `WorkshopAlreadyExistsException` | Ya existe un taller con esos datos |
+| `409` | `UserAlreadyHasWorkshopException` | Usuario ya tiene taller asignado |
 | `401` | `BadCredentialsException` | Credenciales incorrectas |
 | `429` | `RateLimitExceededException` | Demasiados intentos de login/registro |
-| `500` | `Exception` | Error interno no controlado |
+| `500` | `Exception` | Error interno no controlado | [1](#1-0) 
 
----
+## Notas
+
+Las excepciones están agrupadas por código HTTP en el `GlobalExceptionHandler` [2](#1-1) . Las excepciones de negocio (400) cubren validaciones de reglas del dominio, mientras que las de conflicto (409) manejan duplicados y estados inconsistentes. El rate limiting se aplica específicamente a endpoints de autenticación [3](#1-2).
 
 ## Documentación de la API (Swagger)
 

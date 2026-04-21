@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DdlMappings">
+    <mapping uuid="9d8d4012-f253-4187-b056-faff3eba9752" name="carlog_db@localhost Mapping">
+      <data-sources db="f3afb5e3-bff5-400d-bc97-f8ba627917e5" ddl="53cc6d3a-1076-4e0e-a17b-17c07398faa7" />
+      <scope>
+        <node kind="schema" qname="carlog_db" />
+      </scope>
+    </mapping>
+  </component>
+  <component name="SqlDataSourceStorage">
+    <option name="dataSources">
+      <list>
+        <State>
+          <option name="id" value="53cc6d3a-1076-4e0e-a17b-17c07398faa7" />
+          <option name="name" value="carlog_db@localhost (DDL)" />
+          <option name="dbmsName" value="MYSQL" />
+          <option name="urls">
+            <array>
+              <option value="file://$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__Initial_schema.sql" />
+            </array>
+          </option>
+          <option name="outLayout" value="File per object by schema.groovy" />
+        </State>
+      </list>
+    </option>
+  </component>
+</project>

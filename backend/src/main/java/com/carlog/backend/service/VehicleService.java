@@ -196,10 +196,9 @@ public class VehicleService {
             if(dto.images() != null && !dto.images().isEmpty()) {
                 for(String img : dto.images()){
                     if(img.startsWith("http://") || img.startsWith("https://")){
-                        updatedImagesRoutes.add(img); // Ya está en la nube, se mantiene
+                        updatedImagesRoutes.add(img);
                     }
                     else if(img.startsWith("data:image")){
-                        // Es una imagen nueva, la subimos
                         String savedRoute = uploadToCloudinary(img);
                         if(savedRoute != null) updatedImagesRoutes.add(savedRoute);
                     }

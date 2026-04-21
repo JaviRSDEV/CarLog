@@ -1,7 +1,6 @@
 package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewVehicleDTO;
-import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Vehicle;
@@ -30,72 +29,67 @@ public class VehicleServiceTest {
 
     @Mock
     private VehicleJpaRepository vehicleJpaRepository;
+
     @InjectMocks
     private VehicleService vehicleService;
+
     @Captor
     private ArgumentCaptor<Vehicle> vehicleCaptor;
+
     @Test
-    void addVehicleWhenUserIsClient(){
-
+    void addVehicleWhenUserIsClient() {
         String userDni = "12345678A";
-        NewVehicleDTO inputVehicle = new NewVehicleDTO("9999-ZZZ", "Toyota", "Corolla", (long) 100.0,
-                                                "Hybrid", 120, 150, "Michelin",
-                                                 null, null, null, null);
-        User fakeClient = User.builder().dni(userDni).role(Role.CLIENT).build();
+        NewVehicleDTO inputVehicle = new NewVehicleDTO("9999-ZZZ", "Toyota", "Corolla", 100L,
+                "Hybrid", 120, 150, "Michelin",
+                null, null, null, null, null, null);
 
+        User fakeClient = User.builder().dni(userDni).role(Role.CLIENT).build();
         Vehicle savedVehicle = Vehicle.builder().plate("9999-ZZZ").brand("Toyota").owner(fakeClient).build();
 
         when(userJpaRepository.findByDni(userDni)).thenReturn(Optional.of(fakeClient));
-
         when(vehicleJpaRepository.save(any(Vehicle.class))).thenReturn(savedVehicle);
 
         NewVehicleDTO result = vehicleService.add(inputVehicle, userDni);
 
         assertNotNull(result);
         assertEquals("9999-ZZZ", result.plate());
-
         verify(userJpaRepository).findByDni(userDni);
         verify(vehicleJpaRepository).save(any(Vehicle.class));
-
     }
 
     @Test
-    void addVehicleWhenUserIsMechanic(){
+    void addVehicleWhenUserIsMechanic() {
         String userDni = "12345678A";
-        Workshop fakeWorkshop = Workshop.builder().workshopId(1).build();
-        NewVehicleDTO inputVehicle = new NewVehicleDTO("9999-ZZZ", "Toyota", "Corolla", (long) 100.0,
+        Workshop fakeWorkshop = Workshop.builder().workshopId(1L).build();
+        NewVehicleDTO inputVehicle = new NewVehicleDTO("9999-ZZZ", "Toyota", "Corolla", 100L,
                 "Hybrid", 120, 150, "Michelin",
-                null, null, null, null);
+                null, null, null, null, null, null);
 
         User fakeMechanic = User.builder().dni(userDni).role(Role.MECHANIC).workshop(fakeWorkshop).build();
-        Vehicle savedVehicle = Vehicle.builder().plate("9999-ZZZ").brand("Toyota").workshop(fakeWorkshop).build();
 
         when(userJpaRepository.findByDni(userDni)).thenReturn(Optional.of(fakeMechanic));
-        when(vehicleJpaRepository.save(any(Vehicle.class))).thenReturn( new Vehicle());
+        when(vehicleJpaRepository.save(any(Vehicle.class))).thenReturn(new Vehicle());
 
         vehicleService.add(inputVehicle, userDni);
 
         verify(vehicleJpaRepository).save(vehicleCaptor.capture());
-
         Vehicle vehicleStored = vehicleCaptor.getValue();
 
         assertNotNull(vehicleStored.getWorkshop(), "El coche debería tener un taller asignado");
-        assertEquals("9999-ZZZ", vehicleStored.getPlate(), "Las matrículas deberían de coincidir");
-
-        assertEquals(vehicleStored.getWorkshop().getWorkshopId(), fakeMechanic.getWorkshop().getWorkshopId(), "El ID de taller del mecanico y del coche deben de coincidir");
-        assertEquals(savedVehicle.getWorkshop().getWorkshopId(), vehicleStored.getWorkshop().getWorkshopId(), "EL ID de taller de ambos coches deben de coincidir");
+        assertEquals("9999-ZZZ", vehicleStored.getPlate());
+        assertEquals(fakeMechanic.getWorkshop().getWorkshopId(), vehicleStored.getWorkshop().getWorkshopId());
     }
 
     @Test
-    void addVehicleWhenUserDoestNotExist(){
+    void addVehicleWhenUserDoestNotExist() {
         String fakeDni = "000000X";
-        NewVehicleDTO savedVehicle = new NewVehicleDTO("9999-ZZZ", "Fantasma", "CAR", (long) 100.0,
-                                          "GAS", 120, 150,
-                                            null, null, null, null, null);
+        NewVehicleDTO savedVehicle = new NewVehicleDTO("9999-ZZZ", "Fantasma", "CAR", 100L,
+                "GAS", 120, 150, "Stock",
+                null, null, null, null, null, null);
 
         when(userJpaRepository.findByDni(fakeDni)).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () ->{
+        assertThrows(RuntimeException.class, () -> {
             vehicleService.add(savedVehicle, fakeDni);
         });
 

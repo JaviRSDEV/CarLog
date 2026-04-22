@@ -1,7 +1,9 @@
 package com.carlog.backend.service;
 
 import com.carlog.backend.dto.*;
-import com.carlog.backend.error.*;
+import com.carlog.backend.error.UserNotFoundException;
+import com.carlog.backend.error.VehicleNotFoundException;
+import com.carlog.backend.error.WorkOrderNotFoundException;
 import com.carlog.backend.model.*;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
@@ -13,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +26,11 @@ public class WorkOrderService {
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final WorkOrderLineJpaRepository workOrderLineJpaRepository;
 
+    /*public List<NewWorkOrderResponseDTO> getAll(){
+        var result = workOrderJpaRepository.findAll();
+        return result.stream().map(NewWorkOrderResponseDTO::of).toList();
+    }*/
+
     public List<NewWorkOrderResponseDTO> getByEmployee(String dni, String email){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
         User targetMechanic = userJpaRepository.findByDni(dni).orElseThrow(() -> new UserNotFoundException(dni));
@@ -32,7 +40,7 @@ public class WorkOrderService {
                 currentUser.getWorkshop().getWorkshopId().equals(targetMechanic.getWorkshop().getWorkshopId());
 
         if (!isSelf && !isSameWorkshop) {
-            throw new UnauthorizedActionException("Acceso denegado: No puedes ver las órdenes de un mecánico de otro taller.");
+            throw new SecurityException("Acceso denegado: No puedes ver las órdenes de un mecánico de otro taller.");
         }
 
         List<WorkOrder> workOrders = workOrderJpaRepository.findByMechanic_Dni(dni);
@@ -54,16 +62,18 @@ public class WorkOrderService {
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
                 .orElseThrow(() -> new VehicleNotFoundException(plate));
 
-        boolean isWorker = currentUser.getRole().isWorker();
+        boolean isWorker = currentUser.getRole() == Role.MANAGER ||
+                currentUser.getRole() == Role.CO_MANAGER ||
+                currentUser.getRole() == Role.MECHANIC;
 
         if (isWorker) {
             if (vehicle.getWorkshop() == null || currentUser.getWorkshop() == null ||
                     !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
-                throw new UnauthorizedActionException("Acceso denegado: Este vehículo no está en tu taller.");
+                throw new SecurityException("Acceso denegado: Este vehículo no está en tu taller.");
             }
         } else {
             if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
-                throw new UnauthorizedActionException("Acceso denegado: Este vehículo no es tuyo.");
+                throw new SecurityException("Acceso denegado: Este vehículo no es tuyo.");
             }
         }
 
@@ -75,18 +85,19 @@ public class WorkOrderService {
         User connectedUser = userJpaRepository.findByEmail(userEmail).orElseThrow(() -> new UserNotFoundException(userEmail));
         Vehicle referedVehicle = vehicleJpaRepository.findByPlate(vehiclePlate).orElseThrow(() -> new VehicleNotFoundException(vehiclePlate));
 
-        if(!connectedUser.getRole().isWorker()) {
-            throw new UnauthorizedActionException("Error: El usuario no tiene permisos para crear una orden de trabajo");
+        boolean isWorker = connectedUser.getRole() == Role.MECHANIC || connectedUser.getRole() == Role.MANAGER || connectedUser.getRole() == Role.CO_MANAGER || connectedUser.getRole() == Role.DIY;
+        if(!isWorker) {
+            throw new RuntimeException("Error: El usuario no tiene permisos para crear una orden de trabajo");
         }
 
         if (connectedUser.getWorkshop() == null && connectedUser.getRole() != Role.DIY) {
-            throw new WorkshopNotAssignedException("Error: El mecánico o manager no dispone de un taller asignado");
+            throw new RuntimeException("Error: El mecanico o manager no dispone de un taller asignado");
         }
 
         if (connectedUser.getRole() != Role.DIY) {
             if (referedVehicle.getWorkshop() == null ||
                     !referedVehicle.getWorkshop().getWorkshopId().equals(connectedUser.getWorkshop().getWorkshopId())) {
-                throw new VehicleNotInWorkshopException("Error: No puedes abrir una nueva orden. El vehículo ya no se encuentra ingresado en tu taller.");
+                throw new RuntimeException("Error: No puedes abrir una nueva orden. El vehículo ya no se encuentra ingresado en tu taller.");
             }
         }
 
@@ -100,7 +111,7 @@ public class WorkOrderService {
         verifyWriteAccess(workOrder, email);
 
         if(workOrder.getStatus() == WorkOrderStatus.COMPLETED)
-            throw new ClosedWorkOrderException("No se pueden añadir nuevas líneas a una orden cerrada");
+            throw new RuntimeException("No se pueden añadir nuevas lineas a una orden cerrada");
 
         WorkOrderLine newLine = new WorkOrderLine();
         newLine.setConcept(lineDto.concept());
@@ -120,17 +131,17 @@ public class WorkOrderService {
     }
 
     public NewWorkOrderResponseDTO deleteLine(Long orderId, Long lineId, String email){
-        WorkOrderLine line = workOrderLineJpaRepository.findById(lineId).orElseThrow(() -> new WorkOrderLineNotFoundException("Línea no encontrada"));
+        WorkOrderLine line = workOrderLineJpaRepository.findById(lineId).orElseThrow(() -> new RuntimeException("Linea no encontrada"));
 
         if(!line.getWorkOrder().getId().equals(orderId))
-            throw new WorkOrderLineMismatchException("Error: La línea " + lineId + " no pertenece a la orden");
+            throw new RuntimeException("Error: La línea " + lineId + " no pertenece a la orden");
 
         WorkOrder order = line.getWorkOrder();
 
         verifyWriteAccess(order, email);
 
         if(order.getStatus() == WorkOrderStatus.COMPLETED)
-            throw new ClosedWorkOrderException("No se pueden borrar líneas de una orden cerrada");
+            throw new RuntimeException("No se puede borrar líneas de una orden cerrada");
 
         order.removeWorkOrderLine(line);
         WorkOrder updatedOrder = workOrderJpaRepository.save(order);
@@ -169,17 +180,17 @@ public class WorkOrderService {
 
     public NewWorkOrderResponseDTO updateWorkOrderLine(Long orderId, Long lineId, NewWorkOrderLineDTO lineData, String email) {
         WorkOrderLine line = workOrderLineJpaRepository.findById(lineId)
-                .orElseThrow(() -> new WorkOrderLineNotFoundException("Línea no encontrada"));
+                .orElseThrow(() -> new RuntimeException("Linea no encontrada"));
 
         if(!line.getWorkOrder().getId().equals(orderId)){
-            throw new WorkOrderLineMismatchException("Error: la línea " + lineId + " no pertenece a la orden " + orderId);
+            throw new RuntimeException("Error: la línea " + lineId + " no pertenece a la orden " + orderId);
         }
 
         WorkOrder order = line.getWorkOrder();
         verifyWriteAccess(order, email);
 
         if(order.getStatus() == WorkOrderStatus.COMPLETED){
-            throw new ClosedWorkOrderException("No se pueden editar líneas de una orden cerrada");
+            throw new RuntimeException("No se pueden editar líneas de una orden cerrada");
         }
 
         line.setConcept(lineData.concept());
@@ -194,7 +205,7 @@ public class WorkOrderService {
                 .mapToDouble(WorkOrderLine::getSubTotal)
                 .sum();
 
-        newTotalAmount = Math.round(newTotalAmount * 100.0) / 100.0;
+        newTotalAmount = Math.round(newTotalAmount * 100.0) /100.0;
         order.setTotalAmount(newTotalAmount);
 
         WorkOrder updatedOrder = workOrderJpaRepository.save(order);
@@ -211,7 +222,7 @@ public class WorkOrderService {
                 .orElseThrow(() -> new UserNotFoundException(newMechanicId));
 
         if(!workOrder.getWorkshop().getWorkshopId().equals(newMechanic.getWorkshop().getWorkshopId())){
-            throw new MechanicNotInWorkshopException("Error: El mecánico seleccionado no pertenece a este taller");
+            throw new RuntimeException("Error: El mecánico seleccionado no pertenece a este taller");
         }
 
         workOrder.setMechanic(newMechanic);
@@ -223,7 +234,7 @@ public class WorkOrderService {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
         if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
-            throw new UnauthorizedActionException("Acceso denegado: No puedes ver las órdenes de otro taller.");
+            throw new SecurityException("Acceso denegado: No puedes ver las órdenes de otro taller.");
         }
 
         List<WorkOrder> workOrders = workOrderJpaRepository.findByWorkshop_workshopId(workshopId);
@@ -234,15 +245,19 @@ public class WorkOrderService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if (currentUser.getRole().isWorker()) {
+        boolean isWorker = currentUser.getRole() == Role.MANAGER ||
+                currentUser.getRole() == Role.CO_MANAGER ||
+                currentUser.getRole() == Role.MECHANIC;
+
+        if (isWorker) {
             if (workOrder.getWorkshop() == null || currentUser.getWorkshop() == null ||
                     !workOrder.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
-                throw new UnauthorizedActionException("Acceso denegado: Esta orden pertenece a otro taller.");
+                throw new SecurityException("Acceso denegado: Esta orden pertenece a otro taller.");
             }
         } else {
             if (workOrder.getVehicle() == null || workOrder.getVehicle().getOwner() == null ||
                     !workOrder.getVehicle().getOwner().getDni().equals(currentUser.getDni())) {
-                throw new UnauthorizedActionException("Acceso denegado: Esta orden no pertenece a tu vehículo.");
+                throw new SecurityException("Acceso denegado: Esta orden no pertenece a tu vehículo.");
             }
         }
     }
@@ -251,20 +266,24 @@ public class WorkOrderService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if (!currentUser.getRole().isWorker()) {
-            throw new UnauthorizedActionException("Acceso denegado: Solo el personal del taller puede modificar la orden.");
+        boolean isWorker = currentUser.getRole() == Role.MANAGER ||
+                currentUser.getRole() == Role.CO_MANAGER ||
+                currentUser.getRole() == Role.MECHANIC;
+
+        if (!isWorker) {
+            throw new SecurityException("Acceso denegado: Solo el personal del taller puede modificar la orden.");
         }
 
         if (workOrder.getWorkshop() == null || currentUser.getWorkshop() == null ||
                 !workOrder.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
-            throw new UnauthorizedActionException("Acceso denegado: No puedes modificar órdenes de otro taller.");
+            throw new SecurityException("Acceso denegado: No puedes modificar órdenes de otro taller.");
         }
 
         Vehicle vehicle = workOrder.getVehicle();
         if (vehicle != null) {
             if (vehicle.getWorkshop() == null ||
                     !vehicle.getWorkshop().getWorkshopId().equals(workOrder.getWorkshop().getWorkshopId())) {
-                throw new UnauthorizedActionException("Acceso denegado: El vehículo ya no está en el taller. Sus órdenes están bloqueadas en modo 'solo lectura'.");
+                throw new SecurityException("Acceso denegado: El vehículo ya no está en el taller. Sus órdenes están bloqueadas en modo 'solo lectura'.");
             }
         }
     }

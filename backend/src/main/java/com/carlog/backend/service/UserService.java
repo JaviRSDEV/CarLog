@@ -2,7 +2,8 @@ package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.dto.NotificationDTO;
-import com.carlog.backend.error.*;
+import com.carlog.backend.error.UserNotFoundException;
+import com.carlog.backend.error.WorkshopNotFoundException;
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
@@ -25,6 +26,12 @@ public class UserService {
     private final WorkshopJpaRepository workshopJpaRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    /*public List<NewUserDTO> getAll(){
+        var result = userJpaRepository.findAll();
+        if(result.isEmpty()) throw new UserNotFoundException();
+        return result.stream().map(NewUserDTO::of).toList();
+    }*/
+
     public NewUserDTO getByDni(String dni){
         User user = userJpaRepository.findByDni(dni).orElseThrow(() -> new UserNotFoundException(dni));
         return NewUserDTO.of(user);
@@ -32,13 +39,14 @@ public class UserService {
 
     public NewUserDTO getMyProfile(){
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         return getByDni(currentUser.getDni());
     }
 
     public List<NewUserDTO> getByName(String name){
         List<User> results = userJpaRepository.findByNameContainingIgnoreCase(name);
         if(results.isEmpty())
-            throw new UserNotFoundException("No se encontraron usuarios con ese nombre");
+            throw new UserNotFoundException();
 
         return results.stream().map(NewUserDTO::of).toList();
     }
@@ -46,20 +54,15 @@ public class UserService {
     public NewUserDTO add(NewUserDTO dto){
         Workshop workshop = null;
         Role roleToSave = Role.CLIENT;
-
-        if(userJpaRepository.findByDni(dto.dni()).isPresent()) {
-            throw new UserAlreadyExistsException("Ya existe un usuario con el DNI " + dto.dni());
-        }
-
+        if(userJpaRepository.findByDni(dto.dni()).isPresent()) throw new RuntimeException("Ya existe un empleado con el DNI " + dto.dni());
         //Evitamos que alguien pueda auto contratarse en un taller
         if(dto.workShopId() != null){
-            throw new InvalidRegistrationException("No puedes unirte a un taller durante el registro, debes ser contratado por uno");
+            throw new RuntimeException("No puedes unirte a un taller durante el registro, debes ser contratado por uno");
         }
-
         //Si el rol es diferente a null le asignamos el pasado por el dto
         if(dto.role() != null)
             roleToSave = dto.role();
-
+        //Si el rol elegido es co_manager o mechanic en el registro, el sistema por seguridad asignara el rol de cliente
         if(roleToSave == Role.CO_MANAGER || roleToSave == Role.MECHANIC){
             roleToSave = Role.CLIENT;
         }
@@ -78,7 +81,7 @@ public class UserService {
                     userEditing.getWorkshop().equals(user.getWorkshop());
 
             if (!isSelf && !isManagerOfEmployee) {
-                throw new UnauthorizedActionException("No tienes permisos para editar a este usuario.");
+                throw new SecurityException("No tienes permisos para editar a este usuario.");
             }
 
             user.setDni(dto.dni());
@@ -91,12 +94,12 @@ public class UserService {
             }
 
             return NewUserDTO.of(userJpaRepository.save(user));
-        }).orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        }).orElseThrow(() -> new UserNotFoundException());
     }
 
     public NewUserDTO delete(String dni){
         var result = userJpaRepository.findByDni(dni);
-        if(result.isEmpty()) throw new UserNotFoundException("Usuario no encontrado");
+        if(result.isEmpty()) throw new UserNotFoundException();
         userJpaRepository.deleteByDni(dni);
         return NewUserDTO.of(result.get());
     }
@@ -106,11 +109,11 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(id)) {
-            throw new UnauthorizedActionException("Acceso denegado: No puedes ver los empleados de un taller al que no perteneces.");
+            throw new SecurityException("Acceso denegado: No puedes ver los empleados de un taller al que no perteneces.");
         }
 
         Workshop workshop = workshopJpaRepository.findById(id)
-                .orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
+                .orElseThrow(() -> new WorkshopNotFoundException(id));
 
         return workshop.getEmployees().stream()
                 .map(NewUserDTO::of).toList();
@@ -121,15 +124,13 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(managerEmail));
 
         if ((manager.getRole() != Role.MANAGER && manager.getRole() != Role.CO_MANAGER) || manager.getWorkshop() == null) {
-            throw new UnauthorizedActionException("Solo los administradores de un taller pueden invitar empleados.");
+            throw new SecurityException("Solo los administradores de un taller pueden invitar empleados.");
         }
 
         User employee = userJpaRepository.findByDni(employeeDni)
                 .orElseThrow(() -> new UserNotFoundException(employeeDni));
 
-        if(employee.getWorkshop() != null) {
-            throw new UserAlreadyInWorkshopException("El usuario ya se encuentra trabajando en un taller");
-        }
+        if(employee.getWorkshop() != null) throw new RuntimeException("El usuario ya se encuentra trabajando en un taller");
 
         employee.setPendingWorkshop(manager.getWorkshop());
         employee.setPendingRole(role);
@@ -145,11 +146,8 @@ public class UserService {
     }
 
     public NewUserDTO acceptInvitation(String email){
-        User user = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
-
-        if(user.getPendingWorkshop() == null) {
-            throw new NoPendingInvitationException("No hay ninguna invitación pendiente");
-        }
+        User user = userJpaRepository.findByEmail(email).orElseThrow();
+        if(user.getPendingWorkshop() == null) throw new RuntimeException("No hay ninguna invitación");
 
         Workshop workshop = user.getPendingWorkshop();
 
@@ -167,7 +165,7 @@ public class UserService {
                 NotificationDTO alert = NotificationDTO.builder()
                         .type("NEW_EMPLOYEE")
                         .title("¡Nuevo empleado en el taller!")
-                        .message("Un nuevo mecánico aceptó la invitación para trabajar")
+                        .message("Un nuevo mecánico acepto la invitación para trabajar")
                         .extraData(savedUser.getDni())
                         .build();
 
@@ -196,7 +194,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(employeeDni));
 
         if (manager.getWorkshop() == null || !manager.getWorkshop().equals(employee.getWorkshop())) {
-            throw new UnauthorizedActionException("No puedes despedir a un empleado que no pertenece a tu taller.");
+            throw new SecurityException("No puedes despedir a un empleado que no pertenece a tu taller.");
         }
 
         employee.setWorkshop(null);

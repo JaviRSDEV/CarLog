@@ -38,7 +38,7 @@ public class WorkshopController {
     }
 
     @PreAuthorize("hasAuthority('MANAGER')")
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<NewWorkshopDTO> store(@Valid @RequestBody NewWorkshopDTO workshop, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop, principal.getName()));
     }

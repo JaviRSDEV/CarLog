@@ -4,13 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Minor changes in WorkshopController">
-      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/UserServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added batery of tests">
+      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkshopServiceTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -238,14 +235,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00005" summary="Refactorizados los servicios y controladores para devolver la respuesta mediante dto y solventar el problema de seguridad de devolver el objeto entero">
-      <option name="closed" value="true" />
-      <created>1773918843735</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1773918843735</updated>
     </task>
     <task id="LOCAL-00006" summary="Añadidor controlador global de excepciones">
       <option name="closed" value="true" />
@@ -631,7 +620,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776872654307</updated>
     </task>
-    <option name="localTasksCounter" value="54" />
+    <task id="LOCAL-00054" summary="Added batery of tests">
+      <option name="closed" value="true" />
+      <created>1776938355481</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1776938355481</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -652,7 +649,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added security to the critical endpoints" />
     <MESSAGE value="Solved redundant code and solved some security problems" />
     <MESSAGE value="Added a first version of a vehicle browser" />
     <MESSAGE value="Added search filters by brand and model" />
@@ -677,7 +673,8 @@
     <MESSAGE value="Minor changes in application properties" />
     <MESSAGE value="Added custom exception classes and eliminated RuntimeException uses" />
     <MESSAGE value="Minor changes in WorkshopController" />
-    <option name="LAST_COMMIT_MESSAGE" value="Minor changes in WorkshopController" />
+    <MESSAGE value="Added batery of tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added batery of tests" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

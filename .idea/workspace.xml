@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added batery of tests">
-      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkshopServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +72,9 @@
     "JUnit.VehicleServiceTest.getByWorkshop_UserDoesNotBelongToWorkshop_ThrowsUnauthorized.executor": "Run",
     "JUnit.VehicleServiceTest.getMyVehicles_AsClient_ReturnsOwnedVehicles.executor": "Run",
     "JUnit.VehicleServiceTest.requestEntry_MechanicInWorkshop_CreatesPendingRequest.executor": "Run",
+    "Maven.backend [clean].executor": "Run",
+    "Maven.backend [verify,sonar:sonar...].executor": "Run",
+    "Maven.backend [verify...].executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found": "New/updated database configurations found",
     "Notification.DoNotAsk-DatabaseConfigFileWatcher.found": "true",
@@ -84,6 +88,9 @@
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/6003792/Desktop/Proyecto_final/CarLog",
     "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -99,6 +106,15 @@
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="com.carlog.backend.service" />
     </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=JaviRSDEV_CarLog" />
+      <command value="mvn clean" />
+      <command value="set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8" />
+      <command value="mvn verify sonar:sonar -Dsonar.projectKey=JaviRSDEV_CarLog -Dresource.delimiter=@ -Dencoding.skip=true -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8" />
+      <command value="mvn verify sonar:sonar -Dsonar.projectKey=JaviRSDEV_CarLog -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8" />
+    </option>
   </component>
   <component name="RunManager" selected="JUnit.UserServiceTest">
     <configuration name="UserServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
@@ -235,14 +251,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00006" summary="Añadidor controlador global de excepciones">
-      <option name="closed" value="true" />
-      <created>1773928819057</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1773928819057</updated>
     </task>
     <task id="LOCAL-00007" summary="Añadidos métodos al controlador de excepciones">
       <option name="closed" value="true" />
@@ -628,7 +636,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776938355481</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="Added batery of tests">
+      <option name="closed" value="true" />
+      <created>1776939254702</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1776939254702</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

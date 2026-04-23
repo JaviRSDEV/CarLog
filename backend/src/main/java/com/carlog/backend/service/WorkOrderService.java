@@ -90,7 +90,7 @@ public class WorkOrderService {
             throw new RuntimeException("Error: El usuario no tiene permisos para crear una orden de trabajo");
         }
 
-        if (connectedUser.getWorkshop() == null && connectedUser.getRole() != Role.DIY) {
+        if (connectedUser.getWorkshop() == null) {
             throw new RuntimeException("Error: El mecanico o manager no dispone de un taller asignado");
         }
 

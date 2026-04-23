@@ -17,7 +17,7 @@ public record NewWorkOrderLineResponseDTO(
                 wol.getConcept(),
                 wol.getQuantity(),
                 wol.getPricePerUnit(),
-                wol.getIVA(),
+                wol.getIva(),
                 wol.getDiscount(),
                 wol.getSubTotal()
         );}

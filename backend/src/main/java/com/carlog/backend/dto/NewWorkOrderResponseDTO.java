@@ -26,7 +26,7 @@ public record NewWorkOrderResponseDTO(Long id,
                 line.getConcept(),
                 line.getQuantity(),
                 line.getPricePerUnit(),
-                line.getIVA(),
+                line.getIva(),
                 line.getDiscount(),
                 line.getSubTotal()
         )).toList();

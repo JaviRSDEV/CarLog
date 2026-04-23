@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.aspectj.bridge.IMessage;
 
 public record NewWorkOrderLineDTO(
                                   @NotBlank(message = "El concepto no puede estar vacio")
@@ -31,7 +30,7 @@ public record NewWorkOrderLineDTO(
                     wol.getConcept(),
                     wol.getQuantity(),
                     wol.getPricePerUnit(),
-                    wol.getIVA(),
+                    wol.getIva(),
                     wol.getDiscount()
         );
     }

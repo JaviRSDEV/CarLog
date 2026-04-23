@@ -16,36 +16,40 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    private ResponseEntity<Map<String, Object>> buildResponse(String message, HttpStatus status){
+    private static final String KEY_MESSAGE = "message";
+    private static final String KEY_STATUS = "status";
+    private static final String KEY_TIMESTAMP = "timestamp";
+
+    private ResponseEntity<Map<String, Object>> buildResponse(String message, HttpStatus status) {
         Map<String, Object> response = new HashMap<>();
-        response.put("message", message);
-        response.put("status", status.value());
-        response.put("timestamp", System.currentTimeMillis());
+        response.put(KEY_MESSAGE, message);
+        response.put(KEY_STATUS, status.value());
+        response.put(KEY_TIMESTAMP, System.currentTimeMillis());
         return ResponseEntity.status(status).body(response);
     }
 
     @ExceptionHandler(VehicleNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleVehicleNotFound(VehicleNotFoundException ex){
+    public ResponseEntity<Map<String, Object>> handleVehicleNotFound(VehicleNotFoundException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex){
+    public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(WorkOrderNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleWorkOrderNotFound(WorkOrderNotFoundException ex){
+    public ResponseEntity<Map<String, Object>> handleWorkOrderNotFound(WorkOrderNotFoundException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(WorkshopNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleWorkshopNotFound(WorkshopNotFoundException ex){
+    public ResponseEntity<Map<String, Object>> handleWorkshopNotFound(WorkshopNotFoundException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(WorkOrderLineNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleWorkOrderLineNotFound(WorkOrderLineNotFoundException ex){
+    public ResponseEntity<Map<String, Object>> handleWorkOrderLineNotFound(WorkOrderLineNotFoundException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
@@ -60,12 +64,12 @@ public class GlobalExceptionHandler {
             InvalidRegistrationException.class,
             NoPendingInvitationException.class
     })
-    public ResponseEntity<Map<String, Object>> handleBusinessRulesExceptions(RuntimeException ex){
+    public ResponseEntity<Map<String, Object>> handleBusinessRulesExceptions(RuntimeException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UnauthorizedActionException.class)
-    public ResponseEntity<Map<String, Object>> handleUnauthorizedAction(UnauthorizedActionException ex){
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedAction(UnauthorizedActionException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
@@ -77,40 +81,25 @@ public class GlobalExceptionHandler {
             WorkshopAlreadyExistsException.class,
             UserAlreadyHasWorkshopException.class
     })
-    public ResponseEntity<Map<String, Object>> handleVehicleOccupied(VehicleOcuppiedException ex){
+    public ResponseEntity<Map<String, Object>> handleConflictExceptions(RuntimeException ex) {
         return buildResponse(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentialsException(BadCredentialsException ex){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                Map.of(
-                        "message", "Bad credentials",
-                        "status", 401,
-                        "timestamp", System.currentTimeMillis()
-                )
-        );
+    public ResponseEntity<Map<String, Object>> handleBadCredentialsException(BadCredentialsException ex) {
+        return buildResponse("Bad credentials", HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(RateLimitExceededException.class)
-    public ResponseEntity<Object> handleRateLimitExceededException(RateLimitExceededException ex){
-        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(
-                Map.of(
-                        "message", ex.getMessage(),
-                        "status", 429,
-                        "timestamp", System.currentTimeMillis()
-                )
-        );
+    public ResponseEntity<Map<String, Object>> handleRateLimitExceededException(RateLimitExceededException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.TOO_MANY_REQUESTS);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
-        log.error("Error interno no controlado: {}", ex.getMessage());
-        ex.printStackTrace();
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        log.error("Error interno no controlado: ", ex);
 
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", "Error interno del servidor. Por favor, contacte con soporte técnico.");
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        return buildResponse("Error interno del servidor. Por favor, contacte con soporte técnico.",
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

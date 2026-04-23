@@ -4,7 +4,6 @@ import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.service.UserService;
 import com.carlog.backend.service.WorkshopService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +31,9 @@ public class WorkshopController {
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
-    @GetMapping("/{ID}/employees")
-    public List<NewUserDTO> showEmployees(@PathVariable Long ID, @Parameter(hidden = true) Principal principal){
-        return userService.getEmployeesByWorkshopId(ID, principal.getName());
+    @GetMapping("/{id}/employees")
+    public List<NewUserDTO> showEmployees(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
+        return userService.getEmployeesByWorkshopId(id, principal.getName());
     }
 
     @PreAuthorize("hasAuthority('MANAGER')")

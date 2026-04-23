@@ -21,7 +21,7 @@ public class AuthenticationController {
     private final JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<User> register(@RequestBody RegisterRequest registerRequest) {
         User user = authenticationService.register(registerRequest);
         String jwt = jwtService.generateToken(user);
         boolean remember = registerRequest.getRememberMe() != null && registerRequest.getRememberMe();
@@ -33,7 +33,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticate(@RequestBody AuthenticationRequest authRequest) {
+    public ResponseEntity<User> authenticate(@RequestBody AuthenticationRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
         );
@@ -49,7 +49,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
+    public ResponseEntity<String> logout() {
         ResponseCookie cookie = jwtService.cleanJwtCookie();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())

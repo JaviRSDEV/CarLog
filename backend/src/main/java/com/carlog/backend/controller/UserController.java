@@ -37,15 +37,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.add(user));
     }
 
-    @PutMapping("/{DNI}")
-    public NewUserDTO update(@Valid @RequestBody NewUserDTO userData, @PathVariable String DNI, @Parameter(hidden = true) Principal principal){
-        return userService.edit(userData, DNI, principal.getName());
+    @PutMapping("/{dni}")
+    public NewUserDTO update(@Valid @RequestBody NewUserDTO userData, @PathVariable String dni, @Parameter(hidden = true) Principal principal){
+        return userService.edit(userData, dni, principal.getName());
     }
-
-    /*@DeleteMapping("/{DNI}")
-    public NewUserDTO destroy(@PathVariable String DNI){
-        return userService.delete(DNI);
-    }*/
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
     @PatchMapping("/{dni}/invite")
@@ -53,12 +48,12 @@ public class UserController {
         userService.inviteToWorkshop(principal.getName(), dni,  newRole);
     }
 
-    @PatchMapping("/{dni}/accept")
+    @PatchMapping("/accept")
     public NewUserDTO accept(@Parameter(hidden = true) Principal principal){
         return userService.acceptInvitation(principal.getName());
     }
 
-    @PatchMapping("/{dni}/reject")
+    @PatchMapping("/reject")
     public NewUserDTO reject(@PathVariable String dni, @Parameter(hidden = true) Principal principal){
         userService.rejectInvitation(principal.getName());
         return userService.getByDni(dni);

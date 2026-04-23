@@ -1,7 +1,6 @@
 package com.carlog.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,7 +32,7 @@ public class WorkOrderLine {
 
     @Column(nullable = false)
     @Builder.Default
-    private Double IVA = 0.0;
+    private Double iva = 0.0;
 
     @Column(nullable = false)
     @Builder.Default
@@ -49,9 +48,9 @@ public class WorkOrderLine {
     @PreUpdate
     public void calculateSubTotal(){
         if(this.quantity != null && this.pricePerUnit != null){
-            double priceWithoutIVA = this.quantity * this.pricePerUnit;
-            double IVAUnit = (priceWithoutIVA * this.IVA)/100;
-            double subTotalWithoutDiscount = priceWithoutIVA + IVAUnit;
+            double priceWithoutIva = this.quantity * this.pricePerUnit;
+            double ivaUnit = (priceWithoutIva * this.iva)/100;
+            double subTotalWithoutDiscount = priceWithoutIva + ivaUnit;
             double discountAmount = (subTotalWithoutDiscount * this.discount)/100;
 
             this.subTotal = subTotalWithoutDiscount - discountAmount;

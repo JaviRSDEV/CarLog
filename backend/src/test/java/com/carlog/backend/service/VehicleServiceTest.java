@@ -35,7 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class VehicleServiceTest {
+class VehicleServiceTest {
 
     @Mock private UserJpaRepository userJpaRepository;
     @Mock private VehicleJpaRepository vehicleJpaRepository;

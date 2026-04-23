@@ -71,8 +71,8 @@ public class WorkOrder {
 
         double subTotalLine = line.getQuantity() * line.getPricePerUnit();
 
-        double IVAPercent = (subTotalLine * line.getIVA())/100;
-        double subTotalWithoutDiscount = subTotalLine + IVAPercent;
+        double ivaPercent = (subTotalLine * line.getIva())/100;
+        double subTotalWithoutDiscount = subTotalLine + ivaPercent;
 
         double discountPercent = (subTotalWithoutDiscount * line.getDiscount())/100;
         double discountAmount = subTotalWithoutDiscount - discountPercent;

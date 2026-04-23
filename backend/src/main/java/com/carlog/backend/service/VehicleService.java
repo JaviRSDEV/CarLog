@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -89,42 +91,17 @@ public class VehicleService {
                 .map(NewVehicleDTO::of);
     }
 
-    public NewVehicleDTO add(NewVehicleDTO dto, String userEmail){
-        User connectedUser = userJpaRepository.findByEmail(userEmail).orElseThrow(() -> new UserNotFoundException(userEmail));
-        User owner;
-        Workshop currentWorkshop;
+    public NewVehicleDTO add(NewVehicleDTO dto, String userEmail) {
+        User connectedUser = userJpaRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException(userEmail));
 
-        List<String> finalImageRoutes = new ArrayList<>();
+        validateVehicleUniqueness(dto.plate());
 
-        if(dto.images() != null && !dto.images().isEmpty()){
-            for(String img : dto.images()){
-                if(img != null && img.startsWith("data:image")){
-                    String savedRoute = uploadToCloudinary(img);
-                    if(savedRoute != null) finalImageRoutes.add(savedRoute);
-                }
-            }
-        }
+        User owner = determineOwner(connectedUser, dto.ownerId());
+        Workshop currentWorkshop = determineWorkshop(connectedUser);
+        List<String> finalImageRoutes = processImages(dto.images());
 
-        if(connectedUser.getRole().isWorker()){
-            if(dto.ownerId() != null && !dto.ownerId().isBlank()){
-                owner = userJpaRepository.findByDni(dto.ownerId()).orElseThrow(() -> new UserNotFoundException(dto.ownerId()));
-            }else{
-                owner = connectedUser;
-            }
-
-            currentWorkshop = connectedUser.getWorkshop();
-            if(currentWorkshop == null && connectedUser.getRole() != Role.DIY){
-                throw new WorkshopNotAssignedException("Error: El mecánico o manager no dispone de taller asignado.");
-            }
-        }else{
-            owner = connectedUser;
-            currentWorkshop = null;
-        }
-
-        if(vehicleJpaRepository.findByPlate(dto.plate()).isPresent())
-            throw new VehicleAlreadyExistsException("Ya existe un vehículo con la matrícula " + dto.plate());
-
-        var newVehicle = Vehicle.builder()
+        Vehicle newVehicle = Vehicle.builder()
                 .plate(dto.plate())
                 .brand(dto.brand())
                 .model(dto.model())
@@ -140,6 +117,43 @@ public class VehicleService {
                 .build();
 
         return NewVehicleDTO.of(vehicleJpaRepository.save(newVehicle));
+    }
+
+    private void validateVehicleUniqueness(String plate) {
+        if (vehicleJpaRepository.findByPlate(plate).isPresent()) {
+            throw new VehicleAlreadyExistsException("Ya existe un vehículo con la matrícula " + plate);
+        }
+    }
+
+    private List<String> processImages(List<String> images) {
+        if (images == null || images.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return images.stream()
+                .filter(img -> img != null && img.startsWith("data:image"))
+                .map(this::uploadToCloudinary)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private User determineOwner(User connectedUser, String ownerId) {
+        if (connectedUser.getRole().isWorker() && ownerId != null && !ownerId.isBlank()) {
+            return userJpaRepository.findByDni(ownerId)
+                    .orElseThrow(() -> new UserNotFoundException(ownerId));
+        }
+        return connectedUser;
+    }
+
+    private Workshop determineWorkshop(User connectedUser) {
+        if (!connectedUser.getRole().isWorker()) {
+            return null;
+        }
+
+        Workshop workshop = connectedUser.getWorkshop();
+        if (workshop == null) {
+            throw new WorkshopNotAssignedException("Error: El mecánico o manager no dispone de taller asignado.");
+        }
+        return workshop;
     }
 
     private String uploadToCloudinary(String base64Image) {
@@ -172,59 +186,77 @@ public class VehicleService {
         }
     }
 
-    public NewVehicleDTO edit(NewVehicleDTO dto, String plate, String email){
+    public NewVehicleDTO edit(NewVehicleDTO dto, String plate, String email) {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         return vehicleJpaRepository.findByPlate(plate).map(vehicle -> {
+            validateEditAccess(vehicle, currentUser);
+            validateNewPlate(vehicle, dto.plate());
 
-            if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
-                throw new UnauthorizedActionException("Acceso denegado: No tienes permiso para editar el vehículo");
-            }
+            updateVehicleImages(vehicle, dto.images());
 
-            if(!dto.plate().equals(vehicle.getPlate()) && vehicleJpaRepository.findByPlate(dto.plate()).isPresent()){
-                throw new VehicleAlreadyExistsException("La matrícula " + dto.plate() + " ya está en uso");
-            }
-
-            List<String> oldImages = vehicle.getImages() != null ? new ArrayList<>(vehicle.getImages()) : new ArrayList<>();
-            List<String> updatedImagesRoutes = new ArrayList<>();
-
-            if(dto.images() != null && !dto.images().isEmpty()) {
-                for(String img : dto.images()){
-                    if(img.startsWith("http://") || img.startsWith("https://")){
-                        updatedImagesRoutes.add(img);
-                    }
-                    else if(img.startsWith("data:image")){
-                        String savedRoute = uploadToCloudinary(img);
-                        if(savedRoute != null) updatedImagesRoutes.add(savedRoute);
-                    }
-                }
-            }
-
-            for(String oldImageUrl : oldImages){
-                if(!updatedImagesRoutes.contains(oldImageUrl)){
-                    deleteFromCloudinary(oldImageUrl);
-                }
-            }
-
-            vehicle.setPlate(dto.plate());
-            vehicle.setBrand(dto.brand());
-            vehicle.setModel(dto.model());
-            vehicle.setKilometers(dto.kilometers());
-            vehicle.setEngine(dto.engine());
-            vehicle.setHorsePower(dto.horsePower());
-            vehicle.setTorque(dto.torque());
-            vehicle.setTires(dto.tires());
-            vehicle.setImages(updatedImagesRoutes);
-            vehicle.setLastMaintenance(dto.lastMaintenance());
-
-            if(dto.ownerId() != null){
-                User u = userJpaRepository.findByDni(dto.ownerId()).orElseThrow(() -> new UserNotFoundException(dto.ownerId()));
-                vehicle.setOwner(u);
-            }
+            mapDtoToEntity(vehicle, dto);
+            updateOwnerIfPresent(vehicle, dto.ownerId());
 
             return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
         }).orElseThrow(() -> new VehicleNotFoundException(plate));
+    }
+
+    private void validateEditAccess(Vehicle vehicle, User currentUser) {
+        if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
+            throw new UnauthorizedActionException("Acceso denegado: No tienes permiso para editar el vehículo");
+        }
+    }
+
+    private void validateNewPlate(Vehicle vehicle, String newPlate) {
+        if (!newPlate.equals(vehicle.getPlate()) && vehicleJpaRepository.findByPlate(newPlate).isPresent()) {
+            throw new VehicleAlreadyExistsException("La matrícula " + newPlate + " ya está en uso");
+        }
+    }
+
+    private void updateVehicleImages(Vehicle vehicle, List<String> newImages) {
+        List<String> oldImages = vehicle.getImages() != null ? new ArrayList<>(vehicle.getImages()) : new ArrayList<>();
+
+        List<String> inputImages = (newImages == null) ? List.of() : newImages;
+
+        List<String> updatedImagesRoutes = inputImages.stream()
+                .map(this::processImageSource)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        oldImages.stream()
+                .filter(oldUrl -> !updatedImagesRoutes.contains(oldUrl))
+                .forEach(this::deleteFromCloudinary);
+
+        vehicle.setImages(updatedImagesRoutes);
+    }
+
+    private String processImageSource(String img) {
+        if (img != null && img.startsWith("data:image")) {
+            return uploadToCloudinary(img);
+        }
+        return img;
+    }
+
+    private void mapDtoToEntity(Vehicle vehicle, NewVehicleDTO dto) {
+        vehicle.setPlate(dto.plate());
+        vehicle.setBrand(dto.brand());
+        vehicle.setModel(dto.model());
+        vehicle.setKilometers(dto.kilometers());
+        vehicle.setEngine(dto.engine());
+        vehicle.setHorsePower(dto.horsePower());
+        vehicle.setTorque(dto.torque());
+        vehicle.setTires(dto.tires());
+        vehicle.setLastMaintenance(dto.lastMaintenance());
+    }
+
+    private void updateOwnerIfPresent(Vehicle vehicle, String ownerId) {
+        if (ownerId != null) {
+            User newOwner = userJpaRepository.findByDni(ownerId)
+                    .orElseThrow(() -> new UserNotFoundException(ownerId));
+            vehicle.setOwner(newOwner);
+        }
     }
 
     public NewVehicleDTO requestEntry(String plate, Long workshopId, String email) {

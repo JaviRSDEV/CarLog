@@ -24,6 +24,7 @@ public class WorkshopService {
 
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private static final String ERROR_MSG = "Taller no encontrado";
 
     private final Cloudinary cloudinary;
 
@@ -34,7 +35,7 @@ public class WorkshopService {
 
     public NewWorkshopDTO getWorkshopById(Long id, String email){
         Workshop workshop = workshopJpaRepository.findById(id)
-                .orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
+                .orElseThrow(() -> new WorkshopNotFoundException(ERROR_MSG));
 
         verifyWorkshopReadAccess(workshop, email);
         return NewWorkshopDTO.of(workshop);
@@ -79,10 +80,8 @@ public class WorkshopService {
         return workshopJpaRepository.findById(id).map(workshop -> {
             verifyWorkshopManagerAccess(workshop, email);
 
-            if (!workshop.getWorkshopName().equalsIgnoreCase(dto.workshopName())) {
-                if (workshopJpaRepository.findByWorkshopName(dto.workshopName()).isPresent()) {
-                    throw new WorkshopAlreadyExistsException("Error: ya existe otro taller registrado con ese nombre");
-                }
+            if (dto.workshopName() != null && !workshop.getWorkshopName().equalsIgnoreCase(dto.workshopName()) && workshopJpaRepository.findByWorkshopName(dto.workshopName()).isPresent()) {
+                throw new WorkshopAlreadyExistsException("Error: ya existe otro taller registrado con ese nombre");
             }
 
             if (file != null && !file.isEmpty()) {
@@ -100,13 +99,13 @@ public class WorkshopService {
             workshop.setWorkshopEmail(dto.workshopEmail());
 
             return NewWorkshopDTO.of(workshopJpaRepository.save(workshop));
-        }).orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
+        }).orElseThrow(() -> new WorkshopNotFoundException(ERROR_MSG));
     }
 
     @Transactional
     public NewWorkshopDTO delete(Long id, String email) {
         Workshop workshop = workshopJpaRepository.findById(id)
-                .orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
+                .orElseThrow(() -> new WorkshopNotFoundException(ERROR_MSG));
 
         verifyWorkshopManagerAccess(workshop, email);
         String iconUrl = workshop.getIcon();

@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added application.properties for tests">
-      <change beforePath="$PROJECT_DIR$/backend/src/test/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/resources/application.properties" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added variables to application.properties for tests">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -255,14 +255,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00014" summary="Añadida la logica de entrada y salida de vehiculos en el taller, se refactoriza el metodo original y se añade solicitud al cliente para ello">
-      <option name="closed" value="true" />
-      <created>1774522455247</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1774522455247</updated>
     </task>
     <task id="LOCAL-00015" summary="Cambios menores en el DTO para devolver el nombre del taller solicitante del registro del vehiculo, a su vez bloqueada la eliminación y edición de vehículos a personas ajenas al mismo">
       <option name="closed" value="true" />
@@ -648,7 +640,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777015915190</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="Added variables to application.properties for tests">
+      <option name="closed" value="true" />
+      <created>1777016355951</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1777016355951</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -669,7 +669,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added documentation in spanish and english" />
     <MESSAGE value="Fixed: Critical vulnerability" />
     <MESSAGE value="Fixed: Critical vulnerability and prepared application.properties for production" />
     <MESSAGE value="Updated gitignore" />
@@ -694,7 +693,8 @@
     <MESSAGE value="Tried to make sonar in ci works" />
     <MESSAGE value="Fixed yaml from sonarqube" />
     <MESSAGE value="Added application.properties for tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added application.properties for tests" />
+    <MESSAGE value="Added variables to application.properties for tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added variables to application.properties for tests" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

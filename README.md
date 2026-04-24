@@ -8,6 +8,13 @@
 ![WebSocket](https://img.shields.io/badge/RealTime-WebSocket_STOMP-010101?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
+## Estado del Proyecto
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JaviRSDEV_CarLog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JaviRSDEV_CarLog)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JaviRSDEV_CarLog&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=JaviRSDEV_CarLog)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JaviRSDEV_CarLog&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=JaviRSDEV_CarLog)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JaviRSDEV_CarLog&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=JaviRSDEV_CarLog)
+
 ---
 
 ## Descripción

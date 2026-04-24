@@ -54,9 +54,8 @@ public class UserController {
     }
 
     @PatchMapping("/reject")
-    public NewUserDTO reject(@PathVariable String dni, @Parameter(hidden = true) Principal principal){
-        userService.rejectInvitation(principal.getName());
-        return userService.getByDni(dni);
+    public NewUserDTO reject(@Parameter(hidden = true) Principal principal){
+        return userService.rejectInvitation(principal.getName());
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")

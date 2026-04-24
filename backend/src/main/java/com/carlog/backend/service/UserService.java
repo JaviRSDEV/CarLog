@@ -180,12 +180,14 @@ public class UserService {
         return NewUserDTO.of(savedUser);
     }
 
-    public void rejectInvitation(String email){
+    public NewUserDTO rejectInvitation(String email){
         User user = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
         user.setPendingWorkshop(null);
         user.setPendingRole(null);
         userJpaRepository.save(user);
+
+        return NewUserDTO.of(user);
     }
 
     public void fireEmployee(String managerEmail, String employeeDni){

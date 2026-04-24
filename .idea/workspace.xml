@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Tried to make sonar in ci works" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Fixed yaml from sonarqube">
+      <change afterPath="$PROJECT_DIR$/backend/src/test/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -253,14 +256,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00012" summary="Actualizado el gitnignore">
-      <option name="closed" value="true" />
-      <created>1774455778008</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1774455778008</updated>
     </task>
     <task id="LOCAL-00013" summary="Cambios menores">
       <option name="closed" value="true" />
@@ -646,7 +641,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777015071739</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="Fixed yaml from sonarqube">
+      <option name="closed" value="true" />
+      <created>1777015509952</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1777015509952</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -667,7 +670,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added icon implementation in workshops" />
     <MESSAGE value="Deleted unused method and import" />
     <MESSAGE value="Added documentation in spanish and english" />
     <MESSAGE value="Fixed: Critical vulnerability" />
@@ -692,7 +694,8 @@
     <MESSAGE value="Fixed errors in ci file" />
     <MESSAGE value="Added mysql service for sonar tests" />
     <MESSAGE value="Tried to make sonar in ci works" />
-    <option name="LAST_COMMIT_MESSAGE" value="Tried to make sonar in ci works" />
+    <MESSAGE value="Fixed yaml from sonarqube" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed yaml from sonarqube" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

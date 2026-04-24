@@ -16,7 +16,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_DATABASE: carlog
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          # ❌ QUITA LA CLAVE DE AQUÍ. MySQL no sabe qué hacer con un JWT.
         ports:
           - 3306:3306
         options: >-
@@ -50,5 +50,6 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/carlog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: rootpassword
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         working-directory: backend
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=JaviRSDEV_CarLog

@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added mysql service for sonar tests">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Tried to make sonar in ci works" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -256,14 +253,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00011" summary="Añadida la funcionalidad de eliminar imagenes en caso de borrarlas en el front, evitando así la basura residual">
-      <option name="closed" value="true" />
-      <created>1774455630672</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1774455630672</updated>
     </task>
     <task id="LOCAL-00012" summary="Actualizado el gitnignore">
       <option name="closed" value="true" />
@@ -649,7 +638,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776944016617</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="Tried to make sonar in ci works">
+      <option name="closed" value="true" />
+      <created>1777015071739</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1777015071739</updated>
+    </task>
+    <option name="localTasksCounter" value="61" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -670,7 +667,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added pendingWorkshopName to NewUserDTO" />
     <MESSAGE value="Added icon implementation in workshops" />
     <MESSAGE value="Deleted unused method and import" />
     <MESSAGE value="Added documentation in spanish and english" />
@@ -695,7 +691,8 @@
     <MESSAGE value="Added directory for ci/cd pipeline" />
     <MESSAGE value="Fixed errors in ci file" />
     <MESSAGE value="Added mysql service for sonar tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added mysql service for sonar tests" />
+    <MESSAGE value="Tried to make sonar in ci works" />
+    <option name="LAST_COMMIT_MESSAGE" value="Tried to make sonar in ci works" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

@@ -16,6 +16,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_DATABASE: carlog
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         ports:
           - 3306:3306
         options: >-

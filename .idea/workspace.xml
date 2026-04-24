@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added directory for ci/cd pipeline" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added mysql service for sonar tests">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -86,6 +89,7 @@
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -111,7 +115,7 @@
       <command value="mvn verify sonar:sonar -Dsonar.projectKey=JaviRSDEV_CarLog -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8" />
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.UserServiceTest">
+  <component name="RunManager" selected="Spring Boot.BackendApplication">
     <configuration name="UserServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">
@@ -191,7 +195,13 @@
       </method>
     </configuration>
     <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="envFilePaths">
+        <option value="$PROJECT_DIR$/backend/.env" />
+      </option>
       <module name="backend" />
+      <selectedOptions>
+        <option name="environmentVariables" />
+      </selectedOptions>
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.carlog.backend.BackendApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -246,22 +256,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00009" summary="Añadida gestión de imagenes con nombres de archivo dinamicos en funcion de la matricula del vehiculo al que pertenecen">
-      <option name="closed" value="true" />
-      <created>1774343158160</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1774343158160</updated>
-    </task>
-    <task id="LOCAL-00010" summary="Añadida funcionalidad de añadir varias imagenes, crearlas en la carpeta upload y poner un nombre dinamico">
-      <option name="closed" value="true" />
-      <created>1774454219553</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1774454219553</updated>
     </task>
     <task id="LOCAL-00011" summary="Añadida la funcionalidad de eliminar imagenes en caso de borrarlas en el front, evitando así la basura residual">
       <option name="closed" value="true" />
@@ -639,7 +633,23 @@
       <option name="project" value="LOCAL" />
       <updated>1776943405995</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <task id="LOCAL-00058" summary="Fixed errors in ci file">
+      <option name="closed" value="true" />
+      <created>1776943680476</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1776943680476</updated>
+    </task>
+    <task id="LOCAL-00059" summary="Added mysql service for sonar tests">
+      <option name="closed" value="true" />
+      <created>1776944016617</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1776944016617</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -660,8 +670,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added search filters by brand and model" />
-    <MESSAGE value="Refactored the cookie management, now the cookies are httpOnly and are managed by the backend" />
     <MESSAGE value="Added pendingWorkshopName to NewUserDTO" />
     <MESSAGE value="Added icon implementation in workshops" />
     <MESSAGE value="Deleted unused method and import" />
@@ -685,7 +693,9 @@
     <MESSAGE value="Added batery of tests" />
     <MESSAGE value="Minor changes in pom" />
     <MESSAGE value="Added directory for ci/cd pipeline" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added directory for ci/cd pipeline" />
+    <MESSAGE value="Fixed errors in ci file" />
+    <MESSAGE value="Added mysql service for sonar tests" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added mysql service for sonar tests" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added variables to application.properties for tests">
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Changed ilogical code in UserController">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkshopServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkshopServiceTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,6 +71,8 @@
     "JUnit.VehicleServiceTest.getByWorkshop_UserDoesNotBelongToWorkshop_ThrowsUnauthorized.executor": "Run",
     "JUnit.VehicleServiceTest.getMyVehicles_AsClient_ReturnsOwnedVehicles.executor": "Run",
     "JUnit.VehicleServiceTest.requestEntry_MechanicInWorkshop_CreatesPendingRequest.executor": "Run",
+    "JUnit.WorkOrderServiceTest.executor": "Run",
+    "JUnit.WorkshopServiceTest.executor": "Run",
     "Maven.backend [clean].executor": "Run",
     "Maven.backend [verify,sonar:sonar...].executor": "Run",
     "Maven.backend [verify...].executor": "Run",
@@ -114,7 +118,7 @@
       <command value="mvn verify sonar:sonar -Dsonar.projectKey=JaviRSDEV_CarLog -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8" />
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.BackendApplication">
+  <component name="RunManager" selected="JUnit.WorkshopServiceTest">
     <configuration name="UserServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">
@@ -145,22 +149,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="VehicleServiceTest.addVehicleWhenUserIsMechanic" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="backend" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.carlog.backend.service.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.carlog.backend.service" />
-      <option name="MAIN_CLASS_NAME" value="com.carlog.backend.service.VehicleServiceTest" />
-      <option name="METHOD_NAME" value="addVehicleWhenUserIsMechanic" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="VehicleServiceTest.addVehicle_WorkerWithoutWorkshop_ThrowsException" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">
@@ -177,7 +165,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="VehicleServiceTest.getByPlate_UserIsOwner_ReturnsVehicle" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="WorkOrderServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">
         <pattern>
@@ -186,9 +174,23 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.carlog.backend.service" />
-      <option name="MAIN_CLASS_NAME" value="com.carlog.backend.service.VehicleServiceTest" />
-      <option name="METHOD_NAME" value="getByPlate_UserIsOwner_ReturnsVehicle" />
-      <option name="TEST_OBJECT" value="method" />
+      <option name="MAIN_CLASS_NAME" value="com.carlog.backend.service.WorkOrderServiceTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WorkshopServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.carlog.backend.service.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.carlog.backend.service" />
+      <option name="MAIN_CLASS_NAME" value="com.carlog.backend.service.WorkshopServiceTest" />
+      <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -207,20 +209,20 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="JUnit.WorkOrderServiceTest" />
+      <item itemvalue="JUnit.WorkshopServiceTest" />
       <item itemvalue="JUnit.UserServiceTest" />
       <item itemvalue="JUnit.VehicleServiceTest" />
-      <item itemvalue="JUnit.VehicleServiceTest.addVehicleWhenUserIsMechanic" />
       <item itemvalue="JUnit.VehicleServiceTest.addVehicle_WorkerWithoutWorkshop_ThrowsException" />
-      <item itemvalue="JUnit.VehicleServiceTest.getByPlate_UserIsOwner_ReturnsVehicle" />
       <item itemvalue="Spring Boot.BackendApplication" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.UserServiceTest" />
+        <item itemvalue="JUnit.WorkshopServiceTest" />
+        <item itemvalue="JUnit.WorkOrderServiceTest" />
         <item itemvalue="JUnit.VehicleServiceTest" />
+        <item itemvalue="JUnit.UserServiceTest" />
         <item itemvalue="JUnit.VehicleServiceTest.addVehicle_WorkerWithoutWorkshop_ThrowsException" />
-        <item itemvalue="JUnit.VehicleServiceTest.getByPlate_UserIsOwner_ReturnsVehicle" />
-        <item itemvalue="JUnit.VehicleServiceTest.addVehicleWhenUserIsMechanic" />
       </list>
     </recent_temporary>
   </component>
@@ -255,22 +257,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00015" summary="Cambios menores en el DTO para devolver el nombre del taller solicitante del registro del vehiculo, a su vez bloqueada la eliminación y edición de vehículos a personas ajenas al mismo">
-      <option name="closed" value="true" />
-      <created>1774600336818</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1774600336818</updated>
-    </task>
-    <task id="LOCAL-00016" summary="Modificados los metodos de las workOrder para devolver el dto y no el objeto, a su vez en el dto devolvemos el vehiculo como objeto en vez de la matricula">
-      <option name="closed" value="true" />
-      <created>1774612634018</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1774612634018</updated>
     </task>
     <task id="LOCAL-00017" summary="Ligera refactorizacion en el controlador y en el dto de respuesta de las workOrder">
       <option name="closed" value="true" />
@@ -648,7 +634,23 @@
       <option name="project" value="LOCAL" />
       <updated>1777016355951</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="Disabled default springboot test">
+      <option name="closed" value="true" />
+      <created>1777017182638</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1777017182638</updated>
+    </task>
+    <task id="LOCAL-00065" summary="Changed ilogical code in UserController">
+      <option name="closed" value="true" />
+      <created>1777017848105</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1777017848105</updated>
+    </task>
+    <option name="localTasksCounter" value="66" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -669,8 +671,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed: Critical vulnerability" />
-    <MESSAGE value="Fixed: Critical vulnerability and prepared application.properties for production" />
     <MESSAGE value="Updated gitignore" />
     <MESSAGE value="Added security updates" />
     <MESSAGE value="Fixed: Multiple IDOR Vulnerabilities" />
@@ -694,7 +694,9 @@
     <MESSAGE value="Fixed yaml from sonarqube" />
     <MESSAGE value="Added application.properties for tests" />
     <MESSAGE value="Added variables to application.properties for tests" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added variables to application.properties for tests" />
+    <MESSAGE value="Disabled default springboot test" />
+    <MESSAGE value="Changed ilogical code in UserController" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed ilogical code in UserController" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

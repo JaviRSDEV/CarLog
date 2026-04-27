@@ -90,7 +90,8 @@ Cliente (Angular / Postman)
 │  AuthenticationController           │
 │  VehicleController                  │
 │  WorkOrderController                │
-│  WorkshopController                 │
+│  WorkshopController                 |
+│  UserController                     |
 └──────────────┬──────────────────────┘
                │
                ▼
@@ -107,7 +108,8 @@ Cliente (Angular / Postman)
 │  UserJpaRepository                  │
 │  VehicleJpaRepository               │
 │  WorkOrderJpaRepository             │
-│  WorkshopJpaRepository              │
+│  WorkshopJpaRepository              |
+│  WorkOrderLineJpaRepository         |
 └──────────────┬──────────────────────┘
                │
                ▼
@@ -215,7 +217,6 @@ El enum `Role` define cinco roles:
 | `CO_MANAGER` | Co-administrador. Mismos permisos que MANAGER excepto crear/eliminar talleres |
 | `MECHANIC` | Mecánico. Puede gestionar órdenes y vehículos de su taller |
 | `CLIENT` | Cliente. Gestiona sus propios vehículos y consulta su historial |
-| `DIY` | Entusiasta. Puede crear vehículos y órdenes propias sin taller asignado |
 
 **Regla de registro**: Al registrarse, si se solicita `CO_MANAGER` o `MECHANIC`, el sistema asigna `CLIENT` automáticamente. Solo un `MANAGER` puede promover a esos roles mediante invitación.
 
@@ -425,7 +426,7 @@ Las siguientes operaciones se gestionan a través de `WorkshopController` y `Use
 
 ## Notificaciones en Tiempo Real
 
-**Endpoint STOMP**: `ws://host/ws-carlog` (con SockJS fallback)
+**Endpoint STOMP**: `ws://host/ws-carlog`
 
 **Prefijo de aplicación**: `/app`  
 **Broker de mensajes**: `/topic`
@@ -556,6 +557,8 @@ backend/
 │   │   ├── VehicleController.java
 │   │   ├── WorkOrderController.java
 │   │   └── WorkshopController.java
+|   |   └── UserController.java
+|   |   └── RoleConverter.java
 │   ├── dto/                     # Records de entrada/salida
 │   ├── error/                   # Excepciones y GlobalExceptionHandler
 │   ├── model/                   # Entidades JPA

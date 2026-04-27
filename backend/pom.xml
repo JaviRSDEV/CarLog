@@ -23,7 +23,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<encoding>UTF-8</encoding>
+
+		<sonar.organization>javirsdev</sonar.organization>
+		<sonar.projectKey>JaviRSDEV_CarLog</sonar.projectKey>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
+
 	<repositories>
 		<repository>
 			<id>spring-milestones</id>
@@ -62,6 +67,7 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
@@ -83,6 +89,7 @@
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -113,18 +120,17 @@
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>3.0.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 
 	<build>
@@ -151,11 +157,37 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.13</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>5.6.0.6792</version>
+			</plugin>
+
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-
 		</plugins>
+
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -163,6 +195,4 @@
 			</resource>
 		</resources>
 	</build>
-
-
 </project>

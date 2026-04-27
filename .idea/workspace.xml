@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Changed ilogical code in UserController">
-      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/controller/UserControllerTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/controller/VehicleControllerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added tests for userController and vehicleController">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,7 +125,7 @@
       <command value="mvn clean install -U" />
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.VehicleControllerTest">
+  <component name="RunManager" selected="Spring Boot.BackendApplication">
     <configuration name="UserControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">
@@ -268,14 +264,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00017" summary="Ligera refactorizacion en el controlador y en el dto de respuesta de las workOrder">
-      <option name="closed" value="true" />
-      <created>1775462516753</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1775462516753</updated>
     </task>
     <task id="LOCAL-00018" summary="Añadidos metodos para buscar workorders por su id">
       <option name="closed" value="true" />
@@ -661,7 +649,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777017848105</updated>
     </task>
-    <option name="localTasksCounter" value="66" />
+    <task id="LOCAL-00066" summary="Added tests for userController and vehicleController">
+      <option name="closed" value="true" />
+      <created>1777307013214</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1777307013214</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -682,7 +678,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Updated gitignore" />
     <MESSAGE value="Added security updates" />
     <MESSAGE value="Fixed: Multiple IDOR Vulnerabilities" />
     <MESSAGE value="Added RateLimiting to the login and Register endpoints" />
@@ -707,7 +702,8 @@
     <MESSAGE value="Added variables to application.properties for tests" />
     <MESSAGE value="Disabled default springboot test" />
     <MESSAGE value="Changed ilogical code in UserController" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changed ilogical code in UserController" />
+    <MESSAGE value="Added tests for userController and vehicleController" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added tests for userController and vehicleController" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

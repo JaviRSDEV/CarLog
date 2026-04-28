@@ -22,6 +22,7 @@ public class WorkOrderService {
     private final VehicleJpaRepository vehicleJpaRepository;
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final WorkOrderLineJpaRepository workOrderLineJpaRepository;
+    private final MailService mailService;
 
     public List<NewWorkOrderResponseDTO> getByEmployee(String dni, String email) {
         User currentUser = userJpaRepository.findByEmail(email)
@@ -160,8 +161,19 @@ public class WorkOrderService {
             order.setMechanicNotes(dto.mechanicNotes());
 
         if (dto.status() != null) {
+            boolean isNewlyCompleted = order.getStatus() != WorkOrderStatus.COMPLETED
+                    && dto.status() == WorkOrderStatus.COMPLETED;
+
             order.setStatus(dto.status());
             order.setClosedAt(dto.status() == WorkOrderStatus.COMPLETED ? java.time.LocalDate.now() : null);
+
+            if (isNewlyCompleted && order.getVehicle() != null && order.getVehicle().getOwner() != null) {
+                mailService.sendWorkOrderCompletedEmail(
+                        order.getVehicle().getOwner().getEmail(),
+                        order.getVehicle().getOwner().getName(),
+                        order.getVehicle().getPlate()
+                );
+            }
         }
 
         return NewWorkOrderResponseDTO.of(workOrderJpaRepository.save(order));

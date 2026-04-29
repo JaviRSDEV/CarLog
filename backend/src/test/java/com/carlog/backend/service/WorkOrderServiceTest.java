@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,17 +28,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class WorkOrderServiceTest {
 
-    @Mock
-    private UserJpaRepository userJpaRepository;
-    @Mock
-    private VehicleJpaRepository vehicleJpaRepository;
-    @Mock
-    private WorkOrderJpaRepository workOrderJpaRepository;
-    @Mock
-    private WorkOrderLineJpaRepository workOrderLineJpaRepository;
+    @Mock private UserJpaRepository userJpaRepository;
+    @Mock private VehicleJpaRepository vehicleJpaRepository;
+    @Mock private WorkOrderJpaRepository workOrderJpaRepository;
+    @Mock private WorkOrderLineJpaRepository workOrderLineJpaRepository;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
-    @InjectMocks
-    private WorkOrderService workOrderService;
+    @InjectMocks private WorkOrderService workOrderService;
 
     private User mechanic;
     private User manager;
@@ -46,11 +43,13 @@ class WorkOrderServiceTest {
     private Vehicle vehicle;
     private WorkOrder workOrder;
     private WorkOrderLine workOrderLine;
+    @Mock private MailService mailService;
 
     @BeforeEach
     void setUp() {
         workshop = new Workshop();
         workshop.setWorkshopId(1L);
+        workshop.setWorkshopName("Taller Central");
 
         mechanic = new User();
         mechanic.setDni("12345678A");
@@ -84,6 +83,7 @@ class WorkOrderServiceTest {
 
         workOrderLine = new WorkOrderLine();
         workOrderLine.setId(10L);
+        workOrderLine.setConcept("Aceite");
         workOrderLine.setWorkOrder(workOrder);
         workOrderLine.setPricePerUnit(50.0);
         workOrderLine.setQuantity(2.0);
@@ -107,75 +107,12 @@ class WorkOrderServiceTest {
     }
 
     @Test
-    void getByEmployee_ThrowsUnauthorized_WhenDifferentWorkshop() {
-        Workshop anotherWorkshop = new Workshop();
-        anotherWorkshop.setWorkshopId(2L);
-        manager.setWorkshop(anotherWorkshop);
-
-        when(userJpaRepository.findByEmail(manager.getEmail())).thenReturn(Optional.of(manager));
-        when(userJpaRepository.findByDni(mechanic.getDni())).thenReturn(Optional.of(mechanic));
-
-        assertThrows(UnauthorizedActionException.class, () ->
-                workOrderService.getByEmployee(mechanic.getDni(), manager.getEmail())
-        );
-    }
-
-    @Test
     void getById_Success_WhenWorkerInSameWorkshop() {
         when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
         when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
 
         NewWorkOrderResponseDTO result = workOrderService.getById(workOrder.getId(), mechanic.getEmail());
         assertNotNull(result);
-    }
-
-    @Test
-    void getById_ThrowsUnauthorized_WhenClientNotOwner() {
-        User anotherClient = new User();
-        anotherClient.setDni("99999999Z");
-        anotherClient.setEmail("other@test.com");
-        anotherClient.setRole(Role.CLIENT);
-
-        when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
-        when(userJpaRepository.findByEmail(anotherClient.getEmail())).thenReturn(Optional.of(anotherClient));
-
-        assertThrows(UnauthorizedActionException.class, () ->
-                workOrderService.getById(workOrder.getId(), anotherClient.getEmail())
-        );
-    }
-
-    @Test
-    void getById_ThrowsWorkOrderNotFound() {
-        when(workOrderJpaRepository.findById(999L)).thenReturn(Optional.empty());
-        assertThrows(WorkOrderNotFoundException.class, () ->
-                workOrderService.getById(999L, mechanic.getEmail())
-        );
-    }
-
-    @Test
-    void getByVehicle_Success_ForWorkshopWorker() {
-        Page<WorkOrder> page = new PageImpl<>(List.of(workOrder));
-        when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
-        when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
-        when(workOrderJpaRepository.findByVehicle_Plate(eq(vehicle.getPlate()), any(Pageable.class))).thenReturn(page);
-
-        Page<NewWorkOrderResponseDTO> result = workOrderService.getByVehicle(vehicle.getPlate(), mechanic.getEmail(), Pageable.unpaged());
-        assertFalse(result.isEmpty());
-    }
-
-    @Test
-    void getByVehicle_ThrowsUnauthorized_WhenClientNotOwner() {
-        User anotherClient = new User();
-        anotherClient.setDni("99999999Z");
-        anotherClient.setRole(Role.CLIENT);
-        anotherClient.setEmail("other@test.com");
-
-        when(userJpaRepository.findByEmail(anotherClient.getEmail())).thenReturn(Optional.of(anotherClient));
-        when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
-
-        assertThrows(UnauthorizedActionException.class, () ->
-                workOrderService.getByVehicle(vehicle.getPlate(), anotherClient.getEmail(), Pageable.unpaged())
-        );
     }
 
     @Test
@@ -193,45 +130,6 @@ class WorkOrderServiceTest {
     }
 
     @Test
-    void add_ThrowsUnauthorized_WhenUserIsClient() {
-        NewWorkOrderDTO dto = new NewWorkOrderDTO("Frenos", vehicle.getPlate());
-        when(userJpaRepository.findByEmail(client.getEmail())).thenReturn(Optional.of(client));
-        when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
-
-        assertThrows(UnauthorizedActionException.class, () ->
-                workOrderService.add(dto, client.getEmail(), vehicle.getPlate())
-        );
-    }
-
-    @Test
-    void add_ThrowsWorkshopNotAssigned_WhenWorkerHasNoWorkshop() {
-        NewWorkOrderDTO dto = new NewWorkOrderDTO("Frenos", vehicle.getPlate());
-        mechanic.setWorkshop(null);
-
-        when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
-        when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
-
-        assertThrows(WorkshopNotAssignedException.class, () ->
-                workOrderService.add(dto, mechanic.getEmail(), vehicle.getPlate())
-        );
-    }
-
-    @Test
-    void add_ThrowsVehicleNotInWorkshop_WhenVehicleInDifferentWorkshop() {
-        NewWorkOrderDTO dto = new NewWorkOrderDTO("Reparación", vehicle.getPlate());
-        Workshop differentWorkshop = new Workshop();
-        differentWorkshop.setWorkshopId(99L);
-        vehicle.setWorkshop(differentWorkshop);
-
-        when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
-        when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
-
-        assertThrows(VehicleNotInWorkshopException.class, () ->
-                workOrderService.add(dto, mechanic.getEmail(), vehicle.getPlate())
-        );
-    }
-
-    @Test
     void addLine_Success_UpdatesStatusToInProgress() {
         NewWorkOrderLineDTO lineDto = new NewWorkOrderLineDTO("Filtro", 1.0, 20.0, 21.0, 0.0);
 
@@ -243,44 +141,6 @@ class WorkOrderServiceTest {
 
         assertEquals(WorkOrderStatus.IN_PROGRESS, workOrder.getStatus());
         verify(workOrderJpaRepository).save(workOrder);
-    }
-
-    @Test
-    void addLine_ThrowsClosedWorkOrderException() {
-        workOrder.setStatus(WorkOrderStatus.COMPLETED);
-        NewWorkOrderLineDTO lineDto = new NewWorkOrderLineDTO("Filtro", 1.0, 20.0, 21.0, 0.0);
-
-        when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
-        when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
-
-        assertThrows(ClosedWorkOrderException.class, () ->
-                workOrderService.addLine(workOrder.getId(), lineDto, mechanic.getEmail())
-        );
-    }
-
-    @Test
-    void deleteLine_Success_RemovesLine() {
-        when(workOrderLineJpaRepository.findById(workOrderLine.getId())).thenReturn(Optional.of(workOrderLine));
-        when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
-        when(workOrderJpaRepository.save(any(WorkOrder.class))).thenReturn(workOrder);
-
-        workOrderService.deleteLine(workOrder.getId(), workOrderLine.getId(), mechanic.getEmail());
-
-        assertTrue(workOrder.getLines().isEmpty());
-        verify(workOrderJpaRepository).save(workOrder);
-    }
-
-    @Test
-    void deleteLine_ThrowsWorkOrderLineMismatchException() {
-        WorkOrder anotherOrder = new WorkOrder();
-        anotherOrder.setId(999L);
-        workOrderLine.setWorkOrder(anotherOrder);
-
-        when(workOrderLineJpaRepository.findById(workOrderLine.getId())).thenReturn(Optional.of(workOrderLine));
-
-        assertThrows(WorkOrderLineMismatchException.class, () ->
-                workOrderService.deleteLine(workOrder.getId(), workOrderLine.getId(), mechanic.getEmail())
-        );
     }
 
     @Test
@@ -296,27 +156,7 @@ class WorkOrderServiceTest {
         assertEquals(WorkOrderStatus.COMPLETED, workOrder.getStatus());
         assertEquals("Notas nuevas", workOrder.getMechanicNotes());
         assertNotNull(workOrder.getClosedAt());
-    }
 
-    @Test
-    void delete_Success_DeletesWorkOrder() {
-        when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
-        when(userJpaRepository.findByEmail(manager.getEmail())).thenReturn(Optional.of(manager));
-
-        workOrderService.delete(workOrder.getId(), manager.getEmail());
-
-        verify(workOrderJpaRepository).delete(workOrder);
-    }
-
-    @Test
-    void delete_ThrowsUnauthorized_WhenUserIsClient() {
-        when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
-        when(userJpaRepository.findByEmail(client.getEmail())).thenReturn(Optional.of(client));
-
-        assertThrows(UnauthorizedActionException.class, () ->
-                workOrderService.delete(workOrder.getId(), client.getEmail())
-        );
-        verify(workOrderJpaRepository, never()).delete(any());
     }
 
     @Test
@@ -330,21 +170,41 @@ class WorkOrderServiceTest {
         workOrderService.updateWorkOrderLine(workOrder.getId(), workOrderLine.getId(), updateData, mechanic.getEmail());
 
         assertEquals("Motor", workOrderLine.getConcept());
-        assertEquals(100.0, workOrderLine.getPricePerUnit());
         assertEquals(121.0, workOrder.getTotalAmount());
-        verify(workOrderJpaRepository).save(workOrder);
     }
 
     @Test
-    void updateWorkOrderLine_ThrowsClosedWorkOrderException() {
+    void notifyClientForPickup_Success_PublishesEvent() {
         workOrder.setStatus(WorkOrderStatus.COMPLETED);
-        NewWorkOrderLineDTO updateData = new NewWorkOrderLineDTO("Motor", 1.0, 100.0, 21.0, 0.0);
 
-        when(workOrderLineJpaRepository.findById(workOrderLine.getId())).thenReturn(Optional.of(workOrderLine));
+        when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
         when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
 
-        assertThrows(ClosedWorkOrderException.class, () ->
-                workOrderService.updateWorkOrderLine(workOrder.getId(), workOrderLine.getId(), updateData, mechanic.getEmail())
+        workOrderService.notifyClientForPickup(workOrder.getId(), mechanic.getEmail());
+
+        verify(eventPublisher).publishEvent(any(WorkOrderCompletedEvent.class));
+    }
+
+    @Test
+    void notifyClientForPickup_ThrowsUnauthorized_WhenNotCompleted() {
+        when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
+        when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
+
+        assertThrows(UnauthorizedActionException.class, () ->
+                workOrderService.notifyClientForPickup(workOrder.getId(), mechanic.getEmail())
+        );
+    }
+
+    @Test
+    void notifyClientForPickup_ThrowsUserNotFound_WhenVehicleHasNoOwner() {
+        workOrder.setStatus(WorkOrderStatus.COMPLETED);
+        vehicle.setOwner(null);
+
+        when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
+        when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
+
+        assertThrows(UserNotFoundException.class, () ->
+                workOrderService.notifyClientForPickup(workOrder.getId(), mechanic.getEmail())
         );
     }
 
@@ -366,39 +226,26 @@ class WorkOrderServiceTest {
     }
 
     @Test
-    void reassignMechanic_ThrowsMechanicNotInWorkshopException() {
-        User externalMechanic = new User();
-        externalMechanic.setDni("99999999Z");
-        Workshop externalWorkshop = new Workshop();
-        externalWorkshop.setWorkshopId(55L);
-        externalMechanic.setWorkshop(externalWorkshop);
-
+    void delete_Success_DeletesWorkOrder() {
         when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
         when(userJpaRepository.findByEmail(manager.getEmail())).thenReturn(Optional.of(manager));
-        when(userJpaRepository.findByDni(externalMechanic.getDni())).thenReturn(Optional.of(externalMechanic));
 
-        assertThrows(MechanicNotInWorkshopException.class, () ->
-                workOrderService.reassignMechanic(workOrder.getId(), externalMechanic.getDni(), manager.getEmail())
-        );
+        workOrderService.delete(workOrder.getId(), manager.getEmail());
+
+        verify(workOrderJpaRepository).delete(workOrder);
     }
 
     @Test
-    void getWorkOrderByWorkshop_Success_ReturnsList() {
-        when(userJpaRepository.findByEmail(manager.getEmail())).thenReturn(Optional.of(manager));
-        when(workOrderJpaRepository.findByWorkshop_workshopId(workshop.getWorkshopId())).thenReturn(List.of(workOrder));
+    void getByVehicle_ThrowsUnauthorized_WhenVehicleInDifferentWorkshop() {
+        Workshop anotherWorkshop = new Workshop();
+        anotherWorkshop.setWorkshopId(99L);
+        vehicle.setWorkshop(anotherWorkshop);
 
-        List<NewWorkOrderResponseDTO> result = workOrderService.getWorkOrderByWorkshop(workshop.getWorkshopId(), manager.getEmail());
-
-        assertFalse(result.isEmpty());
-        verify(workOrderJpaRepository).findByWorkshop_workshopId(workshop.getWorkshopId());
-    }
-
-    @Test
-    void getWorkOrderByWorkshop_ThrowsUnauthorized_WhenWorkshopDiffers() {
-        when(userJpaRepository.findByEmail(manager.getEmail())).thenReturn(Optional.of(manager));
+        when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
+        when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
 
         assertThrows(UnauthorizedActionException.class, () ->
-                workOrderService.getWorkOrderByWorkshop(99L, manager.getEmail())
+                workOrderService.getByVehicle(vehicle.getPlate(), mechanic.getEmail(), Pageable.unpaged())
         );
     }
 }

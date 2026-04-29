@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333;
+            font-size: 13px;
+        }
+
+        /* Tablas maquetación general (infalible para PDFs) */
+        .layout-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
+        }
+        .layout-table td {
+            border: none;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        /* Cabecera */
+        .header {
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .workshop-name {
+            font-size: 26px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        .invoice-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #7f8c8d;
+            text-align: right;
+            margin: 0 0 5px 0;
+        }
+
+        /* Sección Cliente y Vehículo */
+        .client-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .section-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #95a5a6;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .info-text {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Tabla de líneas de la factura */
+        table.lines {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        table.lines th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        table.lines th.num, table.lines td.num {
+            text-align: right;
+        }
+        table.lines td {
+            padding: 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        /* Contenedor de Totales */
+        table.totals-table {
+            width: 350px;
+            float: right;
+            border-collapse: collapse;
+        }
+        table.totals-table td {
+            padding: 8px 12px;
+            border: none;
+            font-size: 14px;
+        }
+        table.totals-table td.value {
+            text-align: right;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .total-row td {
+            font-size: 18px;
+            color: #2c3e50;
+            border-top: 2px solid #2c3e50 !important;
+            padding-top: 12px;
+        }
+        .text-danger {
+            color: #e74c3c !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <table class="layout-table">
+        <tr>
+            <td style="width: 50%;">
+                <h1 class="workshop-name" th:text="${workshop.workshopName}">Taller CarLog</h1>
+            </td>
+            <td style="width: 50%; text-align: right;">
+                <h2 class="invoice-title">FACTURA</h2>
+                <div style="font-size: 14px; color: #34495e;">
+                    <strong>Nº Orden:</strong> <span th:text="${order.id}"></span><br/>
+                    <strong>Fecha:</strong> <span th:text="${order.closedAt != null ? #temporals.format(order.closedAt, 'dd/MM/yyyy') : #temporals.format(order.createdAt, 'dd/MM/yyyy')}"></span>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="client-section">
+    <table class="layout-table">
+        <tr>
+            <td style="width: 50%;">
+                <div class="section-label">Facturar a:</div>
+                <div class="info-text">
+                    <strong style="font-size: 16px;">[[${client.name}]]</strong><br/>
+                    DNI: [[${client.dni}]]<br/>
+                    Email: [[${client.email}]]<br/>
+                    Teléfono: [[${client.phone}]]
+                </div>
+            </td>
+            <td style="width: 50%; text-align: right;">
+                <div class="section-label">Datos del Vehículo:</div>
+                <div class="info-text">
+                    <strong style="font-size: 16px;">[[${vehicle.brand}]] [[${vehicle.model}]]</strong><br/>
+                    Matrícula: <strong>[[${vehicle.plate}]]</strong><br/>
+                    Mecánico: [[${order.mechanic.name}]]
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<table class="lines">
+    <thead>
+    <tr>
+        <th style="width: 40%;">Concepto</th>
+        <th class="num" style="width: 10%;">Cant.</th>
+        <th class="num" style="width: 15%;">Precio Ud.</th>
+        <th class="num" style="width: 10%;">IVA</th>
+        <th class="num" style="width: 10%;">Dto.</th>
+        <th class="num" style="width: 15%;">Total Línea</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="line : ${order.lines}">
+        <td th:text="${line.concept}"></td>
+        <td class="num" th:text="${line.quantity}"></td>
+        <td class="num" th:text="${#numbers.formatDecimal(line.pricePerUnit, 1, 2)} + ' €'"></td>
+        <td class="num" th:text="${#numbers.formatDecimal(line.iva, 1, 0)} + ' %'"></td>
+        <td class="num" th:text="${line.discount > 0 ? #numbers.formatDecimal(line.discount, 1, 0) + ' %' : '-'}"></td>
+        <td class="num" style="font-weight: bold;" th:text="${#numbers.formatDecimal(line.subTotal, 1, 2)} + ' €'"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="totals-container">
+    <table class="totals-table">
+        <tr>
+            <td>Base Imponible:</td>
+            <td class="value" th:text="${imponibleBase != null ? #numbers.formatDecimal(imponibleBase, 1, 2) : '0,00'} + ' €'"></td>
+        </tr>
+        <tr>
+            <td>Total IVA:</td>
+            <td class="value" th:text="${totalIva != null ? #numbers.formatDecimal(totalIva, 1, 2) : '0,00'} + ' €'"></td>
+        </tr>
+        <tr th:if="${totalDiscount != null and totalDiscount > 0}">
+            <td>Descuentos aplicados:</td>
+            <td class="value text-danger" th:text="'- ' + ${#numbers.formatDecimal(totalDiscount, 1, 2)} + ' €'"></td>
+        </tr>
+        <tr class="total-row">
+            <td>TOTAL FACTURA:</td>
+            <td class="value" th:text="${order.totalAmount != null ? #numbers.formatDecimal(order.totalAmount, 1, 2) : '0,00'} + ' €'"></td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>

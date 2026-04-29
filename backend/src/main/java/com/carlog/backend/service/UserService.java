@@ -2,14 +2,17 @@ package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.dto.NotificationDTO;
+import com.carlog.backend.dto.WorkshopHiringEvent;
 import com.carlog.backend.error.*;
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ public class UserService {
     private final UserJpaRepository userJpaRepository;
     private final WorkshopJpaRepository workshopJpaRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final String NOTIF_TOPIC_PREFIX = "/topic/notificaciones/";
 
@@ -122,31 +126,41 @@ public class UserService {
                 .map(NewUserDTO::of).toList();
     }
 
-    public void inviteToWorkshop(String managerEmail, String employeeDni, Role role){
+    @Transactional
+    public void inviteToWorkshop(String managerEmail, String employeeDni, Role role) {
         User manager = userJpaRepository.findByEmail(managerEmail)
                 .orElseThrow(() -> new UserNotFoundException(managerEmail));
 
         if ((manager.getRole() != Role.MANAGER && manager.getRole() != Role.CO_MANAGER) || manager.getWorkshop() == null) {
-            throw new UnauthorizedActionException("Solo los administradores pueden invitar.");
+            throw new UnauthorizedActionException("Acceso denegado: Solo los administradores de un taller pueden invitar.");
         }
 
         User employee = userJpaRepository.findByDni(employeeDni)
                 .orElseThrow(() -> new UserNotFoundException(employeeDni));
 
-        if(employee.getWorkshop() != null)
-            throw new UserAlreadyHasWorkshopException("El usuario ya tiene taller.");
+        if (employee.getWorkshop() != null) {
+            throw new UserAlreadyHasWorkshopException(employeeDni);
+        }
 
         employee.setPendingWorkshop(manager.getWorkshop());
         employee.setPendingRole(role);
-        userJpaRepository.save(employee);
+        User savedEmployee = userJpaRepository.save(employee);
 
-        NotificationDTO notif = NotificationDTO.builder()
-                .type("INVITE")
-                .title("¡Nueva oferta de empleo!")
-                .message("El taller " + manager.getWorkshop().getWorkshopName() + " quiere contratarte")
-                .build();
+        eventPublisher.publishEvent(WorkshopHiringEvent.of(savedEmployee));
 
-        messagingTemplate.convertAndSend(NOTIF_TOPIC_PREFIX + employeeDni, notif);
+        try {
+            NotificationDTO notif = NotificationDTO.builder()
+                    .type("INVITE")
+                    .title("¡Nueva oferta de empleo!")
+                    .message("El taller " + manager.getWorkshop().getWorkshopName() + " quiere contratarte como " + role.name())
+                    .extraData(manager.getWorkshop().getWorkshopId().toString())
+                    .build();
+
+            messagingTemplate.convertAndSend(NOTIF_TOPIC_PREFIX + employeeDni, notif);
+            log.info("Notificación WebSocket enviada al usuario con DNI: {}", employeeDni);
+        } catch (Exception e) {
+            log.error("Error al enviar WebSocket de invitación: {}", e.getMessage());
+        }
     }
 
     public NewUserDTO acceptInvitation(String email){

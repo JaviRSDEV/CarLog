@@ -4,27 +4,34 @@ import com.carlog.backend.dto.NewWorkOrderDTO;
 import com.carlog.backend.dto.NewWorkOrderLineDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.UpdateWorkOrderDTO;
+import com.carlog.backend.service.InvoiceService;
 import com.carlog.backend.service.WorkOrderService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/workorders")
 @RequiredArgsConstructor
+@Slf4j
 public class WorkOrderController {
 
     private final WorkOrderService workOrderService;
+    private final InvoiceService invoiceService;
 
     @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
     @GetMapping("/workshop/{id}")
@@ -98,5 +105,31 @@ public class WorkOrderController {
     @PatchMapping("/{orderId}/reassign")
     public ResponseEntity<NewWorkOrderResponseDTO> reassignWorkOrder(@PathVariable Long orderId, @RequestParam String newMechanicId, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(workOrderService.reassignMechanic(orderId, newMechanicId, principal.getName()));
+    }
+
+    @PostMapping("/{id}/notify-pickup")
+    public ResponseEntity<Map<String, String>> notifyPickup(
+            @PathVariable Long id,
+            Principal principal
+    ){
+        workOrderService.notifyClientForPickup(id, principal.getName());
+        return ResponseEntity.ok(Map.of("message", "Notificación enviada con éxito al ciente"));
+    }
+
+    @GetMapping("/{id}/invoice")
+    public ResponseEntity<byte[]> downloadInvoice(@PathVariable Long id){
+        try{
+            byte[] pdfBytes = invoiceService.generateInvoicePdf(id);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "factura_carlog_" + id + ".pdf");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

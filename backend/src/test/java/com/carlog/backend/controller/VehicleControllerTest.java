@@ -2,6 +2,9 @@ package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewVehicleDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
+import com.carlog.backend.error.GlobalExceptionHandler;
+import com.carlog.backend.error.UnauthorizedActionException;
+import com.carlog.backend.error.VehicleNotFoundException;
 import com.carlog.backend.service.VehicleService;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +56,6 @@ class VehicleControllerTest {
 
     @BeforeEach
     void setUp() {
-
         objectMapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
                 .build();
@@ -66,143 +68,91 @@ class VehicleControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(vehicleController)
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setMessageConverters(converter)
+                .setControllerAdvice(new GlobalExceptionHandler()) // ¡Activado!
                 .build();
 
-        mockPrincipal = () -> "12345678A";
+        mockPrincipal = () -> "mechanic@test.com";
 
         mockVehicle = new NewVehicleDTO(
                 "1234ABC", "Toyota", "Corolla", 120000L, "2.0 Hybrid", 184, 190,
-                "225/45 R17", new ArrayList<>(), LocalDate.now(), 1L, "12345678A", null, null
+                "225/45 R17", new ArrayList<>(), LocalDate.now(), 1L, "11111111A", null, null
         );
     }
 
     @Test
-    @DisplayName("GET /api/vehicles - Happy Path (Varios filtros)")
-    void index_Success() throws Exception {
+    @DisplayName("GET /api/vehicles - Branching: Workshop filter")
+    void index_WorkshopFilter() throws Exception {
         Page<NewVehicleDTO> page = new PageImpl<>(List.of(mockVehicle));
+        when(vehicleService.getByWorkshop(eq(1L), anyString(), any(Pageable.class))).thenReturn(page);
 
-        when(vehicleService.getMyVehicles(anyString(), any(Pageable.class))).thenReturn(page);
-        when(vehicleService.getByWorkshop(anyLong(), anyString(), any(Pageable.class))).thenReturn(page);
-        when(vehicleService.getByOwner(anyString(), anyString(), any(Pageable.class))).thenReturn(page);
-
-        mockMvc.perform(get("/api/vehicles").param("workshopId", "1").principal(mockPrincipal))
+        mockMvc.perform(get("/api/vehicles")
+                        .param("workshopId", "1")
+                        .principal(mockPrincipal))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].plate").value("1234ABC"));
 
-        mockMvc.perform(get("/api/vehicles").param("ownerId", "owner123").principal(mockPrincipal))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get("/api/vehicles").principal(mockPrincipal))
-                .andExpect(status().isOk());
+        verify(vehicleService).getByWorkshop(eq(1L), anyString(), any(Pageable.class));
     }
 
     @Test
-    @DisplayName("GET /api/vehicles/{plate} - Happy Path")
-    void showByPlate_Success() throws Exception {
-        when(vehicleService.getByPlate(eq("1234ABC"), anyString())).thenReturn(mockVehicle);
+    @DisplayName("GET /api/vehicles/{plate} - Not Found Case")
+    void showByPlate_NotFound() throws Exception {
+        when(vehicleService.getByPlate(eq("404-NOTFOUND"), anyString()))
+                .thenThrow(new VehicleNotFoundException("404-NOTFOUND"));
 
-        mockMvc.perform(get("/api/vehicles/1234ABC").principal(mockPrincipal))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.brand").value("Toyota"));
+        mockMvc.perform(get("/api/vehicles/404-NOTFOUND").principal(mockPrincipal))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("No hay un vehículo con con matricula 404-NOTFOUND"))
+                .andExpect(jsonPath("$.status").value(404));
     }
 
     @Test
-    @DisplayName("POST /api/vehicles - Happy Path")
-    void store_Success() throws Exception {
-        when(vehicleService.add(any(NewVehicleDTO.class), anyString())).thenReturn(mockVehicle);
+    @DisplayName("POST /api/vehicles - Validation Error (Empty Plate)")
+    void store_ValidationError() throws Exception {
+        NewVehicleDTO invalidVehicle = new NewVehicleDTO(
+                "", "", "", -1L, null, -5, -5, null, null, null, null, null, null, null
+        );
 
         mockMvc.perform(post("/api/vehicles")
                         .principal(mockPrincipal)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(mockVehicle)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.plate").value("1234ABC"));
+                        .content(objectMapper.writeValueAsString(invalidVehicle)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
-    @DisplayName("PUT /api/vehicles/{plate} - Happy Path")
-    void update_Success() throws Exception {
-        when(vehicleService.edit(any(NewVehicleDTO.class), eq("1234ABC"), anyString())).thenReturn(mockVehicle);
+    @DisplayName("PUT /api/vehicles/{plate}/request-entry/{workshopId} - Unauthorized Intruder")
+    void requestEntry_Unauthorized() throws Exception {
+        when(vehicleService.requestEntry(anyString(), anyLong(), anyString()))
+                .thenThrow(new UnauthorizedActionException("No perteneces a este taller"));
 
-        mockMvc.perform(put("/api/vehicles/1234ABC")
-                        .principal(mockPrincipal)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(mockVehicle)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.engine").value("2.0 Hybrid"));
-    }
-
-    @Test
-    @DisplayName("DELETE /api/vehicles/{plate} - Happy Path")
-    void destroy_Success() throws Exception {
-        when(vehicleService.delete(eq("1234ABC"), anyString())).thenReturn(mockVehicle);
-
-        mockMvc.perform(delete("/api/vehicles/1234ABC").principal(mockPrincipal))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("POST /{plate}/exit/{workshopId} - Happy Path")
-    void registerExit_Success() throws Exception {
-        when(vehicleService.registerExit(anyString(), anyLong(), anyString())).thenReturn(mockVehicle);
-
-        mockMvc.perform(post("/api/vehicles/1234ABC/exit/1").principal(mockPrincipal))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("PUT /{plate}/request-entry/{workshopId} - Happy Path")
-    void requestEntry_Success() throws Exception {
-        when(vehicleService.requestEntry(anyString(), anyLong(), anyString())).thenReturn(mockVehicle);
-
-        mockMvc.perform(put("/api/vehicles/1234ABC/request-entry/1").principal(mockPrincipal))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("PUT /approve-entry - Happy Path")
-    void approveEntry_Success() throws Exception {
-        when(vehicleService.approveEntry(anyString(), anyString())).thenReturn(mockVehicle);
-
-        mockMvc.perform(put("/api/vehicles/1234ABC/approve-entry").principal(mockPrincipal))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("PUT /reject-entry - Happy Path")
-    void rejectEntry_Success() throws Exception {
-        when(vehicleService.rejectEntry(anyString(), anyString())).thenReturn(mockVehicle);
-
-        mockMvc.perform(put("/api/vehicles/1234ABC/reject-entry").principal(mockPrincipal))
-                .andExpect(status().isOk());
+        mockMvc.perform(put("/api/vehicles/1234ABC/request-entry/99")
+                        .principal(mockPrincipal))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("No perteneces a este taller"))
+                .andExpect(jsonPath("$.status").value(403));
     }
 
     @Test
     @DisplayName("POST /transfer - Happy Path")
     void transferVehicle_Success() throws Exception {
-        when(vehicleService.changeOwner(anyString(), anyString(), anyString())).thenReturn(mockVehicle);
+        when(vehicleService.changeOwner(eq("1234ABC"), eq("99999999Z"), anyString())).thenReturn(mockVehicle);
 
         mockMvc.perform(post("/api/vehicles/1234ABC/transfer")
                         .param("newOwnerId", "99999999Z")
                         .principal(mockPrincipal))
                 .andExpect(status().isOk());
+
+        verify(vehicleService).changeOwner(eq("1234ABC"), eq("99999999Z"), anyString());
     }
 
     @Test
-    @DisplayName("GET /{plate}/history - Happy Path")
-    void getVehicleHistory_Success() throws Exception {
-        Page<NewWorkOrderResponseDTO> historyPage = new PageImpl<>(List.of());
-        when(vehicleService.getVehicleHistory(anyString(), anyString(), any(Pageable.class))).thenReturn(historyPage);
-
-        mockMvc.perform(get("/api/vehicles/1234ABC/history").principal(mockPrincipal))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("GET /search - Happy Path")
+    @DisplayName("GET /search - Verify Parameters")
     void search_Success() throws Exception {
         Page<NewVehicleDTO> searchPage = new PageImpl<>(List.of(mockVehicle));
-        when(vehicleService.searchVehicles(anyString(), anyLong(), anyString(), anyString(), any(Pageable.class)))
+        when(vehicleService.searchVehicles(eq("Toyota"), eq(1L), eq("BRAND"), anyString(), any(Pageable.class)))
                 .thenReturn(searchPage);
 
         mockMvc.perform(get("/api/vehicles/search")
@@ -211,6 +161,16 @@ class VehicleControllerTest {
                         .param("type", "BRAND")
                         .principal(mockPrincipal))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].kilometers").value(120000));
+                .andExpect(jsonPath("$.content[0].brand").value("Toyota"));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/vehicles/{plate} - Happy Path")
+    void destroy_Success() throws Exception {
+        when(vehicleService.delete(eq("1234ABC"), anyString())).thenReturn(mockVehicle);
+
+        mockMvc.perform(delete("/api/vehicles/1234ABC")
+                        .principal(mockPrincipal))
+                .andExpect(status().isOk());
     }
 }

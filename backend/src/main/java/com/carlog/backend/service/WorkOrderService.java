@@ -7,10 +7,12 @@ import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkOrderLineJpaRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class WorkOrderService {
     private final VehicleJpaRepository vehicleJpaRepository;
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final WorkOrderLineJpaRepository workOrderLineJpaRepository;
-    private final MailService mailService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<NewWorkOrderResponseDTO> getByEmployee(String dni, String email) {
         User currentUser = userJpaRepository.findByEmail(email)
@@ -152,31 +154,39 @@ public class WorkOrderService {
         return NewWorkOrderResponseDTO.of(workOrderJpaRepository.save(order));
     }
 
+    @Transactional
     public NewWorkOrderResponseDTO edit(UpdateWorkOrderDTO dto, Long workOrderId, String email) {
         WorkOrder order = workOrderJpaRepository.findById(workOrderId).orElseThrow(WorkOrderNotFoundException::new);
 
         verifyWriteAccess(order, email);
 
-        if (dto.mechanicNotes() != null)
+        if (dto.mechanicNotes() != null) {
             order.setMechanicNotes(dto.mechanicNotes());
+        }
 
         if (dto.status() != null) {
-            boolean isNewlyCompleted = order.getStatus() != WorkOrderStatus.COMPLETED
-                    && dto.status() == WorkOrderStatus.COMPLETED;
-
             order.setStatus(dto.status());
             order.setClosedAt(dto.status() == WorkOrderStatus.COMPLETED ? java.time.LocalDate.now() : null);
-
-            if (isNewlyCompleted && order.getVehicle() != null && order.getVehicle().getOwner() != null) {
-                mailService.sendWorkOrderCompletedEmail(
-                        order.getVehicle().getOwner().getEmail(),
-                        order.getVehicle().getOwner().getName(),
-                        order.getVehicle().getPlate()
-                );
-            }
         }
 
         return NewWorkOrderResponseDTO.of(workOrderJpaRepository.save(order));
+    }
+
+    public void notifyClientForPickup(Long orderId, String email){
+        WorkOrder order = workOrderJpaRepository.findById(orderId)
+                .orElseThrow(WorkOrderNotFoundException::new);
+
+        verifyWriteAccess(order, email);
+
+        if(order.getStatus() != WorkOrderStatus.COMPLETED){
+            throw new UnauthorizedActionException("La orden de estar completada para notificar al cliente");
+        }
+
+        if(order.getVehicle() == null || order.getVehicle().getOwner() == null){
+            throw new UserNotFoundException("El vehículo no tiene un cliente asignado");
+        }
+
+        eventPublisher.publishEvent(WorkOrderCompletedEvent.of(order));
     }
 
     public NewWorkOrderResponseDTO delete(Long workOrderId, String email) {

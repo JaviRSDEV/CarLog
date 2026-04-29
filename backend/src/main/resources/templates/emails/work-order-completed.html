@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header { background-color: #198754; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; margin: -30px -30px 20px -30px; }
+        h1 { margin: 0; font-size: 24px; }
+        .btn { display: inline-block; padding: 10px 20px; background-color: #0d6efd; color: #ffffff; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>¡Tu vehículo está listo!</h1>
+    </div>
+    <p>Hola <strong th:text="${clientName}">Cliente</strong>,</p>
+    <p>Te informamos que la orden de trabajo para tu vehículo con matrícula <strong style="color: #0d6efd;" th:text="${vehiclePlate}">MATRICULA</strong> ha sido completada con éxito.</p>
+    <p>Ya puedes pasarte por el taller a recogerlo y descargar tu factura desde la plataforma.</p>
+    <br>
+    <p>Saludos,<br><strong>El equipo de CarLog</strong></p>
+</div>
+</body>
+</html>

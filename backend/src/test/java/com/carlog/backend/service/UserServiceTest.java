@@ -2,6 +2,7 @@ package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewUserDTO;
 import com.carlog.backend.dto.NotificationDTO;
+import com.carlog.backend.dto.WorkshopHiringEvent;
 import com.carlog.backend.error.*;
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
@@ -17,6 +18,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -25,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +40,7 @@ class UserServiceTest {
     @Mock private UserJpaRepository userJpaRepository;
     @Mock private WorkshopJpaRepository workshopJpaRepository;
     @Mock private SimpMessagingTemplate messagingTemplate;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks private UserService userService;
 
@@ -173,6 +177,18 @@ class UserServiceTest {
     }
 
     @Test
+    void edit_UserToEditNotFound_ThrowsException() {
+        NewUserDTO dto = new NewUserDTO("999", "Fantasma", "X", "X", null, null, null, null);
+
+        when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
+        when(userJpaRepository.findByDni("999")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () ->
+                userService.edit(dto, "999", managerUser.getEmail())
+        );
+    }
+
+    @Test
     void delete_Exists_DeletesUser() {
         when(userJpaRepository.findByDni(clientUser.getDni())).thenReturn(Optional.of(clientUser));
         userService.delete(clientUser.getDni());
@@ -196,16 +212,42 @@ class UserServiceTest {
     }
 
     @Test
+    void getEmployeesByWorkshopId_WorkshopNotFound_ThrowsException() {
+        when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
+        when(workshopJpaRepository.findById(workshop.getWorkshopId())).thenReturn(Optional.empty());
+
+        assertThrows(WorkshopNotFoundException.class, () ->
+                userService.getEmployeesByWorkshopId(workshop.getWorkshopId(), managerUser.getEmail())
+        );
+    }
+
+    @Test
     void inviteToWorkshop_ValidManager_SetsPendingAndNotifies() {
         when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
         when(userJpaRepository.findByDni(clientUser.getDni())).thenReturn(Optional.of(clientUser));
+        when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
 
         userService.inviteToWorkshop(managerUser.getEmail(), clientUser.getDni(), Role.MECHANIC);
 
         verify(userJpaRepository).save(userCaptor.capture());
         assertEquals(workshop, userCaptor.getValue().getPendingWorkshop());
         assertEquals(Role.MECHANIC, userCaptor.getValue().getPendingRole());
+
+        verify(eventPublisher).publishEvent(any(WorkshopHiringEvent.class));
         verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + clientUser.getDni()), any(NotificationDTO.class));
+    }
+
+    @Test
+    void inviteToWorkshop_WebSocketFails_ContinuesWithoutThrowing() {
+        when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
+        when(userJpaRepository.findByDni(clientUser.getDni())).thenReturn(Optional.of(clientUser));
+        when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
+
+        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationDTO.class));
+
+        assertDoesNotThrow(() -> userService.inviteToWorkshop(managerUser.getEmail(), clientUser.getDni(), Role.MECHANIC));
+
+        verify(eventPublisher).publishEvent(any(WorkshopHiringEvent.class));
     }
 
     @Test
@@ -214,6 +256,25 @@ class UserServiceTest {
         when(userJpaRepository.findByDni(employeeUser.getDni())).thenReturn(Optional.of(employeeUser));
 
         assertThrows(UserAlreadyHasWorkshopException.class, () -> userService.inviteToWorkshop(managerUser.getEmail(), employeeUser.getDni(), Role.MECHANIC));
+    }
+
+    @Test
+    void inviteToWorkshop_ManagerHasNoWorkshop_ThrowsException() {
+        User managerWithoutWorkshop = User.builder().dni("999").email("noworkshop@test.com").role(Role.MANAGER).build();
+        when(userJpaRepository.findByEmail(managerWithoutWorkshop.getEmail())).thenReturn(Optional.of(managerWithoutWorkshop));
+
+        assertThrows(UnauthorizedActionException.class, () ->
+                userService.inviteToWorkshop(managerWithoutWorkshop.getEmail(), employeeUser.getDni(), Role.MECHANIC)
+        );
+    }
+
+    @Test
+    void inviteToWorkshop_SenderIsClient_ThrowsException() {
+        when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
+
+        assertThrows(UnauthorizedActionException.class, () ->
+                userService.inviteToWorkshop(clientUser.getEmail(), employeeUser.getDni(), Role.MECHANIC)
+        );
     }
 
     @Test
@@ -237,65 +298,29 @@ class UserServiceTest {
     }
 
     @Test
+    void acceptInvitation_WebSocketFails_ContinuesWithoutThrowing() {
+        clientUser.setPendingWorkshop(workshop);
+        clientUser.setPendingRole(Role.MECHANIC);
+
+        when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
+        when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
+        when(userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER)).thenReturn(Optional.of(managerUser));
+
+        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationDTO.class));
+
+        assertDoesNotThrow(() -> userService.acceptInvitation(clientUser.getEmail()));
+    }
+
+    @Test
     void acceptInvitation_NoPending_ThrowsException() {
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
         assertThrows(NoPendingInvitationException.class, () -> userService.acceptInvitation(clientUser.getEmail()));
     }
 
     @Test
-    void rejectInvitation_ClearsPendingData() {
-        clientUser.setPendingWorkshop(workshop);
-        when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
-
-        userService.rejectInvitation(clientUser.getEmail());
-
-        verify(userJpaRepository).save(userCaptor.capture());
-        assertNull(userCaptor.getValue().getPendingWorkshop());
-    }
-
-    @Test
-    void fireEmployee_ValidManager_FiresAndNotifies() {
-        when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
-        when(userJpaRepository.findByDni(employeeUser.getDni())).thenReturn(Optional.of(employeeUser));
-
-        userService.fireEmployee(managerUser.getEmail(), employeeUser.getDni());
-
-        verify(userJpaRepository).save(userCaptor.capture());
-        User firedUser = userCaptor.getValue();
-
-        assertNull(firedUser.getWorkshop());
-        assertEquals(Role.CLIENT, firedUser.getRole());
-        verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + employeeUser.getDni()), any(NotificationDTO.class));
-    }
-
-    @Test
-    void fireEmployee_ManagerFromOtherWorkshop_ThrowsSecurityException() {
-        Workshop otherWorkshop = Workshop.builder().workshopId(99L).build();
-        User fakeManager = User.builder().dni("999").email("fake@manager.com").role(Role.MANAGER).workshop(otherWorkshop).build();
-
-        when(userJpaRepository.findByEmail(fakeManager.getEmail())).thenReturn(Optional.of(fakeManager));
-        when(userJpaRepository.findByDni(employeeUser.getDni())).thenReturn(Optional.of(employeeUser));
-
-        assertThrows(UnauthorizedActionException.class, () -> userService.fireEmployee(fakeManager.getEmail(), employeeUser.getDni()));
-    }
-
-    @Test
-    void inviteToWorkshop_ManagerHasNoWorkshop_ThrowsException() {
-        User managerWithoutWorkshop = User.builder().dni("999").email("noworkshop@test.com").role(Role.MANAGER).build();
-        when(userJpaRepository.findByEmail(managerWithoutWorkshop.getEmail())).thenReturn(Optional.of(managerWithoutWorkshop));
-
-        assertThrows(UnauthorizedActionException.class, () ->
-                userService.inviteToWorkshop(managerWithoutWorkshop.getEmail(), employeeUser.getDni(), Role.MECHANIC)
-        );
-    }
-
-    @Test
-    void inviteToWorkshop_SenderIsClient_ThrowsException() {
-        when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
-
-        assertThrows(UnauthorizedActionException.class, () ->
-                userService.inviteToWorkshop(clientUser.getEmail(), employeeUser.getDni(), Role.MECHANIC)
-        );
+    void acceptInvitation_UserNotFound_ThrowsException() {
+        when(userJpaRepository.findByEmail("ghost@test.com")).thenReturn(Optional.empty());
+        assertThrows(NoSuchElementException.class, () -> userService.acceptInvitation("ghost@test.com"));
     }
 
     @Test
@@ -314,25 +339,53 @@ class UserServiceTest {
     }
 
     @Test
-    void getEmployeesByWorkshopId_WorkshopNotFound_ThrowsException() {
-        when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
+    void rejectInvitation_Exists_ClearsPendingData() {
+        clientUser.setPendingWorkshop(workshop);
+        when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
 
-        when(workshopJpaRepository.findById(workshop.getWorkshopId())).thenReturn(Optional.empty());
+        userService.rejectInvitation(clientUser.getEmail());
 
-        assertThrows(WorkshopNotFoundException.class, () ->
-                userService.getEmployeesByWorkshopId(workshop.getWorkshopId(), managerUser.getEmail())
-        );
+        verify(userJpaRepository).save(userCaptor.capture());
+        assertNull(userCaptor.getValue().getPendingWorkshop());
     }
 
     @Test
-    void edit_UserToEditNotFound_ThrowsException() {
-        NewUserDTO dto = new NewUserDTO("999", "Fantasma", "X", "X", null, null, null, null);
+    void rejectInvitation_UserNotFound_ThrowsException() {
+        when(userJpaRepository.findByEmail("ghost@test.com")).thenReturn(Optional.empty());
+        assertThrows(UserNotFoundException.class, () -> userService.rejectInvitation("ghost@test.com"));
+    }
 
+    @Test
+    void fireEmployee_ValidManager_FiresAndNotifies() {
         when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
-        when(userJpaRepository.findByDni("999")).thenReturn(Optional.empty());
+        when(userJpaRepository.findByDni(employeeUser.getDni())).thenReturn(Optional.of(employeeUser));
 
-        assertThrows(UserNotFoundException.class, () ->
-                userService.edit(dto, "999", managerUser.getEmail())
-        );
+        userService.fireEmployee(managerUser.getEmail(), employeeUser.getDni());
+
+        verify(userJpaRepository).save(userCaptor.capture());
+        User firedUser = userCaptor.getValue();
+
+        assertNull(firedUser.getWorkshop());
+        assertEquals(Role.CLIENT, firedUser.getRole());
+        verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + employeeUser.getDni()), any(NotificationDTO.class));
+    }
+
+    @Test
+    void fireEmployee_EmployeeNotFound_ThrowsException() {
+        when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
+        when(userJpaRepository.findByDni("ghost")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.fireEmployee(managerUser.getEmail(), "ghost"));
+    }
+
+    @Test
+    void fireEmployee_ManagerFromOtherWorkshop_ThrowsSecurityException() {
+        Workshop otherWorkshop = Workshop.builder().workshopId(99L).build();
+        User fakeManager = User.builder().dni("999").email("fake@manager.com").role(Role.MANAGER).workshop(otherWorkshop).build();
+
+        when(userJpaRepository.findByEmail(fakeManager.getEmail())).thenReturn(Optional.of(fakeManager));
+        when(userJpaRepository.findByDni(employeeUser.getDni())).thenReturn(Optional.of(employeeUser));
+
+        assertThrows(UnauthorizedActionException.class, () -> userService.fireEmployee(fakeManager.getEmail(), employeeUser.getDni()));
     }
 }

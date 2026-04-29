@@ -3,6 +3,7 @@ package com.carlog.backend.service;
 import com.carlog.backend.dto.NewVehicleDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.NotificationDTO;
+import com.carlog.backend.dto.VehicleAdmissionEvent;
 import com.carlog.backend.error.*;
 import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
@@ -21,6 +22,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +45,7 @@ class VehicleServiceTest {
     @Mock private WorkOrderJpaRepository workOrderJpaRepository;
     @Mock private SimpMessagingTemplate messagingTemplate;
     @Mock private Cloudinary cloudinary;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks private VehicleService vehicleService;
 
@@ -150,7 +153,7 @@ class VehicleServiceTest {
     }
 
     @Test
-    void requestEntry_MechanicInWorkshop_CreatesPendingRequest() {
+    void requestEntry_MechanicInWorkshop_CreatesPendingRequestAndNotifies() {
         when(userJpaRepository.findByEmail(mechanicUser.getEmail())).thenReturn(Optional.of(mechanicUser));
         when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
         when(workshopJpaRepository.findById(workshop.getWorkshopId())).thenReturn(Optional.of(workshop));
@@ -159,7 +162,22 @@ class VehicleServiceTest {
         vehicleService.requestEntry(vehicle.getPlate(), workshop.getWorkshopId(), mechanicUser.getEmail());
 
         verify(vehicleJpaRepository).save(argThat(v -> v.getPendingWorkshop() != null));
+
+        verify(eventPublisher).publishEvent(any(VehicleAdmissionEvent.class));
         verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + clientUser.getDni()), any(NotificationDTO.class));
+    }
+
+    @Test
+    void requestEntry_WebSocketFails_ContinuesWithoutThrowing() {
+        when(userJpaRepository.findByEmail(mechanicUser.getEmail())).thenReturn(Optional.of(mechanicUser));
+        when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
+        when(workshopJpaRepository.findById(workshop.getWorkshopId())).thenReturn(Optional.of(workshop));
+        when(vehicleJpaRepository.save(any(Vehicle.class))).thenReturn(vehicle);
+
+        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationDTO.class));
+        assertDoesNotThrow(() -> vehicleService.requestEntry(vehicle.getPlate(), workshop.getWorkshopId(), mechanicUser.getEmail()));
+
+        verify(eventPublisher).publishEvent(any(VehicleAdmissionEvent.class));
     }
 
     @Test
@@ -175,6 +193,24 @@ class VehicleServiceTest {
         assertNull(vehicle.getPendingWorkshop());
         assertEquals(workshop, vehicle.getWorkshop());
         verify(vehicleJpaRepository).save(vehicle);
+    }
+
+    @Test
+    void approveEntry_WebSocketFails_ContinuesWithoutThrowing() {
+        vehicle.setPendingWorkshop(workshop);
+        User managerUser = User.builder().dni("88888888M").role(Role.MANAGER).workshop(workshop).build();
+
+        when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
+        when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
+        when(vehicleJpaRepository.save(any(Vehicle.class))).thenReturn(vehicle);
+        when(userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER)).thenReturn(Optional.of(managerUser));
+
+        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationDTO.class));
+
+        assertDoesNotThrow(() -> vehicleService.approveEntry(vehicle.getPlate(), clientUser.getEmail()));
+
+        assertNull(vehicle.getPendingWorkshop());
+        assertEquals(workshop, vehicle.getWorkshop());
     }
 
     @Test
@@ -242,7 +278,7 @@ class VehicleServiceTest {
     @Test
     void addVehicle_PlateAlreadyExists_ThrowsException() {
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
-        when(vehicleJpaRepository.findByPlate("1234-ABC")).thenReturn(Optional.of(vehicle)); // Ya existe
+        when(vehicleJpaRepository.findByPlate("1234-ABC")).thenReturn(Optional.of(vehicle));
 
         assertThrows(VehicleAlreadyExistsException.class, () ->
                 vehicleService.add(NewVehicleDTO.of(vehicle), clientUser.getEmail())
@@ -274,6 +310,8 @@ class VehicleServiceTest {
     @Test
     void approveEntry_UserIsNotOwner_ThrowsUnauthorized() {
         User intruder = User.builder().dni("66666666X").email("hacker@test.com").role(Role.CLIENT).build();
+        vehicle.setPendingWorkshop(workshop);
+
         when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
         when(userJpaRepository.findByEmail(intruder.getEmail())).thenReturn(Optional.of(intruder));
 
@@ -316,7 +354,7 @@ class VehicleServiceTest {
 
         NewVehicleDTO result = vehicleService.edit(editDto, vehicle.getPlate(), clientUser.getEmail());
 
-        assertEquals("Ford", vehicle.getBrand()); // Verificamos que se actualizaron los datos
+        assertEquals("Ford", vehicle.getBrand());
         assertEquals("Mustang", vehicle.getModel());
         verify(vehicleJpaRepository).save(vehicle);
     }

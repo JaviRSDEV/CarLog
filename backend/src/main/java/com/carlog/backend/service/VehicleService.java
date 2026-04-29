@@ -3,6 +3,7 @@ package com.carlog.backend.service;
 import com.carlog.backend.dto.NewVehicleDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.NotificationDTO;
+import com.carlog.backend.dto.VehicleAdmissionEvent;
 import com.carlog.backend.error.*;
 import com.carlog.backend.model.*;
 import com.carlog.backend.repository.UserJpaRepository;
@@ -14,6 +15,7 @@ import com.cloudinary.utils.ObjectUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -34,6 +36,7 @@ public class VehicleService {
     private final UserJpaRepository userJpaRepository;
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final Cloudinary cloudinary;
 
@@ -259,70 +262,81 @@ public class VehicleService {
         }
     }
 
+    @Transactional
     public NewVehicleDTO requestEntry(String plate, Long workshopId, String email) {
-        User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
 
         if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
             throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
         }
 
-        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
-        Workshop workshop = workshopJpaRepository.findById(workshopId).orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+        Workshop workshop = workshopJpaRepository.findById(workshopId)
+                .orElseThrow(() -> new WorkshopNotFoundException("Taller no encontrado"));
 
         vehicle.setPendingWorkshop(workshop);
         Vehicle savedVehicle = vehicleJpaRepository.save(vehicle);
 
-        String ownerDni = vehicle.getOwner().getDni();
+        eventPublisher.publishEvent(VehicleAdmissionEvent.of(savedVehicle));
 
+        String ownerDni = savedVehicle.getOwner().getDni();
         NotificationDTO notif = NotificationDTO.builder()
                 .type("VEHICLE_REQUEST")
                 .title("Solicitud de Ingreso")
-                .message("El taller " + workshop.getWorkshopName() + " solicita el ingreso de tu vehículo " + plate)
+                .message("El taller " + workshop.getWorkshopName() + " solicita el ingreso de tu vehículo " + plate.toUpperCase())
+                .extraData(plate)
                 .build();
 
-        messagingTemplate.convertAndSend("/topic/notificaciones/" + ownerDni, notif);
+        try {
+            messagingTemplate.convertAndSend("/topic/notificaciones/" + ownerDni, notif);
+        } catch (Exception e) {
+            log.error("Error enviando WebSocket al dueño: {}", e.getMessage());
+        }
 
         return NewVehicleDTO.of(savedVehicle);
     }
 
-    public NewVehicleDTO approveEntry(String plate, String email){
+    @Transactional
+    public NewVehicleDTO approveEntry(String plate, String email) {
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
                 .orElseThrow(() -> new VehicleNotFoundException(plate));
 
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if(!vehicle.getOwner().getDni().equals(currentUser.getDni())) {
+        if (vehicle.getPendingWorkshop() == null) {
+            throw new NoPendingRequestException(plate);
+        }
+
+        if (!vehicle.getOwner().getDni().equals(currentUser.getDni())) {
             throw new UnauthorizedActionException("No tienes permiso para aprobar el ingreso de este vehículo");
         }
 
-        if(vehicle.getPendingWorkshop() == null){
-            throw new NoPendingRequestException("Este vehículo no tiene ninguna solicitud pendiente");
-        }
-
-        Workshop workshop = vehicle.getPendingWorkshop();
-
-        vehicle.setWorkshop(vehicle.getPendingWorkshop());
+        Workshop targetWorkshop = vehicle.getPendingWorkshop();
+        vehicle.setWorkshop(targetWorkshop);
         vehicle.setPendingWorkshop(null);
 
         Vehicle savedVehicle = vehicleJpaRepository.save(vehicle);
 
-        try{
-            User manager = userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER).orElse(null);
+        try {
+            User manager = userJpaRepository.findFirstByWorkshopAndRole(targetWorkshop, Role.MANAGER).orElse(null);
 
-            if(manager != null){
+            if (manager != null) {
                 NotificationDTO alert = NotificationDTO.builder()
                         .type("NEW_FLEET_VEHICLE")
-                        .title("¡Nuevo vehiculo ingresado!")
-                        .message("El cliente ha autorizado el ingreso de la matricula " + plate.toUpperCase())
+                        .title("¡Nuevo vehículo ingresado!")
+                        .message("El cliente ha autorizado el ingreso de la matrícula " + plate.toUpperCase())
                         .extraData(plate)
                         .build();
 
                 messagingTemplate.convertAndSend("/topic/notificaciones/" + manager.getDni(), alert);
             }
-        }catch (Exception e){
-            log.error(e.getMessage());
+        } catch (Exception e) {
+            log.error("Error en notificación WebSocket al Manager: {}", e.getMessage());
         }
+
         return NewVehicleDTO.of(savedVehicle);
     }
 

@@ -8,6 +8,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class MailService {
 
     private final JavaMailSender mailSender;
+    private final SpringTemplateEngine templateEngine;
 
     @Async
     public void sendWorkOrderCompletedEmail(String clientEmail, String clientName, String vehiclePlate){
@@ -25,18 +30,68 @@ public class MailService {
             helper.setTo(clientEmail);
             helper.setSubject("¡Buenas noticias! Tu vehículo está listo - CarLog");
 
-            String htmlContent = String.format(
-                    "<h1>Hola, %s</h1>" +
-                            "<p>Te informamos que la orden de trabajo para el vehículo con matrícula <strong>%s</strong> ha sido completada con éxito.</p>" +
-                            "<p>Ya puedes pasarte por el taller a recogerlo.</p>" +
-                            "<br><p>Saludos,<br>El equipo de CarLog</p>",
-                    clientName, vehiclePlate
-            );
+            Context context = new Context();
+            context.setVariable("clientName", clientName);
+            context.setVariable("vehiclePlate", vehiclePlate.toUpperCase());
+
+            String htmlContent = templateEngine.process("emails/work-order-completed", context);
 
             helper.setText(htmlContent, true);
             mailSender.send(message);
-        }catch (MessagingException e){
+            log.info("Email de orden completada enviado a {}", clientEmail);
+
+        }catch (Exception e){
             log.error("Error enviando email a " + clientEmail + ": " + e.getMessage());
         }
     }
+
+    @Async
+    public void sendVehicleAdmissionEmail(String clientEmail, String clientName, String plate, String workshopName){
+        try{
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+
+            Context context = new Context();
+            context.setVariable("clientName", clientName);
+            context.setVariable("workshopName", workshopName);
+            context.setVariable("plate", plate.toUpperCase());
+
+            String htmlContent = templateEngine.process("emails/vehicle-admission", context);
+
+            helper.setTo(clientEmail);
+            helper.setSubject("Solicitud de ingreso enviada - CarLog");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("Email de ingreso enviado a {}", clientEmail);
+        }catch (Exception e){
+            log.error("Error enviando el email de ingreso: {}", e.getMessage());
+        }
+
+    }
+
+    @Async
+    public void sendHiringMessage(String to, String userName, String workshopName, String roleName){
+        try{
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+
+            Context context = new Context();
+            context.setVariable("userName", userName);
+            context.setVariable("workshopName", workshopName);
+            context.setVariable("roleName", roleName);
+
+            String htmlContent = templateEngine.process("emails/hiring-message", context);
+
+            helper.setTo(to);
+            helper.setSubject("Oferta de trabajo - CarLog");
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("Email de contratación enviado a {}", to);
+        }catch (Exception e){
+            log.error("Error enviando el email de contratación: {}", e.getMessage());
+        }
+    }
+
 }

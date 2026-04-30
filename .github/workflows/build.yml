@@ -16,7 +16,6 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: rootpassword
           MYSQL_DATABASE: carlog
-          # ❌ QUITA LA CLAVE DE AQUÍ. MySQL no sabe qué hacer con un JWT.
         ports:
           - 3306:3306
         options: >-

@@ -5,33 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Add capability for sending emails and generate pdfs">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/VehicleAdmissionEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/WorkOrderCompletedEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/WorkshopHiringEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/listener/NotificationEventListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/listener/WorkOrderNotificationListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/InvoiceService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/templates/emails/hiring-message.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/templates/emails/vehicle-admission.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/templates/emails/work-order-completed.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/resources/templates/invoice-template.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/InvoiceServiceTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/MailServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/VehicleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/VehicleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/WorkOrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/WorkOrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NewVehicleDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NewVehicleDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/error/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/MailService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/MailService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/controller/VehicleControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/controller/VehicleControllerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/UserServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/UserServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/UserJpaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/UserJpaRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,64 +57,64 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "Application.BackendApplication.executor": "Run",
-    "DefaultHtmlFileTemplate": "HTML File",
-    "JUnit.InvoiceServiceTest.executor": "Run",
-    "JUnit.MailServiceTest.executor": "Run",
-    "JUnit.UserControllerTest.executor": "Run",
-    "JUnit.UserServiceTest.executor": "Run",
-    "JUnit.VehicleControllerTest.executor": "Run",
-    "JUnit.VehicleControllerTest.search_Success.executor": "Run",
-    "JUnit.VehicleServiceTest.addVehicleWhenUserDoestNotExist.executor": "Run",
-    "JUnit.VehicleServiceTest.addVehicleWhenUserIsClient.executor": "Run",
-    "JUnit.VehicleServiceTest.addVehicleWhenUserIsMechanic.executor": "Run",
-    "JUnit.VehicleServiceTest.addVehicle_WorkerWithoutWorkshop_ThrowsException.executor": "Run",
-    "JUnit.VehicleServiceTest.approveEntry_UserIsOwner_ApprovesAndNotifies.executor": "Run",
-    "JUnit.VehicleServiceTest.executor": "Run",
-    "JUnit.VehicleServiceTest.getByPlate_UserIsOwner_ReturnsVehicle.executor": "Run",
-    "JUnit.VehicleServiceTest.getByWorkshop_UserBelongsToWorkshop_ReturnsVehicle.executor": "Run",
-    "JUnit.VehicleServiceTest.getByWorkshop_UserDoesNotBelongToWorkshop_ThrowsUnauthorized.executor": "Run",
-    "JUnit.VehicleServiceTest.getMyVehicles_AsClient_ReturnsOwnedVehicles.executor": "Run",
-    "JUnit.VehicleServiceTest.requestEntry_MechanicInWorkshop_CreatesPendingRequest.executor": "Run",
-    "JUnit.WorkOrderControllerTest.executor": "Run",
-    "JUnit.WorkOrderControllerTest.show_ThrowsWorkOrderNotFoundException.executor": "Run",
-    "JUnit.WorkOrderServiceTest.edit_Success_UpdatesStatusAndClosedAt.executor": "Run",
-    "JUnit.WorkOrderServiceTest.executor": "Run",
-    "JUnit.WorkshopControllerTest.executor": "Run",
-    "JUnit.WorkshopServiceTest.executor": "Run",
-    "Maven.backend [clean,install,-U].executor": "Run",
-    "Maven.backend [clean].executor": "Run",
-    "Maven.backend [install].executor": "Run",
-    "Maven.backend [verify,sonar:sonar...].executor": "Run",
-    "Maven.backend [verify...].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found": "New/updated database configurations found",
-    "Notification.DoNotAsk-DatabaseConfigFileWatcher.found": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/6003792/Desktop/CarLog",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;Application.BackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;JUnit.InvoiceServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.MailServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleControllerTest.search_Success.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.addVehicleWhenUserDoestNotExist.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.addVehicleWhenUserIsClient.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.addVehicleWhenUserIsMechanic.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.addVehicle_WorkerWithoutWorkshop_ThrowsException.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.approveEntry_UserIsOwner_ApprovesAndNotifies.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.getByPlate_UserIsOwner_ReturnsVehicle.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.getByWorkshop_UserBelongsToWorkshop_ReturnsVehicle.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.getByWorkshop_UserDoesNotBelongToWorkshop_ThrowsUnauthorized.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.getMyVehicles_AsClient_ReturnsOwnedVehicles.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.VehicleServiceTest.requestEntry_MechanicInWorkshop_CreatesPendingRequest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.WorkOrderControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.WorkOrderControllerTest.show_ThrowsWorkOrderNotFoundException.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.WorkOrderServiceTest.edit_Success_UpdatesStatusAndClosedAt.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.WorkOrderServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.WorkshopControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.WorkshopServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [clean,install,-U].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [install].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [verify,sonar:sonar...].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.backend [verify...].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found&quot;: &quot;New/updated database configurations found&quot;,
+    &quot;Notification.DoNotAsk-DatabaseConfigFileWatcher.found&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/6003792/Desktop/CarLog&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mysql"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\6003792\Desktop\Proyecto_final\CarLog\docs" />
@@ -299,14 +275,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00019" summary="Añadido metodo para actualizar ordenes de trabajo">
-      <option name="closed" value="true" />
-      <created>1775480430412</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1775480430412</updated>
     </task>
     <task id="LOCAL-00020" summary="refactorizados metodos para la reasigancion de ordenes de trabajo a otro mecanicos">
       <option name="closed" value="true" />
@@ -692,7 +660,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777307328744</updated>
     </task>
-    <option name="localTasksCounter" value="68" />
+    <task id="LOCAL-00068" summary="Add capability for sending emails and generate pdfs">
+      <option name="closed" value="true" />
+      <created>1777479004390</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1777479004391</updated>
+    </task>
+    <option name="localTasksCounter" value="69" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

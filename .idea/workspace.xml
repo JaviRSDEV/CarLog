@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Add capability for sending emails and generate pdfs">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/UserJpaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/UserJpaRepository.java" afterDir="false" />
-    </list>
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="minor changes" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -275,14 +271,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00020" summary="refactorizados metodos para la reasigancion de ordenes de trabajo a otro mecanicos">
-      <option name="closed" value="true" />
-      <created>1775549383881</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1775549383882</updated>
     </task>
     <task id="LOCAL-00021" summary="Refactorizada funcionalidad para contrataciones y solucionada redundancia con el cors">
       <option name="closed" value="true" />
@@ -668,7 +656,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777479004391</updated>
     </task>
-    <option name="localTasksCounter" value="69" />
+    <task id="LOCAL-00069" summary="minor changes">
+      <option name="closed" value="true" />
+      <created>1777552281364</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1777552281365</updated>
+    </task>
+    <option name="localTasksCounter" value="70" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -689,7 +685,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added RateLimiting to the login and Register endpoints" />
     <MESSAGE value="Adjusted the application.properties, ready for production" />
     <MESSAGE value="Added control for Images Upload" />
     <MESSAGE value="Added swagger implementation" />
@@ -714,7 +709,8 @@
     <MESSAGE value="Added tests for userController and vehicleController" />
     <MESSAGE value="Minor fixes in pom.xml" />
     <MESSAGE value="Add capability for sending emails and generate pdfs" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add capability for sending emails and generate pdfs" />
+    <MESSAGE value="minor changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor changes" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

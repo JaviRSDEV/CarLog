@@ -2,10 +2,6 @@ package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewVehicleDTO;
 import com.carlog.backend.dto.NewWorkOrderResponseDTO;
-import com.carlog.backend.error.NoPendingRequestException;
-import com.carlog.backend.error.VehicleNotFoundException;
-import com.carlog.backend.model.Vehicle;
-import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.service.VehicleService;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;

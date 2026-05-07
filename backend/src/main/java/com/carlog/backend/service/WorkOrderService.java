@@ -66,7 +66,7 @@ public class WorkOrderService {
         if (isWorker) {
             if (vehicle.getWorkshop() == null || currentUser.getWorkshop() == null ||
                     !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
-                throw new UnauthorizedActionException("Acceso denegado: Este vehículo no está en tu taller.");
+                throw new VehicleNotInWorkshopException("El vehículo no esta en el taller");
             }
         } else {
             if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
@@ -179,11 +179,11 @@ public class WorkOrderService {
         verifyWriteAccess(order, email);
 
         if(order.getStatus() != WorkOrderStatus.COMPLETED){
-            throw new UnauthorizedActionException("La orden de estar completada para notificar al cliente");
+            throw new VehicleNotInWorkshopException("El vehículo no tiene un cliente asignado");
         }
 
         if(order.getVehicle() == null || order.getVehicle().getOwner() == null){
-            throw new UserNotFoundException("El vehículo no tiene un cliente asignado");
+            throw new VehicleNotInWorkshopException("El vehículo no tiene un cliente asignado");
         }
 
         eventPublisher.publishEvent(WorkOrderCompletedEvent.of(order));
@@ -285,13 +285,13 @@ public class WorkOrderService {
 
         if (workOrder.getWorkshop() == null || currentUser.getWorkshop() == null ||
                 !workOrder.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
-            throw new UnauthorizedActionException("Acceso denegado: No puedes modificar órdenes de otro taller.");
+            throw new VehicleNotInWorkshopException("El vehículo ya no esta en el taller");
         }
 
         Vehicle vehicle = workOrder.getVehicle();
         if (vehicle != null && (vehicle.getWorkshop() == null ||
                 !vehicle.getWorkshop().getWorkshopId().equals(workOrder.getWorkshop().getWorkshopId()))) {
-            throw new UnauthorizedActionException("Acceso denegado: El vehículo ya no está en el taller.");
+            throw new VehicleNotInWorkshopException("El vehículo ya no esta en el taller");
         }
     }
 }

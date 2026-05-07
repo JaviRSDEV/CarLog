@@ -179,11 +179,11 @@ public class WorkOrderService {
         verifyWriteAccess(order, email);
 
         if(order.getStatus() != WorkOrderStatus.COMPLETED){
-            throw new VehicleNotInWorkshopException("El vehículo no tiene un cliente asignado");
+            throw new WorkOrderLineMismatchException("La orden de trabajo debe estar cerrad");
         }
 
         if(order.getVehicle() == null || order.getVehicle().getOwner() == null){
-            throw new VehicleNotInWorkshopException("El vehículo no tiene un cliente asignado");
+            throw new VehicleNotFoundException("El vehículo no tiene un cliente asignado");
         }
 
         eventPublisher.publishEvent(WorkOrderCompletedEvent.of(order));

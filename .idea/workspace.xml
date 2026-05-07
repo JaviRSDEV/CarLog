@@ -4,9 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Removed unused imports">
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Minor changes: switched to unauthorizedActionException no VehicleNotInWorkshopException in WorkOrderService">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/CatalogInitializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/FlywayConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/CarCatalogController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/CarBrand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/CarModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/CarBrandJpaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/CarModelJpaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/CarCatalogService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__Initial_schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V1__Initial_schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,6 +31,7 @@
         <option value="Exception" />
         <option value="Record" />
         <option value="HTML File" />
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -130,9 +143,9 @@
       <command value="mvn verify sonar:sonar -Dsonar.projectKey=JaviRSDEV_CarLog -Dresource.delimiter=@ -Dencoding.skip=true -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8" />
       <command value="mvn verify sonar:sonar -Dsonar.projectKey=JaviRSDEV_CarLog -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8" />
       <command value="set MAVEN_OPTS=-Dfile.encoding=UTF-8" />
-      <command value="mvn clean " />
       <command value="mvn install" />
       <command value="mvn clean install -U" />
+      <command value="mvn clean " />
     </option>
   </component>
   <component name="RunManager" selected="Spring Boot.BackendApplication">
@@ -274,14 +287,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00022" summary="Modificada la gestion global de errores y refactorizados metodos">
-      <option name="closed" value="true" />
-      <created>1775646711661</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1775646711661</updated>
     </task>
     <task id="LOCAL-00023" summary="Añadida dependencia para websockets">
       <option name="closed" value="true" />
@@ -667,7 +672,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777984468339</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="Minor changes: switched to unauthorizedActionException no VehicleNotInWorkshopException in WorkOrderService">
+      <option name="closed" value="true" />
+      <created>1778150725716</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1778150725717</updated>
+    </task>
+    <option name="localTasksCounter" value="72" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -688,7 +701,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added control for Images Upload" />
     <MESSAGE value="Added swagger implementation" />
     <MESSAGE value="Added pagination in critial querys" />
     <MESSAGE value="Fixed critical vulnerabilities" />
@@ -713,7 +725,8 @@
     <MESSAGE value="Add capability for sending emails and generate pdfs" />
     <MESSAGE value="minor changes" />
     <MESSAGE value="Removed unused imports" />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed unused imports" />
+    <MESSAGE value="Minor changes: switched to unauthorizedActionException no VehicleNotInWorkshopException in WorkOrderService" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor changes: switched to unauthorizedActionException no VehicleNotInWorkshopException in WorkOrderService" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

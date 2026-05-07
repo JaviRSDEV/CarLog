@@ -105,6 +105,18 @@ create table work_order_line
         foreign key (work_order_id) references work_order (id)
 );
 
+CREATE TABLE car_brands (
+                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            name VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE car_models (
+                            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                            name VARCHAR(100) NOT NULL,
+                            brand_id BIGINT NOT NULL,
+                            CONSTRAINT fk_model_brand FOREIGN KEY (brand_id) REFERENCES car_brands(id) ON DELETE CASCADE
+);
+
 
 
 

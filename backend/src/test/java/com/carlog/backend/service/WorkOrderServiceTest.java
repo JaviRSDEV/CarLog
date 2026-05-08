@@ -185,10 +185,12 @@ class WorkOrderServiceTest {
 
     @Test
     void notifyClientForPickup_ThrowsUnauthorized_WhenNotCompleted() {
+        workOrder.setStatus(WorkOrderStatus.PENDING);
+
         when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
         when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
 
-        assertThrows(UnauthorizedActionException.class, () ->
+        assertThrows(WorkOrderLineMismatchException.class, () ->
                 workOrderService.notifyClientForPickup(workOrder.getId(), mechanic.getEmail())
         );
     }
@@ -201,7 +203,7 @@ class WorkOrderServiceTest {
         when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
         when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
 
-        assertThrows(UserNotFoundException.class, () ->
+        assertThrows(VehicleNotFoundException.class, () ->
                 workOrderService.notifyClientForPickup(workOrder.getId(), mechanic.getEmail())
         );
     }
@@ -237,12 +239,13 @@ class WorkOrderServiceTest {
     void getByVehicle_ThrowsUnauthorized_WhenVehicleInDifferentWorkshop() {
         Workshop anotherWorkshop = new Workshop();
         anotherWorkshop.setWorkshopId(99L);
+
         vehicle.setWorkshop(anotherWorkshop);
 
         when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
         when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
 
-        assertThrows(UnauthorizedActionException.class, () ->
+        assertThrows(VehicleNotInWorkshopException.class, () ->
                 workOrderService.getByVehicle(vehicle.getPlate(), mechanic.getEmail(), Pageable.unpaged())
         );
     }

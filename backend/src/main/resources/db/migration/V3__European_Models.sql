@@ -68,7 +68,6 @@ INSERT IGNORE INTO car_models (name, brand_id) VALUES
 ('106', @peugeot_id), ('205', @peugeot_id), ('206', @peugeot_id), ('207', @peugeot_id),
 ('306', @peugeot_id), ('307', @peugeot_id), ('406', @peugeot_id), ('407', @peugeot_id),
 ('807', @peugeot_id), ('RCZ', @peugeot_id), ('Traveller', @peugeot_id), ('Bipper', @peugeot_id);
--- (Mejor usamos la sintaxis completa para asegurar que no falle en MySQL si hay concurrencia o NULLs previos)
 
 -- 2. CITROËN
 SET @citroen_id = (SELECT id FROM car_brands WHERE name = 'Citroën');
@@ -682,3 +681,37 @@ INSERT IGNORE INTO car_models (name, brand_id) VALUES
 SET @galloper_id = (SELECT id FROM car_brands WHERE name = 'Galloper');
 INSERT IGNORE INTO car_models (name, brand_id) VALUES
 ('Exceed', @galloper_id), ('Super Exceed', @galloper_id), ('Innovation', @galloper_id), ('Santamo', @galloper_id);
+
+-- ==========================================
+-- MERCEDES-BENZ
+-- ==========================================
+
+SET @mercedes_id = (SELECT id FROM car_brands WHERE name = 'Mercedes-Benz');
+
+INSERT IGNORE INTO car_models (name, brand_id) VALUES
+-- Turismos y Berlinas
+('Clase A', @mercedes_id), ('Clase B', @mercedes_id), ('Clase C', @mercedes_id),
+('Clase E', @mercedes_id), ('Clase S', @mercedes_id), ('CLA', @mercedes_id),
+('CLS', @mercedes_id), ('Clase V', @mercedes_id),
+
+-- SUV y Todoterrenos
+('GLA', @mercedes_id), ('GLB', @mercedes_id), ('GLC', @mercedes_id),
+('GLE', @mercedes_id), ('GLS', @mercedes_id), ('GLK', @mercedes_id),
+('Clase G', @mercedes_id), ('ML', @mercedes_id), ('GL', @mercedes_id),
+
+-- Deportivos y Coupés
+('SL', @mercedes_id), ('SLC', @mercedes_id), ('SLK', @mercedes_id),
+('CLK', @mercedes_id), ('CL', @mercedes_id), ('GT', @mercedes_id),
+('SLS AMG', @mercedes_id),
+
+-- Gama Eléctrica (EQ)
+('EQA', @mercedes_id), ('EQB', @mercedes_id), ('EQC', @mercedes_id),
+('EQE', @mercedes_id), ('EQS', @mercedes_id), ('EQV', @mercedes_id),
+
+-- Comerciales e Industriales
+('Vito', @mercedes_id), ('Viano', @mercedes_id), ('Sprinter', @mercedes_id),
+('Citan', @mercedes_id), ('Clase X', @mercedes_id),
+
+-- Clásicos e Históricos
+('190', @mercedes_id), ('300', @mercedes_id), ('500', @mercedes_id),
+('W124', @mercedes_id), ('Ponton', @mercedes_id);

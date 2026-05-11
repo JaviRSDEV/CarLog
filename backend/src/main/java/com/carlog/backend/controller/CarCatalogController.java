@@ -1,7 +1,6 @@
 package com.carlog.backend.controller;
 
-import com.carlog.backend.model.CarBrand;
-import com.carlog.backend.model.CarModel;
+import com.carlog.backend.dto.CatalogItemDTO;
 import com.carlog.backend.repository.CarBrandJpaRepository;
 import com.carlog.backend.repository.CarModelJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +20,18 @@ public class CarCatalogController {
     private final CarModelJpaRepository carModelJpaRepository;
 
     @GetMapping("/brands")
-    public List<String> getBrands(){
-        return carBrandJpaRepository.findAll().stream().map(CarBrand::getName).toList();
+    public List<CatalogItemDTO> getBrands() {
+        return carBrandJpaRepository.findAllByOrderByNameAsc()
+                .stream()
+                .map(brand -> new CatalogItemDTO(brand.getId(), brand.getName()))
+                .toList();
     }
 
     @GetMapping("/models/{brandName}")
-    public List<String> getModels(@PathVariable String brandName){
-        return carModelJpaRepository.findByBrand_NameIgnoreCase(brandName)
-                .stream().map(CarModel::getName).toList();
+    public List<CatalogItemDTO> getModels(@PathVariable String brandName) {
+        return carModelJpaRepository.findByBrand_NameIgnoreCaseOrderByNameAsc(brandName)
+                .stream()
+                .map(model -> new CatalogItemDTO(model.getId(), model.getName()))
+                .toList();
     }
 }

@@ -34,6 +34,10 @@ public class Vehicle implements Serializable {
     @Column(name = "Model")
     private String model;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "version_id")
+    private CarVersion carVersion;
+
     @Column(name = "Kilometers")
     private Long kilometers;
 

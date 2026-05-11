@@ -1,7 +1,6 @@
 package com.carlog.backend.dto;
 
 import com.carlog.backend.model.CarVersion;
-import com.carlog.backend.model.User;
 
 public record CarVersionDTO(
         Long id,
@@ -10,6 +9,7 @@ public record CarVersionDTO(
         String engineType,
         String fuelType,
         Integer powerCv,
+        Integer torque,
         Integer yearStart,
         Integer yearEnd
 ) {
@@ -21,6 +21,7 @@ public record CarVersionDTO(
                 cv.getEngineType(),
                 cv.getFuelType(),
                 cv.getPowerCv(),
+                cv.getTorque(),
                 cv.getYearStart(),
                 cv.getYearEnd()
         );}

@@ -13,4 +13,6 @@ public interface CarBrandJpaRepository extends JpaRepository<CarBrand, Long> {
     Optional<CarBrand> findByName(String brandName);
 
     List<CarBrand> findAllByOrderByNameAsc();
+
+    Optional<CarBrand> findByNameIgnoreCase(String name);
 }

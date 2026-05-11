@@ -1,13 +1,11 @@
 package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.CatalogItemDTO;
-import com.carlog.backend.repository.CarBrandJpaRepository;
-import com.carlog.backend.repository.CarModelJpaRepository;
+import com.carlog.backend.model.CarVersion;
+import com.carlog.backend.service.CarCatalogService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -16,22 +14,37 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CarCatalogController {
 
-    private final CarBrandJpaRepository carBrandJpaRepository;
-    private final CarModelJpaRepository carModelJpaRepository;
+    private final CarCatalogService catalogService;
 
     @GetMapping("/brands")
     public List<CatalogItemDTO> getBrands() {
-        return carBrandJpaRepository.findAllByOrderByNameAsc()
-                .stream()
+        return catalogService.getAllBrands().stream()
                 .map(brand -> new CatalogItemDTO(brand.getId(), brand.getName()))
                 .toList();
     }
 
-    @GetMapping("/models/{brandName}")
-    public List<CatalogItemDTO> getModels(@PathVariable String brandName) {
-        return carModelJpaRepository.findByBrand_NameIgnoreCaseOrderByNameAsc(brandName)
-                .stream()
+    @GetMapping("/brands/{brandId}/models")
+    public List<CatalogItemDTO> getModels(@PathVariable Long brandId) {
+        return catalogService.getModelsByBrand(brandId).stream()
                 .map(model -> new CatalogItemDTO(model.getId(), model.getName()))
                 .toList();
+    }
+
+    @GetMapping("/models/{modelId}/versions")
+    public List<CatalogItemDTO> getVersions(@PathVariable Long modelId) {
+        return catalogService.getVersionsByModel(modelId).stream()
+                .map(v -> new CatalogItemDTO(v.getId(), v.getVersionName()))
+                .toList();
+    }
+
+    @GetMapping("/versions/{versionId}")
+    public ResponseEntity<CarVersion> getVersionDetails(@PathVariable Long versionId) {
+        return ResponseEntity.ok(catalogService.getVersionById(versionId));
+    }
+
+    @PostMapping("/sync")
+    public ResponseEntity<String> triggerSync() {
+        catalogService.syncCatalog();
+        return ResponseEntity.ok("Sincronización iniciada/completada");
     }
 }

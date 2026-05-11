@@ -35,6 +35,9 @@ public class CarVersion {
     @Column(name = "power_cv")
     private Integer powerCv;
 
+    @Column(name = "torque_nm")
+    private Integer torque;
+
     @Column(name = "year_start")
     private Integer yearStart;
 

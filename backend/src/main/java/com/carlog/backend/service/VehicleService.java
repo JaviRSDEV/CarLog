@@ -1,15 +1,9 @@
 package com.carlog.backend.service;
 
-import com.carlog.backend.dto.NewVehicleDTO;
-import com.carlog.backend.dto.NewWorkOrderResponseDTO;
-import com.carlog.backend.dto.NotificationDTO;
-import com.carlog.backend.dto.VehicleAdmissionEvent;
+import com.carlog.backend.dto.*;
 import com.carlog.backend.error.*;
 import com.carlog.backend.model.*;
-import com.carlog.backend.repository.UserJpaRepository;
-import com.carlog.backend.repository.VehicleJpaRepository;
-import com.carlog.backend.repository.WorkOrderJpaRepository;
-import com.carlog.backend.repository.WorkshopJpaRepository;
+import com.carlog.backend.repository.*;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import jakarta.transaction.Transactional;
@@ -37,6 +31,11 @@ public class VehicleService {
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final ApplicationEventPublisher eventPublisher;
+
+    private final CarBrandJpaRepository brandJpaRepository;
+    private final CarModelJpaRepository modelJpaRepository;
+    private final CarVersionJpaRepository versionJpaRepository;
+    private CarVersionDTO carVersionDTO;
 
     private final Cloudinary cloudinary;
 
@@ -94,6 +93,7 @@ public class VehicleService {
                 .map(NewVehicleDTO::of);
     }
 
+    @Transactional
     public NewVehicleDTO add(NewVehicleDTO dto, String userEmail) {
         User connectedUser = userJpaRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException(userEmail));
@@ -106,8 +106,6 @@ public class VehicleService {
 
         Vehicle newVehicle = Vehicle.builder()
                 .plate(dto.plate())
-                .brand(dto.brand())
-                .model(dto.model())
                 .kilometers(dto.kilometers())
                 .engine(dto.engine())
                 .horsePower(dto.horsePower())
@@ -118,6 +116,8 @@ public class VehicleService {
                 .owner(owner)
                 .workshop(currentWorkshop)
                 .build();
+
+        assignVersionToVehicle(newVehicle, dto);
 
         return NewVehicleDTO.of(vehicleJpaRepository.save(newVehicle));
     }
@@ -189,6 +189,7 @@ public class VehicleService {
         }
     }
 
+    @Transactional
     public NewVehicleDTO edit(NewVehicleDTO dto, String plate, String email) {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
@@ -199,11 +200,61 @@ public class VehicleService {
 
             updateVehicleImages(vehicle, dto.images());
 
-            mapDtoToEntity(vehicle, dto);
+            vehicle.setPlate(dto.plate());
+            vehicle.setKilometers(dto.kilometers());
+            vehicle.setEngine(dto.engine());
+            vehicle.setHorsePower(dto.horsePower());
+            vehicle.setTorque(dto.torque());
+            vehicle.setTires(dto.tires());
+            vehicle.setLastMaintenance(dto.lastMaintenance());
+
+            assignVersionToVehicle(vehicle, dto);
+
             updateOwnerIfPresent(vehicle, dto.ownerId());
 
             return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
         }).orElseThrow(() -> new VehicleNotFoundException(plate));
+    }
+
+    private void assignVersionToVehicle(Vehicle vehicle, NewVehicleDTO dto) {
+        if (dto.carVersion() != null && dto.carVersion().id() != null && dto.carVersion().id() != -1) {
+            CarVersion version = versionJpaRepository.findById(dto.carVersion().id())
+                    .orElseThrow(() -> new RuntimeException("Versión del catálogo no encontrada"));
+            vehicle.setCarVersion(version);
+
+            vehicle.setBrand(version.getCarModel().getBrand().getName());
+            vehicle.setModel(version.getCarModel().getName());
+
+        } else {
+            String brandName = (dto.brand() != null && !dto.brand().isBlank()) ? dto.brand().trim() : "Desconocida";
+            String modelName = (dto.model() != null && !dto.model().isBlank()) ? dto.model().trim() : "Desconocido";
+
+            final String finalVersionName = (dto.carVersion() != null && dto.carVersion().versionName() != null && !dto.carVersion().versionName().isBlank())
+                    ? dto.carVersion().versionName().trim()
+                    : dto.engine();
+
+            CarBrand brand = brandJpaRepository.findByNameIgnoreCase(brandName)
+                    .orElseGet(() -> brandJpaRepository.save(CarBrand.builder().name(brandName).build()));
+
+            CarModel model = modelJpaRepository.findByNameIgnoreCaseAndBrandId(modelName, brand.getId())
+                    .orElseGet(() -> modelJpaRepository.save(CarModel.builder().name(modelName).brand(brand).build()));
+
+            CarVersion version = versionJpaRepository.findByVersionNameIgnoreCaseAndCarModelId(finalVersionName, model.getId())
+                    .orElseGet(() -> {
+                        CarVersion newVersion = new CarVersion();
+                        newVersion.setCarModel(model);
+                        newVersion.setVersionName(finalVersionName);
+                        newVersion.setEngineCode(dto.engine());
+                        newVersion.setPowerCv(dto.horsePower());
+                        newVersion.setTorque(dto.torque());
+                        return versionJpaRepository.save(newVersion);
+                    });
+
+            vehicle.setCarVersion(version);
+
+            vehicle.setBrand(brand.getName());
+            vehicle.setModel(model.getName());
+        }
     }
 
     private void validateEditAccess(Vehicle vehicle, User currentUser) {

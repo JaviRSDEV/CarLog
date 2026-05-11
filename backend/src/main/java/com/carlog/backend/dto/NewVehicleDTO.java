@@ -16,6 +16,7 @@ public record NewVehicleDTO(
                             String brand,
                             @NotBlank(message = "El modelo es obligatorio")
                             String model,
+                            CarVersionDTO carVersion,
                             @NotNull @Min(0)
                             Long kilometers,
                             String engine,
@@ -36,7 +37,7 @@ public record NewVehicleDTO(
                 v.getPlate(),
                 v.getBrand(),
                 v.getModel(),
-                v.getKilometers(),
+                v.getCarVersion() != null ? CarVersionDTO.of(v.getCarVersion()) : null,                v.getKilometers(),
                 v.getEngine(),
                 v.getHorsePower(),
                 v.getTorque(),

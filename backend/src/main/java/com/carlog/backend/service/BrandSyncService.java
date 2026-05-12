@@ -21,7 +21,7 @@ public class BrandSyncService {
 
     private final CarBrandJpaRepository carBrandJpaRepository;
     private final CarModelJpaRepository carModelJpaRepository;
-    private final RestClient restClient;
+    private final RestClient restClient = RestClient.create();
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processBrandSync(String brandName) {

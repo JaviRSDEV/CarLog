@@ -5,10 +5,7 @@ import com.carlog.backend.dto.NewWorkOrderResponseDTO;
 import com.carlog.backend.dto.NotificationDTO;
 import com.carlog.backend.dto.VehicleAdmissionEvent;
 import com.carlog.backend.error.*;
-import com.carlog.backend.model.Role;
-import com.carlog.backend.model.User;
-import com.carlog.backend.model.Vehicle;
-import com.carlog.backend.model.Workshop;
+import com.carlog.backend.model.*;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.repository.WorkOrderJpaRepository;
@@ -46,6 +43,9 @@ class VehicleServiceTest {
     @Mock private SimpMessagingTemplate messagingTemplate;
     @Mock private Cloudinary cloudinary;
     @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private com.carlog.backend.repository.CarBrandJpaRepository brandJpaRepository;
+    @Mock private com.carlog.backend.repository.CarModelJpaRepository modelJpaRepository;
+    @Mock private com.carlog.backend.repository.CarVersionJpaRepository versionJpaRepository;
 
     @InjectMocks private VehicleService vehicleService;
 
@@ -64,6 +64,24 @@ class VehicleServiceTest {
         clientUser = User.builder().dni("11111111A").email("client@test.com").role(Role.CLIENT).build();
         mechanicUser = User.builder().dni("22222222B").email("mechanic@test.com").role(Role.MECHANIC).workshop(workshop).build();
         vehicle = Vehicle.builder().plate("1234-ABC").owner(clientUser).workshop(workshop).build();
+
+        lenient().when(brandJpaRepository.save(any(CarBrand.class))).thenAnswer(invocation -> {
+            CarBrand b = invocation.getArgument(0);
+            b.setId(1L);
+            return b;
+        });
+
+        lenient().when(modelJpaRepository.save(any(CarModel.class))).thenAnswer(invocation -> {
+            CarModel m = invocation.getArgument(0);
+            m.setId(1L);
+            return m;
+        });
+
+        lenient().when(versionJpaRepository.save(any(CarVersion.class))).thenAnswer(invocation -> {
+            CarVersion v = invocation.getArgument(0);
+            v.setId(1L);
+            return v;
+        });
     }
 
     @Test
@@ -344,9 +362,11 @@ class VehicleServiceTest {
 
     @Test
     void edit_UserIsOwner_UpdatesVehicleSuccessfully() {
-        NewVehicleDTO editDto = new NewVehicleDTO("1234-ABC", "Ford", "Mustang", 5000L,
+        NewVehicleDTO editDto = new NewVehicleDTO(
+                "1234-ABC", "Ford", "Mustang", null, 5000L,
                 "Gasolina", 400, 500, "Pirelli",
-                null, null, null, null, null, null);
+                null, null, null, null, null, null
+        );
 
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
         when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
@@ -361,8 +381,11 @@ class VehicleServiceTest {
 
     @Test
     void edit_PlateChangedAndAlreadyExists_ThrowsException() {
-        NewVehicleDTO editDto = new NewVehicleDTO("9999-NEW", "Ford", "Mustang", 5000L,
-                "Gasolina", 400, 500, "Pirelli", null, null, null, null, null, null);
+        NewVehicleDTO editDto = new NewVehicleDTO(
+                "9999-NEW", "Ford", "Mustang", null, 5000L,
+                "Gasolina", 400, 500, "Pirelli",
+                null, null, null, null, null, null
+        );
 
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
         when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));

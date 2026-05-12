@@ -74,8 +74,21 @@ class VehicleControllerTest {
         mockPrincipal = () -> "mechanic@test.com";
 
         mockVehicle = new NewVehicleDTO(
-                "1234ABC", "Toyota", "Corolla", 120000L, "2.0 Hybrid", 184, 190,
-                "225/45 R17", new ArrayList<>(), LocalDate.now(), 1L, "11111111A", null, null
+                "1234ABC",
+                "Toyota",
+                "Corolla",
+                null,
+                120000L,
+                "2.0 Hybrid",
+                184,
+                190,
+                "225/45 R17",
+                new ArrayList<>(),
+                LocalDate.now(),
+                1L,
+                "11111111A",
+                null,
+                null
         );
     }
 
@@ -110,7 +123,21 @@ class VehicleControllerTest {
     @DisplayName("POST /api/vehicles - Validation Error (Empty Plate)")
     void store_ValidationError() throws Exception {
         NewVehicleDTO invalidVehicle = new NewVehicleDTO(
-                "", "", "", -1L, null, -5, -5, null, null, null, null, null, null, null
+                "",
+                "",
+                "",
+                null,
+                -1L,
+                null,
+                -5,
+                -5,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
         );
 
         mockMvc.perform(post("/api/vehicles")

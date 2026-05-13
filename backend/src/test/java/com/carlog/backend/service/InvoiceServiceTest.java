@@ -78,8 +78,7 @@ class InvoiceServiceTest {
         Context capturedContext = contextCaptor.getValue();
 
         assertEquals(mockWorkOrder, capturedContext.getVariable("order"));
-        assertEquals("11111111A", ((User) capturedContext.getVariable("client")).getDni());
-
+        assertEquals("11111111A", capturedContext.getVariable("clientDni"));
         assertEquals(100.0, capturedContext.getVariable("imponibleBase"));
         assertEquals(21.0, capturedContext.getVariable("totalIva"));
         assertEquals(12.1, capturedContext.getVariable("totalDiscount"));

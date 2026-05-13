@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing">
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="minor fix in WorkOrderServiceTest">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/InvoiceServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/InvoiceServiceTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,7 +137,22 @@
       <command value="mvn clean " />
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.WorkOrderServiceTest">
+  <component name="RunManager" selected="JUnit.InvoiceServiceTest">
+    <configuration name="InvoiceServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="backend" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.carlog.backend.service.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.carlog.backend.service" />
+      <option name="MAIN_CLASS_NAME" value="com.carlog.backend.service.InvoiceServiceTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="UserServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">
@@ -147,21 +163,6 @@
       </extension>
       <option name="PACKAGE_NAME" value="com.carlog.backend.service" />
       <option name="MAIN_CLASS_NAME" value="com.carlog.backend.service.UserServiceTest" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="VehicleControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="backend" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.carlog.backend.controller.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.carlog.backend.controller" />
-      <option name="MAIN_CLASS_NAME" value="com.carlog.backend.controller.VehicleControllerTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -226,20 +227,20 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="JUnit.InvoiceServiceTest" />
       <item itemvalue="JUnit.UserServiceTest" />
       <item itemvalue="JUnit.WorkOrderServiceTest" />
       <item itemvalue="JUnit.WorkshopServiceTest" />
       <item itemvalue="JUnit.VehicleServiceTest" />
-      <item itemvalue="JUnit.VehicleControllerTest" />
       <item itemvalue="Spring Boot.BackendApplication" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.InvoiceServiceTest" />
         <item itemvalue="JUnit.WorkOrderServiceTest" />
         <item itemvalue="JUnit.UserServiceTest" />
         <item itemvalue="JUnit.WorkshopServiceTest" />
         <item itemvalue="JUnit.VehicleServiceTest" />
-        <item itemvalue="JUnit.VehicleControllerTest" />
       </list>
     </recent_temporary>
   </component>
@@ -274,14 +275,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00029" summary="Solved redundant code and solved some security problems">
-      <option name="closed" value="true" />
-      <created>1776093255626</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1776093255626</updated>
     </task>
     <task id="LOCAL-00030" summary="Added a first version of a vehicle browser">
       <option name="closed" value="true" />
@@ -667,7 +660,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778687967791</updated>
     </task>
-    <option name="localTasksCounter" value="78" />
+    <task id="LOCAL-00078" summary="minor fix in WorkOrderServiceTest">
+      <option name="closed" value="true" />
+      <created>1778688199665</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1778688199665</updated>
+    </task>
+    <option name="localTasksCounter" value="79" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -688,7 +689,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added custom exception classes and eliminated RuntimeException uses" />
     <MESSAGE value="Minor changes in WorkshopController" />
     <MESSAGE value="Added batery of tests" />
     <MESSAGE value="Minor changes in pom" />
@@ -713,7 +713,8 @@
     <MESSAGE value="Fixed problems with tests" />
     <MESSAGE value="Minor changes with hibernate" />
     <MESSAGE value="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing" />
+    <MESSAGE value="minor fix in WorkOrderServiceTest" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor fix in WorkOrderServiceTest" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

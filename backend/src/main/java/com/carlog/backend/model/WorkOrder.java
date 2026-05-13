@@ -42,8 +42,13 @@ public class WorkOrder {
     private LocalDate closedAt;
 
     @ManyToOne
-    @JoinColumn(name = "vehicle_id", nullable = false)
+    @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
+
+    private String historicalPlate;
+    private String historicalBrandModel;
+    private String historicalClientName;
+    private String historicalClientDni;
 
     @ManyToOne
     @JoinColumn(name = "mechanic_id", nullable = false)
@@ -59,6 +64,11 @@ public class WorkOrder {
     @OneToMany(mappedBy = "workOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<WorkOrderLine> lines = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     public void addWorkOrderLine(WorkOrderLine line){
 

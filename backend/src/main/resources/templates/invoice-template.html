@@ -13,7 +13,7 @@
             font-size: 13px;
         }
 
-        /* Tablas maquetación general (infalible para PDFs) */
+        /* Tablas maquetación general */
         .layout-table {
             width: 100%;
             border-collapse: collapse;
@@ -64,7 +64,7 @@
             line-height: 1.5;
         }
 
-        /* Tabla de líneas de la factura */
+        /* Tabla de líneas */
         table.lines {
             width: 100%;
             border-collapse: collapse;
@@ -86,7 +86,7 @@
             border-bottom: 1px solid #ecf0f1;
         }
 
-        /* Contenedor de Totales */
+        /* Totales */
         table.totals-table {
             width: 350px;
             float: right;
@@ -138,18 +138,15 @@
             <td style="width: 50%;">
                 <div class="section-label">Facturar a:</div>
                 <div class="info-text">
-                    <strong style="font-size: 16px;">[[${client.name}]]</strong><br/>
-                    DNI: [[${client.dni}]]<br/>
-                    Email: [[${client.email}]]<br/>
-                    Teléfono: [[${client.phone}]]
+                    <strong style="font-size: 16px;" th:text="${clientName}">Nombre Cliente</strong><br/>
+                    DNI: <span th:text="${clientDni}">00000000X</span>
                 </div>
             </td>
             <td style="width: 50%; text-align: right;">
                 <div class="section-label">Datos del Vehículo:</div>
                 <div class="info-text">
-                    <strong style="font-size: 16px;">[[${vehicle.brand}]] [[${vehicle.model}]]</strong><br/>
-                    Matrícula: <strong>[[${vehicle.plate}]]</strong><br/>
-                    Mecánico: [[${order.mechanic.name}]]
+                    <strong style="font-size: 16px;" th:text="${model}">Marca Modelo</strong><br/>
+                    Matrícula: <strong th:text="${plate}">0000XXX</strong><br/>
                 </div>
             </td>
         </tr>

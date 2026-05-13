@@ -27,4 +27,4 @@ INSERT IGNORE INTO car_brands (name) VALUES
 ('Tesla'), ('Rivian'), ('Lucid'), ('Fisker'), ('Faraday Future'), ('NIO'), ('Xpeng'),
 ('Ferrari'), ('Aston Martin'), ('McLaren'), ('Pagani'), ('Koenigsegg'), ('Aston Martin'),
 -- Marcas clásicas / extintas (opcional pero útil en talleres)
-('Saab'), ('Rover'), ('Daewoo'), ('MG Rover'), ('Talbot'), ('Santana'), ('Galloper');
+('Saab'), ('Rover'), ('Daewoo'), ('MG Rover'), ('Talbot'), ('Santana'), ('Galloper'), ('Mercedes-Benz');

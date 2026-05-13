@@ -447,6 +447,26 @@ public class VehicleService {
         if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
             throw new UnauthorizedActionException("Acceso denegado: No tienes permiso para eliminar el vehículo");
         }
+
+        Page<WorkOrder> orderPage = workOrderJpaRepository.findByVehicle_Plate(plate, Pageable.unpaged());
+        List<WorkOrder> linkedOrders = orderPage.getContent();
+
+        for(WorkOrder order : linkedOrders){
+            order.setHistoricalPlate(vehicle.getPlate());
+            order.setHistoricalBrandModel(vehicle.getBrand() + " " + vehicle.getModel());
+
+            if (vehicle.getOwner() != null) {
+                order.setHistoricalClientName(vehicle.getOwner().getName());
+                order.setHistoricalClientDni(vehicle.getOwner().getDni());
+            }
+
+            order.setVehicle(null);
+        }
+
+        if(!linkedOrders.isEmpty()){
+            workOrderJpaRepository.saveAll(linkedOrders);
+        }
+
         NewVehicleDTO deletedVehicle = NewVehicleDTO.of(vehicle);
 
         if(vehicle.getImages() != null){

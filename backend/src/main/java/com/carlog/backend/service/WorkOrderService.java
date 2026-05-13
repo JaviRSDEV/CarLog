@@ -85,7 +85,7 @@ public class WorkOrderService {
                 .orElseThrow(() -> new VehicleNotFoundException(vehiclePlate));
 
         boolean isWorker = connectedUser.getRole() == Role.MECHANIC || connectedUser.getRole() == Role.MANAGER ||
-                connectedUser.getRole() == Role.CO_MANAGER || connectedUser.getRole() == Role.DIY;
+                connectedUser.getRole() == Role.CO_MANAGER;
 
         if (!isWorker) {
             throw new UnauthorizedActionException("Error: El usuario no tiene permisos para crear una orden de trabajo");
@@ -95,8 +95,8 @@ public class WorkOrderService {
             throw new WorkshopNotAssignedException("Error: El mecánico o manager no dispone de un taller asignado");
         }
 
-        if (connectedUser.getRole() != Role.DIY && (referedVehicle.getWorkshop() == null ||
-                !referedVehicle.getWorkshop().getWorkshopId().equals(connectedUser.getWorkshop().getWorkshopId()))) {
+        if (referedVehicle.getWorkshop() == null ||
+                !referedVehicle.getWorkshop().getWorkshopId().equals(connectedUser.getWorkshop().getWorkshopId())) {
             throw new VehicleNotInWorkshopException("Error: No puedes abrir una nueva orden. El vehículo ya no está en tu taller.");
         }
 
@@ -164,9 +164,21 @@ public class WorkOrderService {
             order.setMechanicNotes(dto.mechanicNotes());
         }
 
+        if(dto.status() != null){
+            if(order.getPaymentStatus() == PaymentStatus.PAID && dto.status() == WorkOrderStatus.IN_PROGRESS){
+                throw new ClosedWorkOrderException("Acción bloqueada: No se puede reabrir una orden pagada");
+            }
+            order.setStatus(dto.status());
+            order.setClosedAt(dto.status() == WorkOrderStatus.COMPLETED ? java.time.LocalDate.now(): null);
+        }
+
         if (dto.status() != null) {
             order.setStatus(dto.status());
             order.setClosedAt(dto.status() == WorkOrderStatus.COMPLETED ? java.time.LocalDate.now() : null);
+        }
+
+        if (dto.paymentStatus() != null) {
+            order.setPaymentStatus(dto.paymentStatus());
         }
 
         return NewWorkOrderResponseDTO.of(workOrderJpaRepository.save(order));

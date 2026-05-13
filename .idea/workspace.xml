@@ -4,9 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="minor fix in WorkOrderServiceTest">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/InvoiceServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/InvoiceServiceTest.java" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="minor fix in InvoiceServiceTest">
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/WorkOrderJpaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/WorkOrderJpaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,7 +137,7 @@
       <command value="mvn clean " />
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.InvoiceServiceTest">
+  <component name="RunManager" selected="JUnit.VehicleServiceTest">
     <configuration name="InvoiceServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">
@@ -236,11 +236,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.VehicleServiceTest" />
         <item itemvalue="JUnit.InvoiceServiceTest" />
         <item itemvalue="JUnit.WorkOrderServiceTest" />
         <item itemvalue="JUnit.UserServiceTest" />
         <item itemvalue="JUnit.WorkshopServiceTest" />
-        <item itemvalue="JUnit.VehicleServiceTest" />
       </list>
     </recent_temporary>
   </component>
@@ -275,14 +275,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00030" summary="Added a first version of a vehicle browser">
-      <option name="closed" value="true" />
-      <created>1776097105484</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1776097105484</updated>
     </task>
     <task id="LOCAL-00031" summary="Added search filters by brand and model">
       <option name="closed" value="true" />
@@ -668,7 +660,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778688199665</updated>
     </task>
-    <option name="localTasksCounter" value="79" />
+    <task id="LOCAL-00079" summary="minor fix in InvoiceServiceTest">
+      <option name="closed" value="true" />
+      <created>1778688516411</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1778688516411</updated>
+    </task>
+    <option name="localTasksCounter" value="80" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -689,7 +689,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Minor changes in WorkshopController" />
     <MESSAGE value="Added batery of tests" />
     <MESSAGE value="Minor changes in pom" />
     <MESSAGE value="Added directory for ci/cd pipeline" />
@@ -714,7 +713,8 @@
     <MESSAGE value="Minor changes with hibernate" />
     <MESSAGE value="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing" />
     <MESSAGE value="minor fix in WorkOrderServiceTest" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor fix in WorkOrderServiceTest" />
+    <MESSAGE value="minor fix in InvoiceServiceTest" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor fix in InvoiceServiceTest" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

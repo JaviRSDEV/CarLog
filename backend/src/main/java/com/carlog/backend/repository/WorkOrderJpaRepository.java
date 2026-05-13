@@ -1,5 +1,6 @@
 package com.carlog.backend.repository;
 
+import com.carlog.backend.model.Vehicle;
 import com.carlog.backend.model.WorkOrder;
 import com.carlog.backend.model.WorkOrderStatus;
 import org.springframework.data.domain.Page;
@@ -15,4 +16,6 @@ public interface WorkOrderJpaRepository extends JpaRepository<WorkOrder, Long> {
 
     Optional<WorkOrder> findByStatus(WorkOrderStatus status);
     List<WorkOrder> findByWorkshop_workshopId(Long workshopId);
+
+    List<WorkOrder> findAllByVehicle(Vehicle vehicle);
 }

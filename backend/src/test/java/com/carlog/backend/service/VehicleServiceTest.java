@@ -21,11 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageImpl; // <-- Importante
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import java.util.Collections; // <-- Importante
 import java.util.List;
 import java.util.Optional;
 
@@ -259,6 +260,9 @@ class VehicleServiceTest {
     void delete_UserIsOwner_DeletesVehicle() {
         when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
+
+        when(workOrderJpaRepository.findByVehicle_Plate(eq(vehicle.getPlate()), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(Collections.emptyList()));
 
         vehicleService.delete(vehicle.getPlate(), clientUser.getEmail());
 

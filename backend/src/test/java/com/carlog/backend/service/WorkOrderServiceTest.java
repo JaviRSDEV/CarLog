@@ -143,7 +143,7 @@ class WorkOrderServiceTest {
 
     @Test
     void edit_Success_UpdatesStatusAndClosedAt() {
-        UpdateWorkOrderDTO updateDto = new UpdateWorkOrderDTO("Notas nuevas", WorkOrderStatus.COMPLETED);
+        UpdateWorkOrderDTO updateDto = new UpdateWorkOrderDTO("Notas nuevas", WorkOrderStatus.COMPLETED, PaymentStatus.PENDING);
 
         when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
         when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));

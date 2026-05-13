@@ -4,18 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Minor changes with hibernate">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/PaymentStatus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NewWorkOrderResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/NewWorkOrderResponseDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/UpdateWorkOrderDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/UpdateWorkOrderDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Role.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/WorkOrder.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/WorkOrder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/InvoiceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/InvoiceService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/WorkOrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V2__European_brands.sql" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/db/migration/V2__European_brands.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/resources/templates/invoice-template.html" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/resources/templates/invoice-template.html" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing">
+      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/WorkOrderServiceTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -146,7 +136,7 @@
       <command value="mvn clean " />
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.BackendApplication">
+  <component name="RunManager" selected="JUnit.WorkOrderServiceTest">
     <configuration name="UserServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">
@@ -245,9 +235,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.WorkOrderServiceTest" />
         <item itemvalue="JUnit.UserServiceTest" />
         <item itemvalue="JUnit.WorkshopServiceTest" />
-        <item itemvalue="JUnit.WorkOrderServiceTest" />
         <item itemvalue="JUnit.VehicleServiceTest" />
         <item itemvalue="JUnit.VehicleControllerTest" />
       </list>
@@ -284,14 +274,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00028" summary="Added security to the critical endpoints">
-      <option name="closed" value="true" />
-      <created>1776066084230</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1776066084230</updated>
     </task>
     <task id="LOCAL-00029" summary="Solved redundant code and solved some security problems">
       <option name="closed" value="true" />
@@ -677,7 +659,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778586525450</updated>
     </task>
-    <option name="localTasksCounter" value="77" />
+    <task id="LOCAL-00077" summary="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing">
+      <option name="closed" value="true" />
+      <created>1778687967790</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1778687967791</updated>
+    </task>
+    <option name="localTasksCounter" value="78" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -698,7 +688,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Minor changes in application properties" />
     <MESSAGE value="Added custom exception classes and eliminated RuntimeException uses" />
     <MESSAGE value="Minor changes in WorkshopController" />
     <MESSAGE value="Added batery of tests" />
@@ -723,7 +712,8 @@
     <MESSAGE value="Fixed reliability problems" />
     <MESSAGE value="Fixed problems with tests" />
     <MESSAGE value="Minor changes with hibernate" />
-    <option name="LAST_COMMIT_MESSAGE" value="Minor changes with hibernate" />
+    <MESSAGE value="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing" />
+    <option name="LAST_COMMIT_MESSAGE" value="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

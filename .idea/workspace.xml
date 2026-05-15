@@ -4,10 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="minor fix in InvoiceServiceTest">
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added the permit to see the details of a workorder of a certain car to the owner of the car">
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/AdminSeeder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/AdminController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/AdminStatsDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/AdminService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/WorkOrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/WorkOrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Role.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/WorkOrderJpaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/WorkOrderJpaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,9 +25,9 @@
         <option value="Exception" />
         <option value="HTML File" />
         <option value="Interface" />
-        <option value="Class" />
-        <option value="Record" />
         <option value="Enum" />
+        <option value="Record" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -276,14 +281,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00031" summary="Added search filters by brand and model">
-      <option name="closed" value="true" />
-      <created>1776097689201</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1776097689202</updated>
     </task>
     <task id="LOCAL-00032" summary="Refactored the cookie management, now the cookies are httpOnly and are managed by the backend">
       <option name="closed" value="true" />
@@ -669,7 +666,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778688516411</updated>
     </task>
-    <option name="localTasksCounter" value="80" />
+    <task id="LOCAL-00080" summary="Added the permit to see the details of a workorder of a certain car to the owner of the car">
+      <option name="closed" value="true" />
+      <created>1778844930209</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1778844930210</updated>
+    </task>
+    <option name="localTasksCounter" value="81" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -690,7 +695,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added batery of tests" />
     <MESSAGE value="Minor changes in pom" />
     <MESSAGE value="Added directory for ci/cd pipeline" />
     <MESSAGE value="Fixed errors in ci file" />
@@ -715,7 +719,8 @@
     <MESSAGE value="changed the workorder arquitecture, now when a vehicle with workorders existing is deleted by the user, the workorder doesnt disappear, it just save a snapshot in the info due to compliment the law of having an history of billing" />
     <MESSAGE value="minor fix in WorkOrderServiceTest" />
     <MESSAGE value="minor fix in InvoiceServiceTest" />
-    <option name="LAST_COMMIT_MESSAGE" value="minor fix in InvoiceServiceTest" />
+    <MESSAGE value="Added the permit to see the details of a workorder of a certain car to the owner of the car" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added the permit to see the details of a workorder of a certain car to the owner of the car" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

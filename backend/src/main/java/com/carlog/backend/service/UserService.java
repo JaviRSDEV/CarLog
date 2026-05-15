@@ -61,7 +61,7 @@ public class UserService {
         if(dto.role() != null)
             roleToSave = dto.role();
 
-        if(roleToSave == Role.CO_MANAGER || roleToSave == Role.MECHANIC){
+        if(roleToSave != Role.CLIENT || roleToSave != Role.MANAGER){
             roleToSave = Role.CLIENT;
         }
 

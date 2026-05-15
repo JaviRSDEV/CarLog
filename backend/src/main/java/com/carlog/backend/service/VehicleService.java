@@ -102,7 +102,7 @@ public class VehicleService {
 
         User owner = determineOwner(connectedUser, dto.ownerId());
         Workshop currentWorkshop = determineWorkshop(connectedUser);
-        List<String> finalImageRoutes = processImages(dto.images());
+        List<String> finalImageRoutes = processImages(dto.images(),dto.plate());
 
         Vehicle newVehicle = Vehicle.builder()
                 .plate(dto.plate())
@@ -128,13 +128,13 @@ public class VehicleService {
         }
     }
 
-    private List<String> processImages(List<String> images) {
+    private List<String> processImages(List<String> images, String identifier) {
         if (images == null || images.isEmpty()) {
             return new ArrayList<>();
         }
         return images.stream()
                 .filter(img -> img != null && img.startsWith("data:image"))
-                .map(this::uploadToCloudinary)
+                .map(img -> uploadToCloudinary(img, identifier))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -159,11 +159,14 @@ public class VehicleService {
         return workshop;
     }
 
-    private String uploadToCloudinary(String base64Image) {
+    private String uploadToCloudinary(String base64Image, String plate) {
         try {
             log.info("Subiendo nueva imagen a Cloudinary...");
+
+            String folderPath = "carlog/vehicles/" + plate;
+
             var uploadResult = cloudinary.uploader().upload(base64Image, ObjectUtils.asMap(
-                    "folder", "carlog/vehicles",
+                    "folder", folderPath,
                     "resource_type", "image"
             ));
 
@@ -176,11 +179,14 @@ public class VehicleService {
         }
     }
 
-    private void deleteFromCloudinary(String imageUrl){
+    private void deleteFromCloudinary(String imageUrl, String plate){
         if(imageUrl == null || !imageUrl.contains("cloudinary")) return;
 
         try {
-            String publicId = "carlog/vehicles/" + imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
+
+            String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
+
+            String publicId = "carlog/vehicles/" + plate + "/" + filename;
 
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
             log.info("Imagen eliminada de Cloudinary: {}", publicId);
@@ -270,25 +276,26 @@ public class VehicleService {
     }
 
     private void updateVehicleImages(Vehicle vehicle, List<String> newImages) {
-        List<String> oldImages = vehicle.getImages() != null ? new ArrayList<>(vehicle.getImages()) : new ArrayList<>();
+        String plate = vehicle.getPlate();
 
+        List<String> oldImages = vehicle.getImages() != null ? new ArrayList<>(vehicle.getImages()) : new ArrayList<>();
         List<String> inputImages = (newImages == null) ? List.of() : newImages;
 
         List<String> updatedImagesRoutes = inputImages.stream()
-                .map(this::processImageSource)
+                .map(image -> processImageSource(image, plate))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(ArrayList::new));
 
         oldImages.stream()
                 .filter(oldUrl -> !updatedImagesRoutes.contains(oldUrl))
-                .forEach(this::deleteFromCloudinary);
+                .forEach(url -> deleteFromCloudinary(url, plate));
 
         vehicle.setImages(updatedImagesRoutes);
     }
 
-    private String processImageSource(String img) {
+    private String processImageSource(String img, String plate) {
         if (img != null && img.startsWith("data:image")) {
-            return uploadToCloudinary(img);
+            return uploadToCloudinary(img, plate);
         }
         return img;
     }
@@ -471,7 +478,7 @@ public class VehicleService {
 
         if(vehicle.getImages() != null){
             for(String imageUrl : vehicle.getImages()){
-                deleteFromCloudinary(imageUrl);
+                deleteFromCloudinary(imageUrl, plate);
             }
         }
 
@@ -541,5 +548,17 @@ public class VehicleService {
         }
 
         throw new InvalidSearchTypeException("Tipo de búsqueda no válido");
+    }
+
+    private void deleteVehicleFolderFromCloudinary(String plate){
+        String folderPath = "carlog/vehicles/" + plate;
+
+        try{
+            log.info("Eliminando todos los recursos de la carpeta: {}", folderPath);
+
+            cloudinary.api().deleteResourcesByPrefix(folderPath, ObjectUtils.emptyMap());
+        }catch (Exception e){
+            log.error("Error al eliminar la carpeta completa de Cloudinary para el vehículo {}: {}", plate, e.getMessage());
+        }
     }
 }

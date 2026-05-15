@@ -5,8 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="minor fix in InvoiceServiceTest">
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/WorkOrderJpaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/WorkOrderJpaRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/test/java/com/carlog/backend/service/VehicleServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/WorkOrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/WorkOrderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/VehicleService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,7 +138,7 @@
       <command value="mvn clean " />
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.VehicleServiceTest">
+  <component name="RunManager" selected="Spring Boot.BackendApplication">
     <configuration name="InvoiceServiceTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="backend" />
       <extension name="coverage">

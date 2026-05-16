@@ -1,8 +1,6 @@
 package com.carlog.backend.controller;
 
-import com.carlog.backend.dto.AdminStatsDTO;
-import com.carlog.backend.dto.NewUserDTO;
-import com.carlog.backend.dto.NewWorkshopDTO;
+import com.carlog.backend.dto.*;
 import com.carlog.backend.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,4 +38,34 @@ public class AdminController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("workshopId").descending());
         return ResponseEntity.ok(adminService.getAllWorkshops(pageable));
     }
-}
+
+    @GetMapping("/vehicles")
+    public ResponseEntity<Page<NewVehicleDTO>> getAllVehicles(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("plate").ascending());
+        return ResponseEntity.ok(adminService.getAllVehicles(pageable));
+    }
+
+    @GetMapping("/workorders")
+    public ResponseEntity<Page<NewWorkOrderResponseDTO>> getAllWorkorders(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return ResponseEntity.ok(adminService.getAllWorkOrders(pageable));
+    }
+
+    @GetMapping("/catalog/brands")
+    public ResponseEntity<Page<CarBrandDTO>> getAllBrands(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        return ResponseEntity.ok(adminService.getAllCarBrands(pageable));
+    }
+
+    @GetMapping("/catalog/models")
+    public ResponseEntity<Page<CarModelDTO>> getAllModels(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+        return ResponseEntity.ok(adminService.getAllCarModels(pageable));
+    }
+
+    @GetMapping("/catalog/versions")
+    public ResponseEntity<Page<CarVersionDTO>> getAllVersions(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("versionName").ascending());
+        return ResponseEntity.ok(adminService.getAllCarVersions(pageable));
+    }
+ }

@@ -50,7 +50,7 @@ public record NewWorkOrderResponseDTO(Long id,
                     0,
                     0,
                     "",
-                    null, null, null, null, null, null
+                    null, null, null, null, null, null, null
             );
         }
 

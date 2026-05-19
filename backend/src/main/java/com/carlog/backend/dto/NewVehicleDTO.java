@@ -29,6 +29,7 @@ public record NewVehicleDTO(
                             LocalDate lastMaintenance,
                             Long workshopId,
                             String ownerId,
+                            String ownerName,
                             Long pendingWorkshopId,
                             String pendingWorkshopName) {
 
@@ -46,6 +47,7 @@ public record NewVehicleDTO(
                 v.getLastMaintenance(),
                 v.getWorkshop() != null ? v.getWorkshop().getWorkshopId(): null,
                 v.getOwner() != null ? v.getOwner().getDni(): null,
+                v.getOwner() != null ? v.getOwner().getName(): null,
                 v.getPendingWorkshop() != null ? v.getPendingWorkshop().getWorkshopId(): null,
                 v.getPendingWorkshop() != null ? v.getPendingWorkshop().getWorkshopName(): null
         );

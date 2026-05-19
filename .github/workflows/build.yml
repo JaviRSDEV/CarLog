@@ -1,15 +1,16 @@
-name: SonarQube
+name: SonarQube + Deploy
+
 on:
   push:
     branches:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
-jobs:
-  build:
-    name: Build and analyze
-    runs-on: ubuntu-latest
 
+jobs:
+  build_and_scan:
+    name: Build, Analyze and Check Quality Gate
+    runs-on: ubuntu-latest
     services:
       mysql:
         image: mysql:8.0
@@ -18,12 +19,7 @@ jobs:
           MYSQL_DATABASE: carlog
         ports:
           - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping" 
-          --health-interval=10s 
-          --health-timeout=5s 
-          --health-retries=3
-
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,21 +30,53 @@ jobs:
         with:
           java-version: '21'
           distribution: 'zulu'
-          cache: 'maven'
+          cache: maven
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+          key: ${{runner.os}}-sonar
+          restore-keys: ${{runner.os}}-sonar
 
       - name: Build and analyze
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/carlog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: rootpassword
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         working-directory: backend
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=JaviRSDEV_CarLog
+        run: >
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+          -Dsonar.projectKey=JaviRSDEV_CarLog 
+          -Dsonar.organization=javirsdev 
+          -Dsonar.host.url=https://sonarcloud.io 
+          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+
+      # Paso configurado para no bloquear el despliegue
+      - name: Wait for Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        continue-on-error: true # <--- AÑADIDO: Si falla, el job sigue
+        timeout-minutes: 5
+        with:
+          scanMetadataReportFile: backend/target/sonar/report-task.txt
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  deploy:
+    name: Deploy to Production (Self-hosted)
+    needs: build_and_scan
+    runs-on: self-hosted # <--- AHORA USA TU SERVIDOR DIRECTAMENTE
+    steps:
+      - name: Deploy to Local Server
+        run: |
+          cd ~/CarLog/backend
+          # Escribir el .env directamente en tu máquina
+          echo "SPRING_DATASOURCE_URL=${{ secrets.DB_URL }}" > .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          
+          # Levantar los servicios
+          docker compose pull
+          docker compose up -d --build

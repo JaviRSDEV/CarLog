@@ -1,20 +1,26 @@
 version: '3.8'
 
 services:
-  # Servicio de Base de Datos MySQL
   mysqldb:
     image: mysql:8.0
     container_name: carlog-mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}     # Contraseña maestra
-      MYSQL_DATABASE: carlog_db        # Crea la BBDD automáticamente
-      MYSQL_USER: ${DB_USER}         # Usuario específico para la App
-      MYSQL_PASSWORD: ${DB_PASSWORD} # Contraseña para la App
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: carlog_db # Tu base de datos real
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "127.0.0.1:3306:3306"                    # Expone el puerto al exterior
+      - "127.0.0.1:3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql      # Persistencia de datos
+      - mysql_data:/var/lib/mysql
+    networks:
+      - carlog-network # Enlazamos el contenedor a la red
 
 volumes:
   mysql_data:
+
+# Creamos la red para que sea visible desde fuera
+networks:
+  carlog-network:
+    name: carlog-network

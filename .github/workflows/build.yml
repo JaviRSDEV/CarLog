@@ -49,7 +49,7 @@ jobs:
         run: >
           mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
           -Dsonar.projectKey=JaviRSDEV_CarLog 
-          -Dsonar.organization=Javier 
+          -Dsonar.organization=javirsdev 
           -Dsonar.host.url=https://sonarcloud.io 
           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 

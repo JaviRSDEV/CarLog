@@ -9,7 +9,7 @@ on:
 
 jobs:
   build_and_scan:
-    name: Build and Analyze
+    name: Build, Analyze and Check Quality Gate
     runs-on: ubuntu-latest
     services:
       mysql:
@@ -53,11 +53,6 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io 
           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
-  quality_gate:
-    name: Sonar Quality Gate
-    needs: build_and_scan
-    runs-on: ubuntu-latest
-    steps:
       - name: Wait for Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
@@ -65,11 +60,10 @@ jobs:
           scanMetadataReportFile: backend/target/sonar/report-task.txt
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   deploy:
     name: Deploy to Production
-    needs: quality_gate
+    needs: build_and_scan
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Server via SSH

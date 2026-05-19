@@ -41,14 +41,17 @@ jobs:
 
       - name: Build and analyze
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/carlog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: rootpassword
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         working-directory: backend
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=JaviRSDEV_CarLog
+        run: >
+          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+          -Dsonar.projectKey=JaviRSDEV_CarLog 
+          -Dsonar.organization=Javier 
+          -Dsonar.host.url=https://sonarcloud.io 
+          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
   quality_gate:
     name: Sonar Quality Gate

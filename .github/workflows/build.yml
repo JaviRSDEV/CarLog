@@ -19,7 +19,7 @@ jobs:
           MYSQL_DATABASE: carlog
         ports:
           - 3306:3306
-        options: --healt-h-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v4
         with:

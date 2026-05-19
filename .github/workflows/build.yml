@@ -19,6 +19,7 @@ jobs:
           MYSQL_DATABASE: carlog
         ports:
           - 3306:3306
+        options: --healt-h-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,6 +30,14 @@ jobs:
         with:
           java-version: '21'
           distribution: 'zulu'
+          cache: maven
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{runner.os}}-sonar
+          restore-keys: ${{runner.os}}-sonar
 
       - name: Build and analyze
         env:
@@ -37,6 +46,7 @@ jobs:
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/carlog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: rootpassword
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         working-directory: backend
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=JaviRSDEV_CarLog
 

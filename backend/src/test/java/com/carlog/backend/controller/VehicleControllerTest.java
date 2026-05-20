@@ -88,6 +88,7 @@ class VehicleControllerTest {
                 1L,
                 "11111111A",
                 null,
+                null,
                 null
         );
     }
@@ -131,6 +132,7 @@ class VehicleControllerTest {
                 null,
                 -5,
                 -5,
+                null,
                 null,
                 null,
                 null,

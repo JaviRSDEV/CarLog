@@ -369,7 +369,7 @@ class VehicleServiceTest {
         NewVehicleDTO editDto = new NewVehicleDTO(
                 "1234-ABC", "Ford", "Mustang", null, 5000L,
                 "Gasolina", 400, 500, "Pirelli",
-                null, null, null, null, null, null
+                null, null, null, null, null,null, null
         );
 
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
@@ -388,7 +388,7 @@ class VehicleServiceTest {
         NewVehicleDTO editDto = new NewVehicleDTO(
                 "9999-NEW", "Ford", "Mustang", null, 5000L,
                 "Gasolina", 400, 500, "Pirelli",
-                null, null, null, null, null, null
+                null, null, null, null, null, null, null
         );
 
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));

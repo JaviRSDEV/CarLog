@@ -56,7 +56,7 @@ jobs:
       # Paso configurado para no bloquear el despliegue
       - name: Wait for Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@master
-        continue-on-error: true # <--- AÑADIDO: Si falla, el job sigue
+        continue-on-error: true
         timeout-minutes: 5
         with:
           scanMetadataReportFile: backend/target/sonar/report-task.txt
@@ -66,7 +66,7 @@ jobs:
   deploy:
     name: Deploy to Production (Self-hosted)
     needs: build_and_scan
-    runs-on: self-hosted # <--- AHORA USA TU SERVIDOR DIRECTAMENTE
+    runs-on: self-hosted
     steps:
       - name: Deploy to Local Server
         run: |

@@ -53,10 +53,9 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io 
           -Dsonar.token=${{ secrets.SONAR_TOKEN }}
 
-      # Paso configurado para no bloquear el despliegue
       - name: Wait for Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@master
-        continue-on-error: true # <--- AÑADIDO: Si falla, el job sigue
+        continue-on-error: true
         timeout-minutes: 5
         with:
           scanMetadataReportFile: backend/target/sonar/report-task.txt
@@ -66,17 +65,37 @@ jobs:
   deploy:
     name: Deploy to Production (Self-hosted)
     needs: build_and_scan
-    runs-on: self-hosted # <--- AHORA USA TU SERVIDOR DIRECTAMENTE
+    runs-on: self-hosted
     steps:
       - name: Deploy to Local Server
         run: |
           cd ~/CarLog/backend
-          # Escribir el .env directamente en tu máquina
+          
+          # Escribir el .env asegurando las variables que hacían petar el contexto
           echo "SPRING_DATASOURCE_URL=${{ secrets.DB_URL }}" > .env
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}" >> .env
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "isSecure=true" >> .env
+          echo "URL_CORS=${{ secrets.URL_CORS }}" >> .env
           
-          # Levantar los servicios
+          # Levantar los servicios con Docker Compose v2
           docker compose pull
           docker compose up -d --build
+
+      - name: Verificar arranque de Spring Boot
+        run: |
+          echo "Esperando 15 segundos a que Spring Boot levante el contexto de la aplicación..."
+          sleep 15
+          
+          echo "=== ÚLTIMOS LOGS DEL BACKEND EN PRODUCCIÓN ==="
+          docker logs carlog-backend --tail 100
+          
+          echo "=== COMPROBANDO ESTADO FINAL DEL CONTENEDOR ==="
+          STATUS=$(docker inspect -f '{{.State.Status}}' carlog-backend)
+          
+          if [ "$STATUS" != "running" ]; then
+            echo "ERROR: El contenedor de Spring Boot ha petado en el arranque. Estado: $STATUS"
+            exit 1
+          fi
+          echo "¡Despliegue exitoso! El backend está corriendo fino en el servidor."

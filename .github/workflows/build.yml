@@ -70,20 +70,8 @@ jobs:
       - name: Deploy to Local Server
         run: |
           cd ~/CarLog/backend
-<<<<<<< HEAD
-          
-=======
-          
-          # Escribir el .env asegurando las variables que hacían petar el contexto
-          echo "SPRING_DATASOURCE_URL=${{ secrets.DB_URL }}" > .env
-          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}" >> .env
-          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
-          echo "isSecure=true" >> .env
-          echo "URL_CORS=${{ secrets.URL_CORS }}" >> .env
           
           # Levantar los servicios con Docker Compose v2
->>>>>>> 82c1cff852fde21174fdccce06110bd0ee115657
           docker compose pull
           docker compose up -d --build
 

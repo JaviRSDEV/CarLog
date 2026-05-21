@@ -85,17 +85,27 @@ jobs:
 
       - name: Verificar arranque de Spring Boot
         run: |
-          echo "Esperando 15 segundos a que Spring Boot levante el contexto de la aplicación..."
-          sleep 15
-          
-          echo "=== ÚLTIMOS LOGS DEL BACKEND EN PRODUCCIÓN ==="
-          docker logs carlog-backend --tail 100
-          
-          echo "=== COMPROBANDO ESTADO FINAL DEL CONTENEDOR ==="
-          STATUS=$(docker inspect -f '{{.State.Status}}' carlog-backend)
-          
-          if [ "$STATUS" != "running" ]; then
-            echo "ERROR: El contenedor de Spring Boot ha petado en el arranque. Estado: $STATUS"
-            exit 1
-          fi
-          echo "¡Despliegue exitoso! El backend está corriendo fino en el servidor."
+            echo "Esperando 20 segundos para asegurar el arranque completo..."
+            sleep 20
+            
+            echo "=== ÚLTIMOS LOGS DEL BACKEND EN PRODUCCIÓN ==="
+            LOGS=$(docker logs carlog-backend --tail 200)
+            echo "$LOGS"
+            
+            echo "=== COMPROBANDO VALIDACIÓN REAL ==="
+            STATUS=$(docker inspect -f '{{.State.Status}}' carlog-backend)
+            
+            # 1. Check de Docker (por si ha muerto el contenedor)
+            if [ "$STATUS" != "running" ]; then
+              echo "ERROR: El contenedor ni siquiera está corriendo. Estado: $STATUS"
+              exit 1
+            fi
+            
+            # 2. Check de Spring Boot (busca el mensaje de éxito en los logs)
+            if ! echo "$LOGS" | grep -q "Started BackendApplication"; then
+              echo "ERROR: El contenedor dice 'running' pero Spring Boot ha petado internamente."
+              echo "No se ha encontrado el mensaje de inicio 'Started BackendApplication'."
+              exit 1
+            fi
+            
+            echo "¡Despliegue exitoso! El backend ha iniciado el contexto sin errores."

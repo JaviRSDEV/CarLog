@@ -35,7 +35,6 @@ public class VehicleService {
     private final CarBrandJpaRepository brandJpaRepository;
     private final CarModelJpaRepository modelJpaRepository;
     private final CarVersionJpaRepository versionJpaRepository;
-    private CarVersionDTO carVersionDTO;
 
     private final Cloudinary cloudinary;
 

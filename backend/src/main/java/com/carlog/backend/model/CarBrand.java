@@ -2,7 +2,6 @@ package com.carlog.backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.context.annotation.Bean;
 
 @Entity
 @Table(name = "car_brands")

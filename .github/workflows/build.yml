@@ -70,6 +70,46 @@ jobs:
       - name: Deploy to Local Server
         run: |
           cd ~/CarLog/backend
+<<<<<<< HEAD
           
+=======
+          
+          # Escribir el .env asegurando las variables que hacían petar el contexto
+          echo "SPRING_DATASOURCE_URL=${{ secrets.DB_URL }}" > .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "isSecure=true" >> .env
+          echo "URL_CORS=${{ secrets.URL_CORS }}" >> .env
+          
+          # Levantar los servicios con Docker Compose v2
+>>>>>>> 82c1cff852fde21174fdccce06110bd0ee115657
           docker compose pull
           docker compose up -d --build
+
+      - name: Verificar arranque de Spring Boot
+        run: |
+            echo "Esperando 20 segundos para asegurar el arranque completo..."
+            sleep 20
+            
+            echo "=== ÚLTIMOS LOGS DEL BACKEND EN PRODUCCIÓN ==="
+            LOGS=$(docker logs carlog-backend --tail 200)
+            echo "$LOGS"
+            
+            echo "=== COMPROBANDO VALIDACIÓN REAL ==="
+            STATUS=$(docker inspect -f '{{.State.Status}}' carlog-backend)
+            
+            # 1. Check de Docker (por si ha muerto el contenedor)
+            if [ "$STATUS" != "running" ]; then
+              echo "ERROR: El contenedor ni siquiera está corriendo. Estado: $STATUS"
+              exit 1
+            fi
+            
+            # 2. Check de Spring Boot (busca el mensaje de éxito en los logs)
+            if ! echo "$LOGS" | grep -q "Started BackendApplication"; then
+              echo "ERROR: El contenedor dice 'running' pero Spring Boot ha petado internamente."
+              echo "No se ha encontrado el mensaje de inicio 'Started BackendApplication'."
+              exit 1
+            fi
+            
+            echo "¡Despliegue exitoso! El backend ha iniciado el contexto sin errores."

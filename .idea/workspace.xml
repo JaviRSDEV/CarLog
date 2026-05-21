@@ -4,15 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="Added the permit to see the details of a workorder of a certain car to the owner of the car">
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/config/AdminSeeder.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/controller/AdminController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/dto/AdminStatsDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/AdminService.java" afterDir="false" />
+    <list default="true" id="728210a9-6f0e-40b0-9438-107d98916211" name="Changes" comment="changes in build.yml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/model/Role.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/WorkOrderJpaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/repository/WorkOrderJpaRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/carlog/backend/service/UserService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,7 +99,7 @@
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/6003792/Desktop/CarLog&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
@@ -235,9 +228,9 @@
     <list>
       <item itemvalue="JUnit.InvoiceServiceTest" />
       <item itemvalue="JUnit.UserServiceTest" />
+      <item itemvalue="JUnit.VehicleServiceTest" />
       <item itemvalue="JUnit.WorkOrderServiceTest" />
       <item itemvalue="JUnit.WorkshopServiceTest" />
-      <item itemvalue="JUnit.VehicleServiceTest" />
       <item itemvalue="Spring Boot.BackendApplication" />
     </list>
     <recent_temporary>
@@ -281,14 +274,6 @@
       <workItem from="1774508781844" duration="9294000" />
       <workItem from="1774595767122" duration="7016000" />
       <workItem from="1775456039842" duration="14000" />
-    </task>
-    <task id="LOCAL-00032" summary="Refactored the cookie management, now the cookies are httpOnly and are managed by the backend">
-      <option name="closed" value="true" />
-      <created>1776167547750</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1776167547751</updated>
     </task>
     <task id="LOCAL-00033" summary="Added pendingWorkshopName to NewUserDTO">
       <option name="closed" value="true" />
@@ -674,7 +659,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778844930210</updated>
     </task>
-    <option name="localTasksCounter" value="81" />
+    <task id="LOCAL-00081" summary="changes in build.yml">
+      <option name="closed" value="true" />
+      <created>1779294461460</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1779294461461</updated>
+    </task>
+    <option name="localTasksCounter" value="82" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -695,7 +688,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Minor changes in pom" />
     <MESSAGE value="Added directory for ci/cd pipeline" />
     <MESSAGE value="Fixed errors in ci file" />
     <MESSAGE value="Added mysql service for sonar tests" />
@@ -720,7 +712,8 @@
     <MESSAGE value="minor fix in WorkOrderServiceTest" />
     <MESSAGE value="minor fix in InvoiceServiceTest" />
     <MESSAGE value="Added the permit to see the details of a workorder of a certain car to the owner of the car" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added the permit to see the details of a workorder of a certain car to the owner of the car" />
+    <MESSAGE value="changes in build.yml" />
+    <option name="LAST_COMMIT_MESSAGE" value="changes in build.yml" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/CarLog$BackendApplication.ic" NAME="BackendApplication Coverage Results" MODIFIED="1773393529133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

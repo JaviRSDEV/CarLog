@@ -1,3 +1,4 @@
+
 # CarLog — Plataforma de Gestión Integral de Talleres Mecánicos
 
 ![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot_4.0.1-6db33f?style=for-the-badge&logo=spring)
@@ -10,7 +11,6 @@
 
 ## Estado del Proyecto
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=JaviRSDEV_CarLog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=JaviRSDEV_CarLog)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=JaviRSDEV_CarLog&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=JaviRSDEV_CarLog)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=JaviRSDEV_CarLog&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=JaviRSDEV_CarLog)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=JaviRSDEV_CarLog&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=JaviRSDEV_CarLog)
@@ -36,6 +36,9 @@ El sistema está diseñado para dar soporte a múltiples roles de usuario, garan
 - [API REST — Referencia de Endpoints](#api-rest--referencia-de-endpoints)
 - [Flujo de Trabajo Principal](#flujo-de-trabajo-principal)
 - [Notificaciones en Tiempo Real](#notificaciones-en-tiempo-real)
+- [Sistema de Facturación](#sistema-de-facturación)
+- [Notificaciones por Email](#notificaciones-por-email)
+- [Catálogo de Vehículos](#catálogo-de-vehículos)
 - [Manejo de Errores](#manejo-de-errores)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Inicio Rápido](#inicio-rápido)
@@ -55,6 +58,12 @@ El sistema está diseñado para dar soporte a múltiples roles de usuario, garan
 - **Gestión de imágenes**: subida de fotos de vehículos e iconos de taller (Base64 y Multipart).
 - **Manejo centralizado de errores** con respuestas JSON estandarizadas.
 - **Infraestructura containerizada** con Docker Compose (MySQL + phpMyAdmin).
+- **Catálogo de coches europeo completo**: +100 marcas, +500 modelos, +3000 versiones con especificaciones técnicas (motor, potencia, par, años de producción).
+- **Panel de administración**: Dashboard con estadísticas globales para rol ADMIN.
+- **Generación de facturas PDF**: Sistema de facturación con plantillas HTML y conversión a PDF.
+- **Sistema de notificaciones por email**: Emails automáticos para eventos clave (órdenes completadas, ingresos de vehículos, contrataciones).
+- **Sincronización con API externa**: Integración con NHTSA para catálogo de vehículos americano.
+- **Gestión de estados de pago**: Nuevo enum PaymentStatus para seguimiento de pagos.
 
 ---
 
@@ -67,7 +76,7 @@ El sistema está diseñado para dar soporte a múltiples roles de usuario, garan
 | Spring Security | (boot managed) | Autenticación y autorización |
 | Spring Data JPA | (boot managed) | Acceso a datos |
 | MySQL | 8.0 | Base de datos |
-| Flyway | (boot managed) | Migraciones de esquema |
+| Flyway | 10.10.0 | Migraciones de esquema |
 | JJWT | 0.12.6 | Generación y validación de JWT |
 | Bucket4j | 8.10.1 | Rate limiting |
 | Cloudinary | 2.0.0 | Almacenamiento de imágenes |
@@ -76,6 +85,10 @@ El sistema está diseñado para dar soporte a múltiples roles de usuario, garan
 | Lombok | (boot managed) | Reducción de boilerplate |
 | spring-dotenv | 4.0.0 | Variables de entorno desde `.env` |
 | Apache Tika | 2.9.1 | Detección de tipo MIME |
+| OpenHTMLToPDF | 1.0.10 | Generación de PDF |
+| Thymeleaf | (boot managed) | Plantillas HTML para emails y facturas |
+| Spring Mail | (boot managed) | Envío de emails |
+| Spring Async | (boot managed) | Procesamiento asíncrono |
 
 ---
 
@@ -90,8 +103,10 @@ Cliente (Angular / Postman)
 │  AuthenticationController           │
 │  VehicleController                  │
 │  WorkOrderController                │
-│  WorkshopController                 |
-│  UserController                     |
+│  WorkshopController                 │
+│  UserController                     │
+│  AdminController                    │
+│  CarCatalogController               │
 └──────────────┬──────────────────────┘
                │
                ▼
@@ -99,6 +114,11 @@ Cliente (Angular / Postman)
 │           Service Layer             │  ← Lógica de negocio
 │  UserService / VehicleService       │
 │  WorkOrderService / WorkshopService │
+│  AdminService                       │
+│  InvoiceService                     │
+│  MailService                        │
+│  CarCatalogService                  │
+│  BrandSyncService                   │
 │  RateLimitingService                │
 └──────────────┬──────────────────────┘
                │
@@ -108,8 +128,11 @@ Cliente (Angular / Postman)
 │  UserJpaRepository                  │
 │  VehicleJpaRepository               │
 │  WorkOrderJpaRepository             │
-│  WorkshopJpaRepository              |
-│  WorkOrderLineJpaRepository         |
+│  WorkshopJpaRepository              │
+│  WorkOrderLineJpaRepository         │
+│  CarBrandJpaRepository              │
+│  CarModelJpaRepository              │
+│  CarVersionJpaRepository            │
 └──────────────┬──────────────────────┘
                │
                ▼
@@ -118,7 +141,7 @@ Cliente (Angular / Postman)
 └─────────────────────────────────────┘
 ```
 
-El esquema de base de datos es gestionado por **Flyway** (`V1__Initial_schema.sql`).
+El esquema de base de datos es gestionado por **Flyway** (`V1__Initial_schema.sql` a `V5__Clean_DB.sql`).
 La configuración JPA usa `ddl-auto=validate` — Flyway es la única fuente de verdad del esquema.
 
 ---
@@ -205,6 +228,44 @@ subTotal = (cantidad × precio_unitario) × (1 + IVA%) × (1 - descuento%)
 | `employees` | `List<User>` | Empleados |
 | `vehicles` | `List<Vehicle>` | Vehículos ingresados |
 
+### `CarBrand` — tabla `car_brands`
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | `Long` (PK, auto) | Identificador |
+| `name` | `String` (unique) | Nombre de la marca |
+
+### `CarModel` — tabla `car_models`
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | `Long` (PK, auto) | Identificador |
+| `name` | `String` | Nombre del modelo |
+| `brand` | `CarBrand` | Marca asociada |
+
+### `CarVersion` — tabla `car_version`
+
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `id` | `Long` (PK, auto) | Identificador |
+| `carModel` | `CarModel` | Modelo asociado |
+| `versionName` | `String` | Nombre de la versión |
+| `engineCode` | `String` | Código del motor |
+| `engineType` | `String` | Tipo de motor |
+| `fuelType` | `String` | Tipo de combustible |
+| `powerCv` | `Integer` | Potencia en CV |
+| `torque` | `Integer` | Par motor en Nm |
+| `yearStart` | `Integer` | Año inicio producción |
+| `yearEnd` | `Integer` | Año fin producción |
+
+### `PaymentStatus` — Enum
+
+| Valor | Descripción |
+|---|---|
+| `PENDING` | Pago pendiente |
+| `PAID` | Pagado |
+| `CANCELLED` | Cancelado |
+
 ---
 
 ## Roles del Sistema
@@ -213,6 +274,7 @@ El enum `Role` define cinco roles:
 
 | Rol | Descripción |
 |---|---|
+| `ADMIN` | Administrador global. Acceso a estadísticas globales y gestión de todo el sistema |
 | `MANAGER` | Administrador de taller. Puede crear/eliminar talleres, contratar/despedir empleados, reasignar órdenes |
 | `CO_MANAGER` | Co-administrador. Mismos permisos que MANAGER excepto crear/eliminar talleres |
 | `MECHANIC` | Mecánico. Puede gestionar órdenes y vehículos de su taller |
@@ -392,6 +454,37 @@ Las siguientes operaciones se gestionan a través de `WorkshopController` y `Use
 
 ---
 
+### Administración — `/api/admin`
+
+> Todos los endpoints requieren rol `ADMIN`.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/admin/stats` | Estadísticas globales del sistema |
+| `GET` | `/api/admin/users` | Lista paginada de todos los usuarios |
+| `GET` | `/api/admin/workshops` | Lista paginada de todos los talleres |
+| `GET` | `/api/admin/vehicles` | Lista paginada de todos los vehículos |
+| `GET` | `/api/admin/workorders` | Lista paginada de todas las órdenes de trabajo |
+| `GET` | `/api/admin/catalog/brands` | Lista paginada de todas las marcas del catálogo |
+| `GET` | `/api/admin/catalog/models` | Lista paginada de todos los modelos del catálogo |
+| `GET` | `/api/admin/catalog/versions` | Lista paginada de todas las versiones del catálogo |
+
+---
+
+### Catálogo de Vehículos — `/api/catalog`
+
+> Todos los endpoints son públicos.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/catalog/brands` | Lista de todas las marcas |
+| `GET` | `/api/catalog/brands/{brandId}/models` | Modelos de una marca |
+| `GET` | `/api/catalog/models/{modelId}/versions` | Versiones de un modelo |
+| `GET` | `/api/catalog/versions/{versionId}` | Detalles de una versión |
+| `POST` | `/api/catalog/sync` | Sincronizar catálogo con API externa (NHTSA) |
+
+---
+
 ## Flujo de Trabajo Principal
 
 ```
@@ -461,6 +554,84 @@ Cada usuario se suscribe a su propio canal usando su DNI.
 
 ---
 
+## Sistema de Facturación
+
+El sistema incluye generación de facturas en PDF mediante `InvoiceService`:
+
+### Características
+
+- **Motor de renderizado**: OpenHTMLToPDF con PDFBox
+- **Plantillas**: Thymeleaf para diseño HTML de facturas
+- **Cálculos automáticos**: Base imponible, IVA, descuentos y total
+- **Datos históricos**: Mantiene información del vehículo incluso si se elimina
+
+### Proceso de generación
+
+1. Se recupera la orden de trabajo por ID
+2. Se calculan los totales (base imponible, IVA, descuentos)
+3. Se prepara el contexto con datos del vehículo, cliente y taller
+4. Se renderiza la plantilla HTML con Thymeleaf
+5. Se convierte el HTML a PDF usando OpenHTMLToPDF
+6. Se retorna el PDF como array de bytes
+
+### Endpoint
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/workorders/{id}/invoice` | Generar factura PDF de una orden |
+
+---
+
+## Notificaciones por Email
+
+El sistema envía emails automáticos mediante `MailService` usando JavaMailSender y Thymeleaf:
+
+### Tipos de emails
+
+| Tipo | Destinatario | Asunto | Cuándo se envía |
+|---|---|---|---|
+| Orden completada | Cliente | "¡Buenas noticias! Tu vehículo está listo - CarLog" | Al cerrar una orden de trabajo |
+| Ingreso vehículo | Cliente | "Solicitud de ingreso enviada - CarLog" | Al solicitar ingreso de vehículo |
+| Contratación | Usuario | "Oferta de trabajo - CarLog" | Al invitar a un empleado |
+
+### Características
+
+- **Envío asíncrono**: Usa `@Async` para no bloquear el hilo principal
+- **Plantillas HTML**: Thymeleaf para diseño personalizado
+- **Manejo de errores**: Logging de errores sin interrumpir el flujo
+- **Soporte UTF-8**: Compatible con caracteres especiales
+
+---
+
+## Catálogo de Vehículos
+
+El sistema incluye un catálogo completo de vehículos europeos con especificaciones técnicas:
+
+### Datos incluidos
+
+- **+100 marcas**: Volkswagen, BMW, Mercedes, Toyota, Ford, etc.
+- **+500 modelos**: Organizados por marca
+- **+3000 versiones**: Con especificaciones técnicas detalladas
+
+### Especificaciones por versión
+
+- Código de motor
+- Tipo de motor
+- Tipo de combustible
+- Potencia (CV)
+- Par motor (Nm)
+- Años de producción (inicio/fin)
+
+### Sincronización con API externa
+
+El sistema puede sincronizarse con la API de NHTSA para obtener datos de vehículos americanos:
+
+- **Endpoint**: `POST /api/catalog/sync`
+- **API**: NHTSA Vehicle Products API
+- **Proceso**: Asíncrono, crea marcas y modelos automáticamente
+
+---
+
 ## Integración con Cloudinary
 
 Las imágenes se almacenan en Cloudinary en dos carpetas:
@@ -518,11 +689,11 @@ Basado en el análisis del `GlobalExceptionHandler`, aquí está la tabla comple
 | `409` | `UserAlreadyHasWorkshopException` | Usuario ya tiene taller asignado |
 | `401` | `BadCredentialsException` | Credenciales incorrectas |
 | `429` | `RateLimitExceededException` | Demasiados intentos de login/registro |
-| `500` | `Exception` | Error interno no controlado | [1](#1-0) 
+| `500` | `Exception` | Error interno no controlado |
 
-## Notas
+Las excepciones están agrupadas por código HTTP en el `GlobalExceptionHandler`. Las excepciones de negocio (400) cubren validaciones de reglas del dominio, mientras que las de conflicto (409) manejan duplicados y estados inconsistentes. El rate limiting se aplica específicamente a endpoints de autenticación.
 
-Las excepciones están agrupadas por código HTTP en el `GlobalExceptionHandler` [2](#1-1) . Las excepciones de negocio (400) cubren validaciones de reglas del dominio, mientras que las de conflicto (409) manejan duplicados y estados inconsistentes. El rate limiting se aplica específicamente a endpoints de autenticación [3](#1-2).
+---
 
 ## Documentación de la API (Swagger)
 
@@ -556,19 +727,53 @@ backend/
 │   ├── controller/              # Endpoints REST
 │   │   ├── VehicleController.java
 │   │   ├── WorkOrderController.java
-│   │   └── WorkshopController.java
-|   |   └── UserController.java
-|   |   └── RoleConverter.java
+│   │   ├── WorkshopController.java
+│   │   ├── UserController.java
+│   │   ├── AdminController.java
+│   │   ├── CarCatalogController.java
+│   │   └── RoleConverter.java
 │   ├── dto/                     # Records de entrada/salida
 │   ├── error/                   # Excepciones y GlobalExceptionHandler
+│   ├── listener/                # Event listeners
 │   ├── model/                   # Entidades JPA
+│   │   ├── User.java
+│   │   ├── Vehicle.java
+│   │   ├── WorkOrder.java
+│   │   ├── WorkOrderLine.java
+│   │   ├── Workshop.java
+│   │   ├── Role.java
+│   │   ├── WorkOrderStatus.java
+│   │   ├── CarBrand.java
+│   │   ├── CarModel.java
+│   │   ├── CarVersion.java
+│   │   └── PaymentStatus.java
 │   ├── repository/              # Interfaces Spring Data JPA
 │   ├── security/                # JwtService
 │   └── service/                 # Lógica de negocio
+│       ├── UserService.java
+│       ├── VehicleService.java
+│       ├── WorkOrderService.java
+│       ├── WorkshopService.java
+│       ├── AdminService.java
+│       ├── InvoiceService.java
+│       ├── MailService.java
+│       ├── CarCatalogService.java
+│       ├── BrandSyncService.java
+│       └── RateLimitingService.java
 └── src/main/resources/
     ├── application.properties
+    ├── templates/
+    │   ├── invoice-template.html
+    │   └── emails/
+    │       ├── work-order-completed.html
+    │       ├── vehicle-admission.html
+    │       └── hiring-message.html
     └── db/migration/
-        └── V1__Initial_schema.sql
+        ├── V1__Initial_schema.sql
+        ├── V2__European_brands.sql
+        ├── V3__European_Models.sql
+        ├── V4__Car_Versions.sql
+        └── V5__Clean_DB.sql
 BBDD_CARLOG/
 └── docker-compose.yml
 ```
@@ -612,6 +817,10 @@ El proyecto usa `spring-dotenv` para cargar un archivo `.env` en desarrollo.
 | `CLOUDINARY_API_KEY` | Cloudinary API key | Sí |
 | `API_SECRET` | Cloudinary API secret | Sí |
 | `DB_ROOT_PASSWORD` | Contraseña root de MySQL (solo Docker) | Sí (Docker) |
+| `MAIL_HOST` | Servidor SMTP para emails | Sí (para emails) |
+| `MAIL_PORT` | Puerto SMTP | Sí (para emails) |
+| `MAIL_USERNAME` | Usuario SMTP | Sí (para emails) |
+| `MAIL_PASSWORD` | Contraseña SMTP | Sí (para emails) |
 
 **Ejemplo de `.env` para desarrollo**:
 ```env
@@ -625,6 +834,10 @@ isSecure=false
 API_NAME=tu_cloud_name
 CLOUDINARY_API_KEY=tu_api_key
 API_SECRET=tu_api_secret
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=tu_email@gmail.com
+MAIL_PASSWORD=tu_app_password
 ```
 
 ### Base de Datos con Docker
@@ -640,7 +853,7 @@ Esto crea:
 - Contenedor `carlog-mysql` con MySQL 8.0
 - Base de datos `carlog_db`
 - Puerto expuesto solo en `127.0.0.1:3306` (no accesible desde el exterior)
-- Vol
+- Volúmenes para persistencia de datos
 
 ---
 
@@ -656,4 +869,3 @@ Este proyecto está bajo licencia **MIT**. Consulta el archivo [LICENSE](LICENSE
 - **[API Reference](./README.md)** - Documentación completa de endpoints REST
 - **[Documentación Técnica (ESP)](./docs/CARLOG_DOCUMENTATION_ESP.pdf)** - Documentación técnica en español
 - **[Technical Documentation (ENG)](./docs/CARLOG_DOCUMENTATION_ENG.pdf)** - Technical Documentation in english
-```

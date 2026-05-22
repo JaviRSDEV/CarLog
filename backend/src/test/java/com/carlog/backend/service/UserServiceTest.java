@@ -234,7 +234,9 @@ class UserServiceTest {
         assertEquals(Role.MECHANIC, userCaptor.getValue().getPendingRole());
 
         verify(eventPublisher).publishEvent(any(WorkshopHiringEvent.class));
-        verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + clientUser.getDni()), any(NotificationDTO.class));
+
+        // Aserción corregida para WebSockets privados (usa email y convertAndSendToUser)
+        verify(messagingTemplate).convertAndSendToUser(eq(clientUser.getEmail()), eq("/queue/notificaciones"), any(NotificationDTO.class));
     }
 
     @Test
@@ -243,7 +245,9 @@ class UserServiceTest {
         when(userJpaRepository.findByDni(clientUser.getDni())).thenReturn(Optional.of(clientUser));
         when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
 
-        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationDTO.class));
+        // Mock actualizado para usar convertAndSendToUser con 3 parámetros
+        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate)
+                .convertAndSendToUser(anyString(), anyString(), any(NotificationDTO.class));
 
         assertDoesNotThrow(() -> userService.inviteToWorkshop(managerUser.getEmail(), clientUser.getDni(), Role.MECHANIC));
 
@@ -294,7 +298,8 @@ class UserServiceTest {
         assertEquals(Role.MECHANIC, savedUser.getRole());
         assertNull(savedUser.getPendingWorkshop());
 
-        verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + managerUser.getDni()), any(NotificationDTO.class));
+        // Aserción corregida para notificar al manager por su email
+        verify(messagingTemplate).convertAndSendToUser(eq(managerUser.getEmail()), eq("/queue/notificaciones"), any(NotificationDTO.class));
     }
 
     @Test
@@ -306,7 +311,9 @@ class UserServiceTest {
         when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
         when(userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER)).thenReturn(Optional.of(managerUser));
 
-        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationDTO.class));
+        // Mock actualizado para usar convertAndSendToUser
+        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate)
+                .convertAndSendToUser(anyString(), anyString(), any(NotificationDTO.class));
 
         assertDoesNotThrow(() -> userService.acceptInvitation(clientUser.getEmail()));
     }
@@ -335,7 +342,9 @@ class UserServiceTest {
         userService.acceptInvitation(clientUser.getEmail());
 
         verify(userJpaRepository).save(any(User.class));
-        verify(messagingTemplate, never()).convertAndSend(anyString(), any(NotificationDTO.class));
+
+        // Verificación actualizada
+        verify(messagingTemplate, never()).convertAndSendToUser(anyString(), anyString(), any(NotificationDTO.class));
     }
 
     @Test
@@ -367,7 +376,9 @@ class UserServiceTest {
 
         assertNull(firedUser.getWorkshop());
         assertEquals(Role.CLIENT, firedUser.getRole());
-        verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + employeeUser.getDni()), any(NotificationDTO.class));
+
+        // Aserción corregida para el despido (usa email y convertAndSendToUser)
+        verify(messagingTemplate).convertAndSendToUser(eq(employeeUser.getEmail()), eq("/queue/notificaciones"), any(NotificationDTO.class));
     }
 
     @Test

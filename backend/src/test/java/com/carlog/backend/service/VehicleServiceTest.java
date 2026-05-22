@@ -21,12 +21,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl; // <-- Importante
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-import java.util.Collections; // <-- Importante
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -183,7 +183,9 @@ class VehicleServiceTest {
         verify(vehicleJpaRepository).save(argThat(v -> v.getPendingWorkshop() != null));
 
         verify(eventPublisher).publishEvent(any(VehicleAdmissionEvent.class));
-        verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + clientUser.getDni()), any(NotificationDTO.class));
+
+        // Aserción corregida para WebSockets privados (usa convertAndSendToUser y el email del cliente)
+        verify(messagingTemplate).convertAndSendToUser(eq(clientUser.getEmail()), eq("/queue/notificaciones"), any(NotificationDTO.class));
     }
 
     @Test
@@ -193,7 +195,10 @@ class VehicleServiceTest {
         when(workshopJpaRepository.findById(workshop.getWorkshopId())).thenReturn(Optional.of(workshop));
         when(vehicleJpaRepository.save(any(Vehicle.class))).thenReturn(vehicle);
 
-        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationDTO.class));
+        // Mock actualizado para interceptar convertAndSendToUser
+        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate)
+                .convertAndSendToUser(anyString(), anyString(), any(NotificationDTO.class));
+
         assertDoesNotThrow(() -> vehicleService.requestEntry(vehicle.getPlate(), workshop.getWorkshopId(), mechanicUser.getEmail()));
 
         verify(eventPublisher).publishEvent(any(VehicleAdmissionEvent.class));
@@ -217,14 +222,17 @@ class VehicleServiceTest {
     @Test
     void approveEntry_WebSocketFails_ContinuesWithoutThrowing() {
         vehicle.setPendingWorkshop(workshop);
-        User managerUser = User.builder().dni("88888888M").role(Role.MANAGER).workshop(workshop).build();
+        // AÑADIDO: email configurado para que el manager no sea null y el verify funcione
+        User managerUser = User.builder().dni("88888888M").email("manager@test.com").role(Role.MANAGER).workshop(workshop).build();
 
         when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
         when(vehicleJpaRepository.save(any(Vehicle.class))).thenReturn(vehicle);
         when(userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER)).thenReturn(Optional.of(managerUser));
 
-        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate).convertAndSend(anyString(), any(NotificationDTO.class));
+        // Mock actualizado para interceptar convertAndSendToUser
+        doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate)
+                .convertAndSendToUser(anyString(), anyString(), any(NotificationDTO.class));
 
         assertDoesNotThrow(() -> vehicleService.approveEntry(vehicle.getPlate(), clientUser.getEmail()));
 
@@ -530,7 +538,8 @@ class VehicleServiceTest {
     @Test
     void approveEntry_NotifiesManagerSuccessfully() {
         vehicle.setPendingWorkshop(workshop);
-        User managerUser = User.builder().dni("88888888M").role(Role.MANAGER).workshop(workshop).build();
+        // AÑADIDO: email configurado para que el manager no sea null y el verify funcione
+        User managerUser = User.builder().dni("88888888M").email("manager@test.com").role(Role.MANAGER).workshop(workshop).build();
 
         when(vehicleJpaRepository.findByPlate(vehicle.getPlate())).thenReturn(Optional.of(vehicle));
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
@@ -539,7 +548,8 @@ class VehicleServiceTest {
 
         vehicleService.approveEntry(vehicle.getPlate(), clientUser.getEmail());
 
-        verify(messagingTemplate).convertAndSend(eq("/topic/notificaciones/" + managerUser.getDni()), any(NotificationDTO.class));
+        // Aserción corregida para WebSockets privados (usa convertAndSendToUser y el email del manager)
+        verify(messagingTemplate).convertAndSendToUser(eq(managerUser.getEmail()), eq("/queue/notificaciones"), any(NotificationDTO.class));
     }
 
     @Test

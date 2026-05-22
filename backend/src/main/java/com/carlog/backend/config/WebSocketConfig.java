@@ -27,11 +27,20 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value("${URL_CORS}")
     private String urlCors;
 
+    private final ThreadPoolTaskScheduler taskScheduler;
+
+    public WebSocketConfig() {
+        this.taskScheduler = new ThreadPoolTaskScheduler();
+        this.taskScheduler.setPoolSize(1);
+        this.taskScheduler.setThreadNamePrefix("wss-heartbeat-thread-");
+        this.taskScheduler.initialize();
+    }
+
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry config){
+    public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic", "/queue")
                 .setHeartbeatValue(new long[]{20000, 20000})
-                .setTaskScheduler(heartbeatScheduler());
+                .setTaskScheduler(taskScheduler);
 
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");

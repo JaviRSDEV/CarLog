@@ -320,7 +320,7 @@ public class WorkOrderService {
 
         if(isWorker){
             if(currentUser.getWorkshop() == null || vehicle.getWorkshop() == null ||
-                    !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())){
+                    !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId()) && !vehicle.getOwner().getDni().equals(currentUser.getDni())){
                 throw new VehicleNotInWorkshopException("Acceso denegado: El vehiculo no esta en el taller ahora mismo");
             }
             currentWorkshopId = currentUser.getWorkshop().getWorkshopId();

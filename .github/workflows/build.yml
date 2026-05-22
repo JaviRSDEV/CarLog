@@ -67,11 +67,13 @@ jobs:
     needs: build_and_scan
     runs-on: self-hosted
     steps:
+      - name: Checkout código actualizado
+        uses: actions/checkout@v4
+
       - name: Deploy to Local Server
         run: |
           cd ~/CarLog/backend
-          
-          # Levantar los servicios con Docker Compose v2
+          docker compose down
           docker compose pull
           docker compose up -d --build
 

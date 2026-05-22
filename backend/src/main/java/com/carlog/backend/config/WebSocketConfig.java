@@ -48,29 +48,31 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-    public void configureClientInboundChannel(ChannelRegistration registration){
+    public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(new ChannelInterceptor() {
             @Override
-            public Message<?> preSend(Message<?> message, MessageChannel channel){
+            public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-                if(accessor != null && StompCommand.SUBSCRIBE.equals(accessor.getCommand())){
-                    String destination = accessor.getDestination();
-                    Principal principal = accessor.getUser();
+                if (accessor == null || !StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+                    return message;
+                }
 
-                    if(principal instanceof UsernamePasswordAuthenticationToken auth && auth.getPrincipal() instanceof User user){
-                        String userDni = user.getDni();
+                String destination = accessor.getDestination();
+                Principal principal = accessor.getUser();
 
-                        if(destination != null && destination.startsWith("/topic/notificaciones/")){
-                            String requestedDni = destination.substring("/topic/notificaciones/".length());
-                            if(!userDni.equals(requestedDni)){
-                                throw new IllegalArgumentException("Acceso denegado: Suscripción a canal no autorizado");
-                            }
-                        }
-                    }else {
-                        throw new IllegalArgumentException("Usuario no autenticado en la conexión STOMP.");
+                if (!(principal instanceof UsernamePasswordAuthenticationToken auth)
+                        || !(auth.getPrincipal() instanceof User user)) {
+                    throw new IllegalArgumentException("Usuario no autenticado");
+                }
+
+                if (destination != null && destination.startsWith("/topic/notificaciones/")) {
+                    String requestedDni = destination.substring("/topic/notificaciones/".length());
+                    if (!user.getDni().equals(requestedDni)) {
+                        throw new IllegalArgumentException("Acceso denegado: DNI no coincide");
                     }
                 }
+
                 return message;
             }
         });

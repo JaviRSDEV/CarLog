@@ -52,7 +52,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .requestMatchers("/api/auth/**", "/error").permitAll()
                             .requestMatchers("/uploads/**").authenticated()
-                            .requestMatchers("/ws-carlog/**").authenticated()
+                            .requestMatchers("/ws-carlog/**").permitAll()
                             .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").authenticated()
                             .anyRequest().authenticated()
                     )

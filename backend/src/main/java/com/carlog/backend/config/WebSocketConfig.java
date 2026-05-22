@@ -2,6 +2,7 @@ package com.carlog.backend.config;
 
 import com.carlog.backend.model.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -28,17 +29,21 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config){
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(1);
-        taskScheduler.setThreadNamePrefix("wss-heartbeat-thread-");
-        taskScheduler.initialize();
-
         config.enableSimpleBroker("/topic", "/queue")
-                .setTaskScheduler(taskScheduler)
-                .setHeartbeatValue(new long[]{20000, 20000});
+                .setHeartbeatValue(new long[]{20000, 20000})
+                .setTaskScheduler(heartbeatScheduler());
 
         config.setApplicationDestinationPrefixes("/app");
         config.setUserDestinationPrefix("/user");
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler heartbeatScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("wss-heartbeat-thread-");
+        scheduler.initialize();
+        return scheduler;
     }
 
     @Override

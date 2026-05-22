@@ -77,24 +77,24 @@ jobs:
 
       - name: Verificar arranque de Spring Boot
         run: |
-            echo "Esperando 25 segundos para asegurar el arranque completo..."
+          echo "Esperando 25 segundos para asegurar el arranque completo..."
             sleep 25
             
-            echo "=== LOG COMPLETO DEL BACKEND (Últimos 1000 registros) ==="
+          echo "=== LOG COMPLETO DEL BACKEND (Últimos 1000 registros) ==="
             # Cambiamos tail 200 por 1000 para no perdernos nada importante
-            LOGS=$(docker logs carlog-backend --tail 1000)
-            echo "$LOGS"
+           LOGS=$(docker logs carlog-backend --tail 1000)
+          echo "$LOGS"
             
-            echo "=== COMPROBANDO VALIDACIÓN REAL ==="
-            STATUS=$(docker inspect -f '{{.State.Status}}' carlog-backend)
+          echo "=== COMPROBANDO VALIDACIÓN REAL ==="
+          STATUS=$(docker inspect -f '{{.State.Status}}' carlog-backend)
             
             # 1. Check de Docker (por si ha muerto el contenedor)
-            if [ "$STATUS" != "running" ]; then
-              echo "ERROR: El contenedor no está corriendo. Estado: $STATUS"
+          if [ "$STATUS" != "running" ]; then
+            echo "ERROR: El contenedor no está corriendo. Estado: $STATUS"
               # Imprimimos logs de error específicos si el contenedor murió
-              echo "--- LOGS DE ERROR (Si existen) ---"
-              docker logs carlog-backend --tail 50
-              exit 1
+            echo "--- LOGS DE ERROR (Si existen) ---"
+            docker logs carlog-backend --tail 50
+            exit 1
             fi
             
             # 2. Check de Spring Boot (busca el mensaje de éxito)

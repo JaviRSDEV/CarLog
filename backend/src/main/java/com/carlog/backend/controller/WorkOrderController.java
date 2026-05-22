@@ -1,9 +1,6 @@
 package com.carlog.backend.controller;
 
-import com.carlog.backend.dto.NewWorkOrderDTO;
-import com.carlog.backend.dto.NewWorkOrderLineDTO;
-import com.carlog.backend.dto.NewWorkOrderResponseDTO;
-import com.carlog.backend.dto.UpdateWorkOrderDTO;
+import com.carlog.backend.dto.*;
 import com.carlog.backend.service.InvoiceService;
 import com.carlog.backend.service.WorkOrderService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -131,5 +129,15 @@ public class WorkOrderController {
             log.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/vehicle/{plate}/history")
+    public ResponseEntity<Page<VehicleHistoryDTO>> getVehicleHistory(
+            @PathVariable String plate,
+            Pageable pageable,
+            Authentication authentication) {
+
+        Page<VehicleHistoryDTO> history = workOrderService.getVehicleHistory(plate, authentication.getName(), pageable);
+        return ResponseEntity.ok(history);
     }
 }

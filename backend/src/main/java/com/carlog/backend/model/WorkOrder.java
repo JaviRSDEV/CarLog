@@ -44,6 +44,7 @@ public class WorkOrder {
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
+    private Long kilometers;
 
     private String historicalPlate;
     private String historicalBrandModel;

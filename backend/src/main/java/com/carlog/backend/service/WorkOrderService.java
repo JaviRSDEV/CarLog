@@ -105,6 +105,7 @@ public class WorkOrderService {
                 .mechanicNotes(null)
                 .status(WorkOrderStatus.PENDING)
                 .vehicle(referedVehicle)
+                .kilometers(referedVehicle.getKilometers())
                 .mechanic(connectedUser)
                 .workshop(connectedUser.getWorkshop())
                 .totalAmount(0.0)
@@ -305,5 +306,46 @@ public class WorkOrderService {
                 !vehicle.getWorkshop().getWorkshopId().equals(workOrder.getWorkshop().getWorkshopId()))) {
             throw new VehicleNotInWorkshopException("El vehículo ya no esta en el taller");
         }
+    }
+
+    public Page<VehicleHistoryDTO> getVehicleHistory(String plate, String email, Pageable pageable){
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+
+        boolean isWorker = currentUser.getRole().isWorker();
+        Long currentWorkshopId = null;
+
+        if(isWorker){
+            if(currentUser.getWorkshop() == null || vehicle.getWorkshop() == null ||
+                    !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())){
+                throw new VehicleNotInWorkshopException("Acceso denegado: El vehiculo no esta en el taller ahora mismo");
+            }
+            currentWorkshopId = currentUser.getWorkshop().getWorkshopId();
+        }else{
+            if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
+                throw new UnauthorizedActionException("Acceso denegado: Este vehñiculo no es tuyo");
+            }
+        }
+
+        Page<WorkOrder> workOrderPage = workOrderJpaRepository.findByVehicle_Plate(plate, pageable);
+
+        final Long finalWorkshopId = isWorker ? currentWorkshopId: -1L;
+
+        return workOrderPage.map(order -> {
+            if(!isWorker){
+                return new VehicleHistoryDTO(
+                        order.getId().toString(),
+                        order.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                        order.getKilometers(),
+                        order.getWorkshop().getWorkshopName(),
+                        order.getLines().stream().map(WorkOrderLine::getConcept).toList(),
+                        true
+                );
+            }
+                    return VehicleHistoryDTO.of(order, finalWorkshopId);
+                });
     }
 }

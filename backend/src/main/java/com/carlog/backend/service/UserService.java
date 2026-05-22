@@ -156,7 +156,8 @@ public class UserService {
                     .extraData(manager.getWorkshop().getWorkshopId().toString())
                     .build();
 
-            messagingTemplate.convertAndSend(NOTIF_TOPIC_PREFIX + employeeDni, notif);
+            //messagingTemplate.convertAndSend(NOTIF_TOPIC_PREFIX + employeeDni, notif);
+            messagingTemplate.convertAndSendToUser(employee.getEmail(), "/queue/notificaciones", notif);
             log.info("Notificación WebSocket enviada al usuario con DNI: {}", employeeDni);
         } catch (Exception e) {
             log.error("Error al enviar WebSocket de invitación: {}", e.getMessage());
@@ -186,7 +187,7 @@ public class UserService {
                         .extraData(savedUser.getDni())
                         .build();
 
-                messagingTemplate.convertAndSend(NOTIF_TOPIC_PREFIX + manager.getDni(), alert);
+                messagingTemplate.convertAndSendToUser(manager.getEmail(), "/queue/notificaciones", alert);
             }
         }catch (Exception e){
             log.error("Error enviando notificación: {}", e.getMessage());
@@ -225,6 +226,6 @@ public class UserService {
                 .message("Has sido despedido del taller.")
                 .build();
 
-        messagingTemplate.convertAndSend(NOTIF_TOPIC_PREFIX + employeeDni, notif);
+        messagingTemplate.convertAndSendToUser(employee.getEmail(), "/queue/notificaciones", notif);
     }
 }

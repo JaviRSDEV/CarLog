@@ -347,7 +347,8 @@ public class VehicleService {
                 .build();
 
         try {
-            messagingTemplate.convertAndSend("/topic/notificaciones/" + ownerDni, notif);
+            User owner = savedVehicle.getOwner();
+            messagingTemplate.convertAndSendToUser(owner.getEmail(), "/queue/notificaciones", notif);
         } catch (Exception e) {
             log.error("Error enviando WebSocket al dueño: {}", e.getMessage());
         }
@@ -388,8 +389,7 @@ public class VehicleService {
                         .extraData(plate)
                         .build();
 
-                messagingTemplate.convertAndSend("/topic/notificaciones/" + manager.getDni(), alert);
-            }
+                messagingTemplate.convertAndSendToUser(manager.getEmail(), "/queue/notificaciones", alert);            }
         } catch (Exception e) {
             log.error("Error en notificación WebSocket al Manager: {}", e.getMessage());
         }

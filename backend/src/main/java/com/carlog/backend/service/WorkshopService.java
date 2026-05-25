@@ -2,10 +2,9 @@ package com.carlog.backend.service;
 
 import com.carlog.backend.dto.NewWorkshopDTO;
 import com.carlog.backend.error.*;
-import com.carlog.backend.model.Role;
-import com.carlog.backend.model.User;
-import com.carlog.backend.model.Workshop;
+import com.carlog.backend.model.*;
 import com.carlog.backend.repository.UserJpaRepository;
+import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
@@ -15,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class WorkshopService {
 
     private final WorkshopJpaRepository workshopJpaRepository;
     private final UserJpaRepository userJpaRepository;
+    private final WorkOrderJpaRepository workOrderJpaRepository;
     private static final String ERROR_MSG = "Taller no encontrado";
 
     private final Cloudinary cloudinary;
@@ -48,11 +50,18 @@ public class WorkshopService {
             throw new WorkshopAlreadyExistsException("Ya existe un taller con ese nombre: " + dto.workshopName());
         }
 
-        User workshopOwner = userJpaRepository.findByEmail(email)
+        User creator = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if(workshopOwner.getWorkshop() != null){
-            throw new UserAlreadyHasWorkshopException("Este usuario ya es administrador de otro taller");
+        String targetOwnerEmail = (creator.getRole() == Role.ADMIN && dto.ownerEmail() != null && !dto.ownerEmail().isEmpty())
+                ? dto.ownerEmail()
+                : email;
+
+        User workshopOwner = userJpaRepository.findByEmail(targetOwnerEmail)
+                .orElseThrow(() -> new UserNotFoundException("No se encontró el usuario con email: " + targetOwnerEmail));
+
+        if (workshopOwner.getWorkshop() != null) {
+            throw new UserAlreadyHasWorkshopException("Este usuario ya pertenece o es administrador de otro taller");
         }
 
         String iconUrl = dto.icon();
@@ -69,6 +78,10 @@ public class WorkshopService {
                 .build();
 
         newWorkshop = workshopJpaRepository.save(newWorkshop);
+
+        if (workshopOwner.getRole() != Role.ADMIN) {
+            workshopOwner.setRole(Role.MANAGER);
+        }
         workshopOwner.setWorkshop(newWorkshop);
         userJpaRepository.save(workshopOwner);
 
@@ -80,8 +93,35 @@ public class WorkshopService {
         return workshopJpaRepository.findById(id).map(workshop -> {
             verifyWorkshopManagerAccess(workshop, email);
 
+            User currentUser = userJpaRepository.findByEmail(email).orElseThrow();
+
             if (dto.workshopName() != null && !workshop.getWorkshopName().equalsIgnoreCase(dto.workshopName()) && workshopJpaRepository.findByWorkshopName(dto.workshopName()).isPresent()) {
                 throw new WorkshopAlreadyExistsException("Error: ya existe otro taller registrado con ese nombre");
+            }
+
+            if(currentUser.getRole() == Role.ADMIN && dto.ownerEmail() != null && !dto.ownerEmail().isEmpty()){
+                Optional<User> currentManagerOpt = workshop.getEmployees().stream()
+                        .findFirst();
+
+                if(currentManagerOpt.isEmpty() || !currentManagerOpt.get().getEmail().equalsIgnoreCase(dto.ownerEmail())){
+                    User newOwner = userJpaRepository.findByEmail(dto.ownerEmail())
+                            .orElseThrow(() -> new UserNotFoundException("El nuevo dueño especificado no existe: " + dto.ownerEmail()));
+
+                    if(newOwner.getWorkshop() != null && !newOwner.getWorkshop().getWorkshopId().equals(id)){
+                        throw new UserAlreadyHasWorkshopException("El nuevo usuario ya pertenece a otro taller");
+                    }
+
+                    if(currentManagerOpt.isPresent()){
+                        User oldManager = currentManagerOpt.get();
+                        oldManager.setRole(Role.CLIENT);
+                        oldManager.setWorkshop(null);
+                        userJpaRepository.save(oldManager);
+                    }
+
+                    newOwner.setRole(Role.MANAGER);
+                    newOwner.setWorkshop(workshop);
+                    userJpaRepository.save(newOwner);
+                }
             }
 
             if (file != null && !file.isEmpty()) {
@@ -109,6 +149,36 @@ public class WorkshopService {
 
         verifyWorkshopManagerAccess(workshop, email);
         String iconUrl = workshop.getIcon();
+
+        List<WorkOrder> workOrders = workOrderJpaRepository.findByWorkshop_workshopId(id);
+        for(WorkOrder order : workOrders){
+            order.setHistoricalWorkshopName(workshop.getWorkshopName());
+            order.setWorkshop(null);
+            workOrderJpaRepository.save(order);
+        }
+
+        if(workshop.getVehicles() != null){
+            for(Vehicle vehicle : new ArrayList<>(workshop.getVehicles())){
+                vehicle.setWorkshop(null);
+
+                if(vehicle.getPendingWorkshop() != null && vehicle.getPendingWorkshop().getWorkshopId().equals(id)){
+                    vehicle.setPendingWorkshop(null);
+                }
+            }
+            workshop.getVehicles().clear();
+        }
+
+        if (workshop.getEmployees() != null && !workshop.getEmployees().isEmpty()) {
+            for (User employee : new java.util.ArrayList<>(workshop.getEmployees())) {
+                employee.setWorkshop(null);
+
+                if (employee.getRole() != Role.ADMIN) {
+                    employee.setRole(Role.CLIENT);
+                }
+                userJpaRepository.save(employee);
+            }
+            workshop.getEmployees().clear();
+        }
 
         workshopJpaRepository.delete(workshop);
 
@@ -170,6 +240,10 @@ public class WorkshopService {
     private void verifyWorkshopManagerAccess(Workshop workshop, String email) {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
+
+        if (currentUser.getRole() == Role.ADMIN) {
+            return;
+        }
 
         boolean isManagerOrCoManager = currentUser.getRole() == Role.MANAGER ||
                 currentUser.getRole() == Role.CO_MANAGER;

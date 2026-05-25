@@ -24,25 +24,25 @@ public class WorkshopController {
     private final WorkshopService workshopService;
     private final UserService userService;
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @GetMapping("/details/{id}")
     public NewWorkshopDTO showById(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
         return workshopService.getWorkshopById(id, principal.getName());
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN'")
     @GetMapping("/{id}/employees")
     public List<NewUserDTO> showEmployees(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
         return userService.getEmployeesByWorkshopId(id, principal.getName());
     }
 
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<NewWorkshopDTO> store(@Valid @RequestBody NewWorkshopDTO workshop, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'ADMIN')")
     @PutMapping(value = "/details/{id}", consumes = { "multipart/form-data" })
     public NewWorkshopDTO update(
             @PathVariable Long id,
@@ -53,7 +53,7 @@ public class WorkshopController {
         return workshopService.edit(dto, id, file, principal.getName());
     }
 
-    @PreAuthorize("hasAuthority('MANAGER')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'ADMIN')")
     @DeleteMapping("/details/{id}")
     public NewWorkshopDTO destroy(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
         return workshopService.delete(id, principal.getName());

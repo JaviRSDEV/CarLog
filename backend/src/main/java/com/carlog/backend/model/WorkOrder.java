@@ -56,8 +56,11 @@ public class WorkOrder {
     private User mechanic;
 
     @ManyToOne
-    @JoinColumn(name = "workshop_id", nullable = false)
+    @JoinColumn(name = "workshop_id")
     private Workshop workshop;
+
+    @Column(name = "historical_workshop_name")
+    private String historicalWorkshopName;
 
     @Builder.Default
     private Double totalAmount = 0.0;

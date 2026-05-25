@@ -80,7 +80,7 @@ create table work_order
     total_amount   double                                       null,
     mechanic_id    varchar(255)                                 not null,
     vehicle_id     bigint                                       not null,
-    workshop_id    bigint                                       not null,
+    workshop_id    bigint                                       null,
     constraint FKglfk5g4gqq4msnlj7m2dba7j9
         foreign key (workshop_id) references workshop (workshop_id),
     constraint FKkv9i5s1j5jd6mxon26d284fd9

@@ -9,7 +9,8 @@ public record NewWorkshopDTO(
                              String address,
                              String workshopPhone,
                              String workshopEmail,
-                             String icon
+                             String icon,
+                             String ownerEmail
                              ) {
 
     public static NewWorkshopDTO of(Workshop w){
@@ -19,7 +20,8 @@ public record NewWorkshopDTO(
                 w.getAddress(),
                 w.getWorkshopPhone(),
                 w.getWorkshopEmail(),
-                w.getIcon()
+                w.getIcon(),
+                null
         );}
 
 }

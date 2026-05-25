@@ -44,12 +44,14 @@ class UserControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
         objectMapper = new ObjectMapper();
 
+        // Ajustado con los 9 campos del Record, incluyendo la contraseña
         mockUserDTO = new NewUserDTO(
                 "12345678A",
                 "Carlos Gómez",
                 "carlos@example.com",
                 "600123456",
                 Role.MECHANIC,
+                "password123", // Contraseña añadida para mapear con el DTO actual
                 1L,
                 null,
                 null
@@ -80,7 +82,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("GET /search/{name} - Retorna lista vacía (Happy Path sin resultados)")
+    @DisplayName("GET /search/{name} - Retorna lista vacía")
     void searchByName_Empty() throws Exception {
         when(userService.getByName("Inexistente")).thenReturn(Collections.emptyList());
 
@@ -149,7 +151,8 @@ class UserControllerTest {
         Principal mockPrincipal = () -> "user@test.com";
 
         mockMvc.perform(patch("/api/users/reject").principal(mockPrincipal))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dni").value("12345678A"));
     }
 
     @Test
@@ -161,5 +164,18 @@ class UserControllerTest {
                 .andExpect(status().isOk());
 
         verify(userService).fireEmployee("manager@test.com", "12345678A");
+    }
+
+    @Test
+    @DisplayName("DELETE /{dni} - Elimina un usuario por completo del sistema")
+    void delete_Success() throws Exception {
+        when(userService.delete("12345678A")).thenReturn(mockUserDTO);
+
+        mockMvc.perform(delete("/api/users/12345678A"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dni").value("12345678A"))
+                .andExpect(jsonPath("$.name").value("Carlos Gómez"));
+
+        verify(userService, times(1)).delete("12345678A");
     }
 }

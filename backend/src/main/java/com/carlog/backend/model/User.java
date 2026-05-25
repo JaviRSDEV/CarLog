@@ -50,7 +50,7 @@ public class User implements UserDetails, Serializable {
     @EqualsAndHashCode.Exclude
     private Workshop workshop;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "owner")
     private List<Vehicle> vehicles;
 
     @ManyToOne

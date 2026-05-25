@@ -8,9 +8,11 @@ import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
+import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +25,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,8 +42,10 @@ class UserServiceTest {
 
     @Mock private UserJpaRepository userJpaRepository;
     @Mock private WorkshopJpaRepository workshopJpaRepository;
+    @Mock private VehicleJpaRepository vehicleJpaRepository; // Añadido para el método delete
     @Mock private SimpMessagingTemplate messagingTemplate;
     @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private PasswordEncoder passwordEncoder; // OBLIGATORIO: Mockearlo para el método add
 
     @InjectMocks private UserService userService;
 
@@ -49,6 +54,7 @@ class UserServiceTest {
     private User clientUser;
     private User managerUser;
     private User employeeUser;
+    private User adminUser; // Añadido para probar el nuevo bypass de admin
     private Workshop workshop;
 
     @BeforeEach
@@ -60,6 +66,8 @@ class UserServiceTest {
         managerUser = User.builder().dni("22222222B").name("Manager").email("manager@test.com").role(Role.MANAGER).workshop(workshop).build();
 
         employeeUser = User.builder().dni("33333333C").name("Empleado").email("emp@test.com").role(Role.MECHANIC).workshop(workshop).build();
+
+        adminUser = User.builder().dni("44444444D").name("Admin").email("admin@test.com").role(Role.ADMIN).build();
 
         workshop.setEmployees(List.of(managerUser, employeeUser));
     }
@@ -112,7 +120,7 @@ class UserServiceTest {
 
     @Test
     void add_DniAlreadyExists_ThrowsException() {
-        NewUserDTO dto = new NewUserDTO(clientUser.getDni(), "X", "X", "X", null, null, null, null);
+        NewUserDTO dto = new NewUserDTO(clientUser.getDni(), "X", "X", "X", null, "password", null, null, null);
         when(userJpaRepository.findByDni(dto.dni())).thenReturn(Optional.of(clientUser));
 
         assertThrows(UserAlreadyExistsException.class, () -> userService.add(dto));
@@ -120,15 +128,16 @@ class UserServiceTest {
 
     @Test
     void add_UserTriesToAutoHire_ThrowsException() {
-        NewUserDTO dto = new NewUserDTO("88888888X", "X", "X", "X", Role.CLIENT, 1L, null, null);
+        NewUserDTO dto = new NewUserDTO("88888888X", "X", "X", "X", Role.CLIENT, "password", 1L, null, null);
 
         assertThrows(InvalidRegistrationException.class, () -> userService.add(dto));
     }
 
     @Test
     void add_RoleIsNull_DefaultsToClient() {
-        NewUserDTO dto = new NewUserDTO("88888888X", "Nuevo", "X", "X", null, null, null, null);
+        NewUserDTO dto = new NewUserDTO("88888888X", "Nuevo", "X", "X", null, "password", null, null, null);
         when(userJpaRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
 
         NewUserDTO result = userService.add(dto);
         assertEquals(Role.CLIENT, result.role());
@@ -136,8 +145,9 @@ class UserServiceTest {
 
     @Test
     void add_RoleIsMechanicOrCoManager_ForcesToClient() {
-        NewUserDTO dto = new NewUserDTO("88888888X", "Nuevo", "X", "X", Role.MECHANIC, null, null, null);
+        NewUserDTO dto = new NewUserDTO("88888888X", "Nuevo", "X", "X", Role.MECHANIC, "password", null, null, null);
         when(userJpaRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
 
         NewUserDTO result = userService.add(dto);
         assertEquals(Role.CLIENT, result.role());
@@ -145,7 +155,7 @@ class UserServiceTest {
 
     @Test
     void edit_UserEditsThemselves_Success() {
-        NewUserDTO dto = new NewUserDTO(clientUser.getDni(), "Cliente Modificado", "X", "X", null, null, null, null);
+        NewUserDTO dto = new NewUserDTO(clientUser.getDni(), "Cliente Modificado", "X", "X", null, null, null, null, null);
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
         when(userJpaRepository.findByDni(clientUser.getDni())).thenReturn(Optional.of(clientUser));
         when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
@@ -156,7 +166,7 @@ class UserServiceTest {
 
     @Test
     void edit_ManagerEditsEmployeeAndChangesRole_Success() {
-        NewUserDTO dto = new NewUserDTO(employeeUser.getDni(), "Empleado Modificado", "X", "X", Role.CO_MANAGER, null, null, null);
+        NewUserDTO dto = new NewUserDTO(employeeUser.getDni(), "Empleado Modificado", "X", "X", Role.CO_MANAGER, null, null, null, null);
         when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
         when(userJpaRepository.findByDni(employeeUser.getDni())).thenReturn(Optional.of(employeeUser));
         when(userJpaRepository.save(any(User.class))).thenReturn(employeeUser);
@@ -168,8 +178,24 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("edit() - Permite a un ADMIN editar a cualquier usuario y cambiarle el rol")
+    void edit_AdminEditsAnyUser_Success() {
+        NewUserDTO dto = new NewUserDTO(clientUser.getDni(), "Cliente por Admin", "client@test.com", "666", Role.MECHANIC, null, null, null, null);
+        when(userJpaRepository.findByEmail(adminUser.getEmail())).thenReturn(Optional.of(adminUser));
+        when(userJpaRepository.findByDni(clientUser.getDni())).thenReturn(Optional.of(clientUser));
+        when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
+
+        userService.edit(dto, clientUser.getDni(), adminUser.getEmail());
+
+        verify(userJpaRepository).save(userCaptor.capture());
+        User saved = userCaptor.getValue();
+        assertEquals("Cliente por Admin", saved.getName());
+        assertEquals(Role.MECHANIC, saved.getRole()); // Comprobamos que el admin sí puede ascender/cambiar rol
+    }
+
+    @Test
     void edit_IntruderTriesToEdit_ThrowsSecurityException() {
-        NewUserDTO dto = new NewUserDTO(managerUser.getDni(), "Hackeado", "X", "X", null, null, null, null);
+        NewUserDTO dto = new NewUserDTO(managerUser.getDni(), "Hackeado", "X", "X", null, null, null, null, null);
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
         when(userJpaRepository.findByDni(managerUser.getDni())).thenReturn(Optional.of(managerUser));
 
@@ -178,7 +204,7 @@ class UserServiceTest {
 
     @Test
     void edit_UserToEditNotFound_ThrowsException() {
-        NewUserDTO dto = new NewUserDTO("999", "Fantasma", "X", "X", null, null, null, null);
+        NewUserDTO dto = new NewUserDTO("999", "Fantasma", "X", "X", null, null, null, null, null);
 
         when(userJpaRepository.findByEmail(managerUser.getEmail())).thenReturn(Optional.of(managerUser));
         when(userJpaRepository.findByDni("999")).thenReturn(Optional.empty());
@@ -192,7 +218,7 @@ class UserServiceTest {
     void delete_Exists_DeletesUser() {
         when(userJpaRepository.findByDni(clientUser.getDni())).thenReturn(Optional.of(clientUser));
         userService.delete(clientUser.getDni());
-        verify(userJpaRepository).deleteByDni(clientUser.getDni());
+        verify(userJpaRepository).deleteByDni(clientUser.getDni()); // Coincide con tu cambio a deleteByDni
     }
 
     @Test
@@ -234,8 +260,6 @@ class UserServiceTest {
         assertEquals(Role.MECHANIC, userCaptor.getValue().getPendingRole());
 
         verify(eventPublisher).publishEvent(any(WorkshopHiringEvent.class));
-
-        // Aserción corregida para WebSockets privados (usa email y convertAndSendToUser)
         verify(messagingTemplate).convertAndSendToUser(eq(clientUser.getEmail()), eq("/queue/notificaciones"), any(NotificationDTO.class));
     }
 
@@ -245,12 +269,10 @@ class UserServiceTest {
         when(userJpaRepository.findByDni(clientUser.getDni())).thenReturn(Optional.of(clientUser));
         when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
 
-        // Mock actualizado para usar convertAndSendToUser con 3 parámetros
         doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate)
                 .convertAndSendToUser(anyString(), anyString(), any(NotificationDTO.class));
 
         assertDoesNotThrow(() -> userService.inviteToWorkshop(managerUser.getEmail(), clientUser.getDni(), Role.MECHANIC));
-
         verify(eventPublisher).publishEvent(any(WorkshopHiringEvent.class));
     }
 
@@ -298,7 +320,6 @@ class UserServiceTest {
         assertEquals(Role.MECHANIC, savedUser.getRole());
         assertNull(savedUser.getPendingWorkshop());
 
-        // Aserción corregida para notificar al manager por su email
         verify(messagingTemplate).convertAndSendToUser(eq(managerUser.getEmail()), eq("/queue/notificaciones"), any(NotificationDTO.class));
     }
 
@@ -311,7 +332,6 @@ class UserServiceTest {
         when(userJpaRepository.save(any(User.class))).thenReturn(clientUser);
         when(userJpaRepository.findFirstByWorkshopAndRole(workshop, Role.MANAGER)).thenReturn(Optional.of(managerUser));
 
-        // Mock actualizado para usar convertAndSendToUser
         doThrow(new RuntimeException("WebSocket Error")).when(messagingTemplate)
                 .convertAndSendToUser(anyString(), anyString(), any(NotificationDTO.class));
 
@@ -342,8 +362,6 @@ class UserServiceTest {
         userService.acceptInvitation(clientUser.getEmail());
 
         verify(userJpaRepository).save(any(User.class));
-
-        // Verificación actualizada
         verify(messagingTemplate, never()).convertAndSendToUser(anyString(), anyString(), any(NotificationDTO.class));
     }
 
@@ -377,7 +395,6 @@ class UserServiceTest {
         assertNull(firedUser.getWorkshop());
         assertEquals(Role.CLIENT, firedUser.getRole());
 
-        // Aserción corregida para el despido (usa email y convertAndSendToUser)
         verify(messagingTemplate).convertAndSendToUser(eq(employeeUser.getEmail()), eq("/queue/notificaciones"), any(NotificationDTO.class));
     }
 

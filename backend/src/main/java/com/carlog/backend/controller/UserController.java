@@ -63,4 +63,10 @@ public class UserController {
     public void fireEmployee(@PathVariable String dni, @Parameter(hidden = true) Principal principal){
         userService.fireEmployee(principal.getName(), dni);
     }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @DeleteMapping("/{dni}")
+    public ResponseEntity<NewUserDTO> delete(@PathVariable String dni) {
+        return ResponseEntity.ok(userService.delete(dni));
+    }
 }

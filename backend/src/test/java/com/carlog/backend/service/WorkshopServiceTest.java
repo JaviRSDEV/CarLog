@@ -6,6 +6,7 @@ import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.model.Workshop;
 import com.carlog.backend.repository.UserJpaRepository;
+import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkshopJpaRepository;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Uploader;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,17 +33,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class WorkshopServiceTest {
 
-    @Mock
-    private WorkshopJpaRepository workshopJpaRepository;
-    @Mock
-    private UserJpaRepository userJpaRepository;
-    @Mock
-    private Cloudinary cloudinary;
-    @Mock
-    private Uploader uploader;
+    @Mock private WorkshopJpaRepository workshopJpaRepository;
+    @Mock private UserJpaRepository userJpaRepository;
+    @Mock private WorkOrderJpaRepository workOrderJpaRepository;
+    @Mock private Cloudinary cloudinary;
+    @Mock private Uploader uploader;
 
-    @InjectMocks
-    private WorkshopService workshopService;
+    @InjectMocks private WorkshopService workshopService;
 
     private Workshop workshop;
     private User manager;
@@ -57,6 +55,8 @@ class WorkshopServiceTest {
         workshop.setWorkshopPhone("600123456");
         workshop.setWorkshopEmail("contacto@tallerpaco.com");
         workshop.setIcon("http://res.cloudinary.com/demo/image/upload/v1234/carlog/workshops/icono1.jpg");
+        workshop.setEmployees(new ArrayList<>());
+        workshop.setVehicles(new ArrayList<>());
 
         manager = new User();
         manager.setDni("11111111A");
@@ -76,6 +76,7 @@ class WorkshopServiceTest {
                 "Calle Falsa 123",
                 "600123456",
                 "contacto@tallerpaco.com",
+                null,
                 null
         );
     }
@@ -130,6 +131,7 @@ class WorkshopServiceTest {
     void add_Success_WithoutIcon() {
         User newOwner = new User();
         newOwner.setEmail("nuevo@test.com");
+        newOwner.setRole(Role.CLIENT);
 
         when(workshopJpaRepository.findByWorkshopName(workshopDTO.workshopName())).thenReturn(Optional.empty());
         when(userJpaRepository.findByEmail(newOwner.getEmail())).thenReturn(Optional.of(newOwner));
@@ -146,10 +148,11 @@ class WorkshopServiceTest {
     @Test
     void add_Success_WithBase64Icon() throws Exception {
         NewWorkshopDTO dtoWithBase64 = new NewWorkshopDTO(
-                null, "Taller Paco", "Calle Falsa 123", "600123456", "contacto@tallerpaco.com", "data:image/png;base64,iVBOR..."
+                null, "Taller Paco", "Calle Falsa 123", "600123456", "contacto@tallerpaco.com", "data:image/png;base64,iVBOR...", null
         );
         User newOwner = new User();
         newOwner.setEmail("nuevo@test.com");
+        newOwner.setRole(Role.CLIENT);
 
         when(workshopJpaRepository.findByWorkshopName(dtoWithBase64.workshopName())).thenReturn(Optional.empty());
         when(userJpaRepository.findByEmail(newOwner.getEmail())).thenReturn(Optional.of(newOwner));
@@ -184,7 +187,7 @@ class WorkshopServiceTest {
 
     @Test
     void edit_Success_UpdatesDataAndClearsIcon() throws Exception {
-        NewWorkshopDTO editDto = new NewWorkshopDTO(1L, "Taller Modificado", "Nueva dir", "123", "new@test.com", "");
+        NewWorkshopDTO editDto = new NewWorkshopDTO(1L, "Taller Modificado", "Nueva dir", "123", "new@test.com", "", null);
 
         when(workshopJpaRepository.findById(1L)).thenReturn(Optional.of(workshop));
         when(userJpaRepository.findByEmail(manager.getEmail())).thenReturn(Optional.of(manager));
@@ -201,7 +204,7 @@ class WorkshopServiceTest {
     @Test
     void edit_Success_UpdatesDataAndUploadsMultipartFile() throws Exception {
         MultipartFile file = new MockMultipartFile("file", "icon.png", "image/png", "img_data".getBytes());
-        NewWorkshopDTO editDto = new NewWorkshopDTO(1L, "Taller Modificado", "Nueva dir", "123", "new@test.com", "dummy_icon");
+        NewWorkshopDTO editDto = new NewWorkshopDTO(1L, "Taller Modificado", "Nueva dir", "123", "new@test.com", "dummy_icon", null);
 
         when(workshopJpaRepository.findById(1L)).thenReturn(Optional.of(workshop));
         when(userJpaRepository.findByEmail(manager.getEmail())).thenReturn(Optional.of(manager));
@@ -228,7 +231,7 @@ class WorkshopServiceTest {
 
     @Test
     void edit_ThrowsWorkshopAlreadyExists_WhenNameIsTakenByAnotherWorkshop() {
-        NewWorkshopDTO editDto = new NewWorkshopDTO(1L, "Otro Taller", "dir", "1", "e@e.com", null);
+        NewWorkshopDTO editDto = new NewWorkshopDTO(1L, "Otro Taller", "dir", "1", "e@e.com", null, null);
         Workshop anotherWorkshop = new Workshop();
         anotherWorkshop.setWorkshopId(2L);
 
@@ -246,6 +249,10 @@ class WorkshopServiceTest {
         when(workshopJpaRepository.findById(1L)).thenReturn(Optional.of(workshop));
         when(userJpaRepository.findByEmail(manager.getEmail())).thenReturn(Optional.of(manager));
         when(cloudinary.uploader()).thenReturn(uploader);
+
+        // CORREGIDO: Adaptados a tus nombres exactos con guion bajo (_)
+        when(workOrderJpaRepository.findByWorkshop_workshopId(1L)).thenReturn(List.of());
+        when(userJpaRepository.findByPendingWorkshop_workshopId(1L)).thenReturn(List.of());
 
         workshopService.delete(1L, manager.getEmail());
 

@@ -37,14 +37,10 @@ class WorkshopControllerTest {
 
     private MockMvc mockMvc;
 
-    @Mock
-    private WorkshopService workshopService;
+    @Mock private WorkshopService workshopService;
+    @Mock private UserService userService;
 
-    @Mock
-    private UserService userService;
-
-    @InjectMocks
-    private WorkshopController workshopController;
+    @InjectMocks private WorkshopController workshopController;
 
     private ObjectMapper objectMapper;
     private Principal mockPrincipal;
@@ -54,7 +50,6 @@ class WorkshopControllerTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
@@ -72,7 +67,8 @@ class WorkshopControllerTest {
                 "Calle Falsa 123",
                 "600123456",
                 "contacto@tallerpaco.com",
-                "https://cloudinary.com/mifoto.png"
+                "https://cloudinary.com/mifoto.png",
+                null
         );
     }
 
@@ -130,6 +126,7 @@ class WorkshopControllerTest {
 
         when(workshopService.edit(any(NewWorkshopDTO.class), eq(1L), any(), anyString()))
                 .thenReturn(mockWorkshop);
+
         MockMultipartHttpServletRequestBuilder builder =
                 (MockMultipartHttpServletRequestBuilder) multipart("/api/workshop/details/1")
                         .with(request -> {

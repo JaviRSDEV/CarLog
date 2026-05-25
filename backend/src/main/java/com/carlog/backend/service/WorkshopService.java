@@ -151,10 +151,12 @@ public class WorkshopService {
         String iconUrl = workshop.getIcon();
 
         List<WorkOrder> workOrders = workOrderJpaRepository.findByWorkshop_workshopId(id);
-        for(WorkOrder order : workOrders){
-            order.setHistoricalWorkshopName(workshop.getWorkshopName());
-            order.setWorkshop(null);
-            workOrderJpaRepository.save(order);
+        if (workOrders != null && !workOrders.isEmpty()) {
+            for (WorkOrder order : workOrders) {
+                order.setHistoricalWorkshopName(workshop.getWorkshopName());
+                order.setWorkshop(null);
+                workOrderJpaRepository.save(order);
+            }
         }
 
         if(workshop.getVehicles() != null){
@@ -178,6 +180,15 @@ public class WorkshopService {
                 userJpaRepository.save(employee);
             }
             workshop.getEmployees().clear();
+        }
+
+        List<User> usersWithPendingInvitations = userJpaRepository.findByPendingWorkshop_workshopId(id);
+        if (usersWithPendingInvitations != null && !usersWithPendingInvitations.isEmpty()) {
+            for (User user : usersWithPendingInvitations) {
+                user.setPendingWorkshop(null);
+                user.setPendingRole(null);
+                userJpaRepository.save(user);
+            }
         }
 
         workshopJpaRepository.delete(workshop);

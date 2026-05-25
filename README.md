@@ -25,6 +25,14 @@ El sistema está diseñado para dar soporte a múltiples roles de usuario, garan
 
 ---
 
+## Estructura del proyecto.
+
+Backend (Spring Boot 4.0.1) Este repositorio contiene la API REST, WebSockets, seguridad, lógica de negocio y validaciones.
+
+Frontend (Angular 21+) Repositorio con la SPA, gestión de estado con Signals y UI: https://github.com/JaviRSDEV/FrontCarLog
+
+---
+
 ## Tabla de Contenidos
 
 - [Características Principales](#características-principales)

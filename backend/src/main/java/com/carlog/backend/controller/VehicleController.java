@@ -62,13 +62,13 @@ public class VehicleController {
         return vehicleService.delete(plate, principal.getName());
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @PostMapping("/{plate}/exit/{workshopId}")
     public ResponseEntity<NewVehicleDTO> registerExit(@PathVariable String plate, @PathVariable Long workshopId, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(vehicleService.registerExit(plate, workshopId, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @PutMapping("/{plate}/request-entry/{workshopId}")
     public ResponseEntity<NewVehicleDTO> requestEntry(@PathVariable String plate, @PathVariable Long workshopId, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(vehicleService.requestEntry(plate, workshopId, principal.getName()));

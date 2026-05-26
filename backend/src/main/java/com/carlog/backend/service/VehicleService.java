@@ -43,6 +43,11 @@ public class VehicleService {
                 .orElseThrow(() -> new UserNotFoundException(email));
 
         boolean isWorker = currentUser.getRole().isWorker();
+        boolean isAdmin = currentUser.getRole().isAdmin();
+
+        if (isAdmin) {
+            return vehicleJpaRepository.findAll(pageable).map(NewVehicleDTO::of);
+        }
 
         if (isWorker && currentUser.getWorkshop() != null) {
             return vehicleJpaRepository.findByWorkshop_WorkshopId(currentUser.getWorkshop().getWorkshopId(), pageable)
@@ -56,7 +61,7 @@ public class VehicleService {
     public Page<NewVehicleDTO> getByWorkshop(Long workshopId, String email, Pageable pageable){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
-        if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
+        if (!currentUser.getRole().isAdmin() && (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId))) {
             throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
         }
 
@@ -73,7 +78,7 @@ public class VehicleService {
     public Page<NewVehicleDTO> getByOwner(String ownerDni, String email, Pageable pageable){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
-        if (!currentUser.getDni().equals(ownerDni)) {
+        if (!currentUser.getRole().isAdmin() && !currentUser.getDni().equals(ownerDni)) {
             throw new UnauthorizedActionException("Acceso denegado: No puedes ver los vehículos de otro usuario.");
         }
 
@@ -84,7 +89,7 @@ public class VehicleService {
     public Page<NewVehicleDTO> getVehiclesAssignedToMechanic(String mechanicDni, String email, Pageable pageable){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
-        if (!currentUser.getDni().equals(mechanicDni) && currentUser.getRole() != Role.MANAGER) {
+        if (!currentUser.getRole().isAdmin() && !currentUser.getDni().equals(mechanicDni) && currentUser.getRole() != Role.MANAGER) {
             throw new UnauthorizedActionException("Acceso denegado: No puedes ver los vehículos de otro mecánico.");
         }
 
@@ -101,7 +106,7 @@ public class VehicleService {
 
         User owner = determineOwner(connectedUser, dto.ownerId());
         Workshop currentWorkshop = determineWorkshop(connectedUser);
-        List<String> finalImageRoutes = processImages(dto.images(),dto.plate());
+        List<String> finalImageRoutes = processImages(dto.images(), dto.plate());
 
         Vehicle newVehicle = Vehicle.builder()
                 .plate(dto.plate())
@@ -139,7 +144,7 @@ public class VehicleService {
     }
 
     private User determineOwner(User connectedUser, String ownerId) {
-        if (connectedUser.getRole().isWorker() && ownerId != null && !ownerId.isBlank()) {
+        if ((connectedUser.getRole().isWorker() || connectedUser.getRole().isAdmin()) && ownerId != null && !ownerId.isBlank()) {
             return userJpaRepository.findByDni(ownerId)
                     .orElseThrow(() -> new UserNotFoundException(ownerId));
         }
@@ -147,6 +152,10 @@ public class VehicleService {
     }
 
     private Workshop determineWorkshop(User connectedUser) {
+        if (connectedUser.getRole().isAdmin()) {
+            return null;
+        }
+
         if (!connectedUser.getRole().isWorker()) {
             return null;
         }
@@ -161,7 +170,6 @@ public class VehicleService {
     private String uploadToCloudinary(String base64Image, String plate) {
         try {
             log.info("Subiendo nueva imagen a Cloudinary...");
-
             String folderPath = "carlog/vehicles/" + plate;
 
             var uploadResult = cloudinary.uploader().upload(base64Image, ObjectUtils.asMap(
@@ -182,9 +190,7 @@ public class VehicleService {
         if(imageUrl == null || !imageUrl.contains("cloudinary")) return;
 
         try {
-
             String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1, imageUrl.lastIndexOf("."));
-
             String publicId = "carlog/vehicles/" + plate + "/" + filename;
 
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
@@ -263,6 +269,9 @@ public class VehicleService {
     }
 
     private void validateEditAccess(Vehicle vehicle, User currentUser) {
+        if (currentUser.getRole().isAdmin()) {
+            return;
+        }
         if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
             throw new UnauthorizedActionException("Acceso denegado: No tienes permiso para editar el vehículo");
         }
@@ -299,20 +308,8 @@ public class VehicleService {
         return img;
     }
 
-    private void mapDtoToEntity(Vehicle vehicle, NewVehicleDTO dto) {
-        vehicle.setPlate(dto.plate());
-        vehicle.setBrand(dto.brand());
-        vehicle.setModel(dto.model());
-        vehicle.setKilometers(dto.kilometers());
-        vehicle.setEngine(dto.engine());
-        vehicle.setHorsePower(dto.horsePower());
-        vehicle.setTorque(dto.torque());
-        vehicle.setTires(dto.tires());
-        vehicle.setLastMaintenance(dto.lastMaintenance());
-    }
-
     private void updateOwnerIfPresent(Vehicle vehicle, String ownerId) {
-        if (ownerId != null) {
+        if (ownerId != null && !ownerId.isBlank()) {
             User newOwner = userJpaRepository.findByDni(ownerId)
                     .orElseThrow(() -> new UserNotFoundException(ownerId));
             vehicle.setOwner(newOwner);
@@ -324,7 +321,7 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
+        if (!currentUser.getRole().isAdmin() && (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId))) {
             throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
         }
 
@@ -338,7 +335,6 @@ public class VehicleService {
 
         eventPublisher.publishEvent(VehicleAdmissionEvent.of(savedVehicle));
 
-        String ownerDni = savedVehicle.getOwner().getDni();
         NotificationDTO notif = NotificationDTO.builder()
                 .type("VEHICLE_REQUEST")
                 .title("Solicitud de Ingreso")
@@ -348,7 +344,9 @@ public class VehicleService {
 
         try {
             User owner = savedVehicle.getOwner();
-            messagingTemplate.convertAndSendToUser(owner.getEmail(), "/queue/notificaciones", notif);
+            if (owner != null) {
+                messagingTemplate.convertAndSendToUser(owner.getEmail(), "/queue/notificaciones", notif);
+            }
         } catch (Exception e) {
             log.error("Error enviando WebSocket al dueño: {}", e.getMessage());
         }
@@ -368,7 +366,7 @@ public class VehicleService {
             throw new NoPendingRequestException(plate);
         }
 
-        if (!vehicle.getOwner().getDni().equals(currentUser.getDni())) {
+        if (!currentUser.getRole().isAdmin() && !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
             throw new UnauthorizedActionException("No tienes permiso para aprobar el ingreso de este vehículo");
         }
 
@@ -380,7 +378,6 @@ public class VehicleService {
 
         try {
             User manager = userJpaRepository.findFirstByWorkshopAndRole(targetWorkshop, Role.MANAGER).orElse(null);
-
             if (manager != null) {
                 NotificationDTO alert = NotificationDTO.builder()
                         .type("NEW_FLEET_VEHICLE")
@@ -389,7 +386,8 @@ public class VehicleService {
                         .extraData(plate)
                         .build();
 
-                messagingTemplate.convertAndSendToUser(manager.getEmail(), "/queue/notificaciones", alert);            }
+                messagingTemplate.convertAndSendToUser(manager.getEmail(), "/queue/notificaciones", alert);
+            }
         } catch (Exception e) {
             log.error("Error en notificación WebSocket al Manager: {}", e.getMessage());
         }
@@ -404,7 +402,7 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if(!vehicle.getOwner().getDni().equals(currentUser.getDni())){
+        if (!currentUser.getRole().isAdmin() && !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
             throw new UnauthorizedActionException("No tienes permiso para rechazar el ingreso de este vehículo");
         }
 
@@ -415,15 +413,16 @@ public class VehicleService {
     public NewVehicleDTO registerExit(String plate, Long workshopId, String email){
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
-        if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
+        if (!currentUser.getRole().isAdmin() && (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId))) {
             throw new UnauthorizedActionException("Acceso denegado: No puedes registrar salidas de otro taller.");
         }
 
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
 
-        if(vehicle.getWorkshop() == null || !vehicle.getWorkshop().getWorkshopId().equals(workshopId)){
+        if (vehicle.getWorkshop() == null || (!currentUser.getRole().isAdmin() && !vehicle.getWorkshop().getWorkshopId().equals(workshopId))) {
             throw new VehicleNotInWorkshopException("No puedes dar salida a un coche que no está registrado en el taller");
         }
+
         vehicle.setWorkshop(null);
         return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
     }
@@ -432,7 +431,7 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
 
-        if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
+        if (!currentUser.getRole().isAdmin() && (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni()))) {
             throw new UnauthorizedActionException("Acceso denegado: Solo el dueño actual puede transferir el vehículo.");
         }
 
@@ -450,14 +449,14 @@ public class VehicleService {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
 
-        if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
+        if (!currentUser.getRole().isAdmin() && (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni()))) {
             throw new UnauthorizedActionException("Acceso denegado: No tienes permiso para eliminar el vehículo");
         }
 
         Page<WorkOrder> orderPage = workOrderJpaRepository.findByVehicle_Plate(plate, Pageable.unpaged());
         List<WorkOrder> linkedOrders = orderPage.getContent();
 
-        for(WorkOrder order : linkedOrders){
+        for (WorkOrder order : linkedOrders) {
             order.setHistoricalPlate(vehicle.getPlate());
             order.setHistoricalBrandModel(vehicle.getBrand() + " " + vehicle.getModel());
 
@@ -465,18 +464,17 @@ public class VehicleService {
                 order.setHistoricalClientName(vehicle.getOwner().getName());
                 order.setHistoricalClientDni(vehicle.getOwner().getDni());
             }
-
             order.setVehicle(null);
         }
 
-        if(!linkedOrders.isEmpty()){
+        if (!linkedOrders.isEmpty()) {
             workOrderJpaRepository.saveAll(linkedOrders);
         }
 
         NewVehicleDTO deletedVehicle = NewVehicleDTO.of(vehicle);
 
-        if(vehicle.getImages() != null){
-            for(String imageUrl : vehicle.getImages()){
+        if (vehicle.getImages() != null) {
+            for (String imageUrl : vehicle.getImages()) {
                 deleteFromCloudinary(imageUrl, plate);
             }
         }
@@ -498,6 +496,10 @@ public class VehicleService {
     private void verifyVehicleReadAccess(Vehicle vehicle, String email) {
         User currentUser = userJpaRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
+
+        if (currentUser.getRole().isAdmin()) {
+            return;
+        }
 
         if (vehicle.getOwner() != null && vehicle.getOwner().getDni().equals(currentUser.getDni())) {
             return;
@@ -539,7 +541,8 @@ public class VehicleService {
                     .map(NewVehicleDTO::of);
 
         } else if ("WORKSHOP".equalsIgnoreCase(type)) {
-            if (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId)) {
+            // PERMISOS ADMIN: El administrador puede ejecutar búsquedas sobre el parque móvil de cualquier taller
+            if (!currentUser.getRole().isAdmin() && (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId))) {
                 throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
             }
             return vehicleJpaRepository.searchByWorkshopAndText(workshopId, text, pageable)
@@ -551,12 +554,10 @@ public class VehicleService {
 
     private void deleteVehicleFolderFromCloudinary(String plate){
         String folderPath = "carlog/vehicles/" + plate;
-
-        try{
+        try {
             log.info("Eliminando todos los recursos de la carpeta: {}", folderPath);
-
             cloudinary.api().deleteResourcesByPrefix(folderPath, ObjectUtils.emptyMap());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("Error al eliminar la carpeta completa de Cloudinary para el vehículo {}: {}", plate, e.getMessage());
         }
     }

@@ -11,4 +11,8 @@ public enum Role {
     public boolean isWorker(){
         return this == MANAGER || this == CO_MANAGER || this == MECHANIC;
     }
+
+    public boolean isAdmin(){
+        return this == ADMIN;
+    }
 }

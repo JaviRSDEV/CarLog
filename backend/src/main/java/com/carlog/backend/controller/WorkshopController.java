@@ -30,7 +30,7 @@ public class WorkshopController {
         return workshopService.getWorkshopById(id, principal.getName());
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN'")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @GetMapping("/{id}/employees")
     public List<NewUserDTO> showEmployees(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
         return userService.getEmployeesByWorkshopId(id, principal.getName());

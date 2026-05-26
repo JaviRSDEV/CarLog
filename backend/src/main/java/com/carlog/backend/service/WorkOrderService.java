@@ -33,10 +33,11 @@ public class WorkOrderService {
                 .orElseThrow(() -> new UserNotFoundException(dni));
 
         boolean isSelf = currentUser.getDni().equals(dni);
+        boolean isAdmin = currentUser.getRole().isAdmin();
         boolean isSameWorkshop = currentUser.getWorkshop() != null && targetMechanic.getWorkshop() != null &&
                 currentUser.getWorkshop().getWorkshopId().equals(targetMechanic.getWorkshop().getWorkshopId());
 
-        if (!isSelf && !isSameWorkshop) {
+        if (!isSelf && !isSameWorkshop || isAdmin) {
             throw new UnauthorizedActionException("Acceso denegado: No puedes ver las órdenes de un mecánico de otro taller.");
         }
 
@@ -46,9 +47,7 @@ public class WorkOrderService {
 
     public NewWorkOrderResponseDTO getById(Long id, String email) {
         WorkOrder workOrder = workOrderJpaRepository.findById(id).orElseThrow(WorkOrderNotFoundException::new);
-
         verifyReadAccess(workOrder, email);
-
         return NewWorkOrderResponseDTO.of(workOrder);
     }
 
@@ -59,14 +58,13 @@ public class WorkOrderService {
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
                 .orElseThrow(() -> new VehicleNotFoundException(plate));
 
-        boolean isWorker = currentUser.getRole() == Role.MANAGER ||
-                currentUser.getRole() == Role.CO_MANAGER ||
-                currentUser.getRole() == Role.MECHANIC;
+        boolean isWorker = currentUser.getRole().isWorker();
+        boolean isAdmin = currentUser.getRole().isAdmin();
 
-        if (isWorker) {
+        if (isWorker || isAdmin) {
             if (vehicle.getWorkshop() == null || currentUser.getWorkshop() == null ||
                     !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
-                throw new VehicleNotInWorkshopException("El vehículo no esta en el taller");
+                throw new VehicleNotInWorkshopException("El vehículo no está en el taller");
             }
         } else {
             if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
@@ -84,10 +82,10 @@ public class WorkOrderService {
         Vehicle referedVehicle = vehicleJpaRepository.findByPlate(vehiclePlate)
                 .orElseThrow(() -> new VehicleNotFoundException(vehiclePlate));
 
-        boolean isWorker = connectedUser.getRole() == Role.MECHANIC || connectedUser.getRole() == Role.MANAGER ||
-                connectedUser.getRole() == Role.CO_MANAGER;
+        boolean isWorker = connectedUser.getRole().isWorker();
+        boolean isAdmin = connectedUser.getRole().isAdmin();
 
-        if (!isWorker) {
+        if (!isWorker || isAdmin) {
             throw new UnauthorizedActionException("Error: El usuario no tiene permisos para crear una orden de trabajo");
         }
 
@@ -119,7 +117,10 @@ public class WorkOrderService {
 
         verifyWriteAccess(workOrder, email);
 
-        if (workOrder.getStatus() == WorkOrderStatus.COMPLETED)
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        if (workOrder.getStatus() == WorkOrderStatus.COMPLETED && !currentUser.getRole().isAdmin())
             throw new ClosedWorkOrderException("No se pueden añadir nuevas líneas a una orden cerrada");
 
         WorkOrderLine newLine = new WorkOrderLine();
@@ -148,10 +149,13 @@ public class WorkOrderService {
         WorkOrder order = line.getWorkOrder();
         verifyWriteAccess(order, email);
 
-        if (order.getStatus() == WorkOrderStatus.COMPLETED)
+        User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+
+        if (order.getStatus() == WorkOrderStatus.COMPLETED && !currentUser.getRole().isAdmin())
             throw new ClosedWorkOrderException("No se puede borrar líneas de una orden cerrada");
 
         order.removeWorkOrderLine(line);
+        updateOrderTotal(order);
         return NewWorkOrderResponseDTO.of(workOrderJpaRepository.save(order));
     }
 
@@ -165,15 +169,10 @@ public class WorkOrderService {
             order.setMechanicNotes(dto.mechanicNotes());
         }
 
-        if(dto.status() != null){
-            if(order.getPaymentStatus() == PaymentStatus.PAID && dto.status() == WorkOrderStatus.IN_PROGRESS){
+        if (dto.status() != null) {
+            if (order.getPaymentStatus() == PaymentStatus.PAID && dto.status() == WorkOrderStatus.IN_PROGRESS) {
                 throw new ClosedWorkOrderException("Acción bloqueada: No se puede reabrir una orden pagada");
             }
-            order.setStatus(dto.status());
-            order.setClosedAt(dto.status() == WorkOrderStatus.COMPLETED ? java.time.LocalDate.now(): null);
-        }
-
-        if (dto.status() != null) {
             order.setStatus(dto.status());
             order.setClosedAt(dto.status() == WorkOrderStatus.COMPLETED ? java.time.LocalDate.now() : null);
         }
@@ -191,11 +190,11 @@ public class WorkOrderService {
 
         verifyWriteAccess(order, email);
 
-        if(order.getStatus() != WorkOrderStatus.COMPLETED){
-            throw new WorkOrderLineMismatchException("La orden de trabajo debe estar cerrad");
+        if (order.getStatus() != WorkOrderStatus.COMPLETED) {
+            throw new WorkOrderLineMismatchException("La orden de trabajo debe estar cerrada");
         }
 
-        if(order.getVehicle() == null || order.getVehicle().getOwner() == null){
+        if (order.getVehicle() == null || order.getVehicle().getOwner() == null) {
             throw new VehicleNotFoundException("El vehículo no tiene un cliente asignado");
         }
 
@@ -220,7 +219,9 @@ public class WorkOrderService {
         WorkOrder order = line.getWorkOrder();
         verifyWriteAccess(order, email);
 
-        if (order.getStatus() == WorkOrderStatus.COMPLETED) {
+        User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+
+        if (order.getStatus() == WorkOrderStatus.COMPLETED && !currentUser.getRole().isAdmin()) {
             throw new ClosedWorkOrderException("No se pueden editar líneas de una orden cerrada");
         }
 
@@ -292,19 +293,23 @@ public class WorkOrderService {
     private void verifyWriteAccess(WorkOrder workOrder, String email) {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
 
-        if (!currentUser.getRole().isWorker()) {
-            throw new UnauthorizedActionException("Acceso denegado: Solo el personal del taller puede modificar la orden.");
+        if (!currentUser.getRole().isWorker() && !currentUser.getRole().isAdmin()) {
+            throw new UnauthorizedActionException("Acceso denegado: Solo el personal del taller o administradores pueden modificar la orden.");
+        }
+
+        if (currentUser.getRole().isAdmin()) {
+            return;
         }
 
         if (workOrder.getWorkshop() == null || currentUser.getWorkshop() == null ||
                 !workOrder.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
-            throw new VehicleNotInWorkshopException("El vehículo ya no esta en el taller");
+            throw new VehicleNotInWorkshopException("El vehículo ya no está en el taller");
         }
 
         Vehicle vehicle = workOrder.getVehicle();
         if (vehicle != null && (vehicle.getWorkshop() == null ||
                 !vehicle.getWorkshop().getWorkshopId().equals(workOrder.getWorkshop().getWorkshopId()))) {
-            throw new VehicleNotInWorkshopException("El vehículo ya no esta en el taller");
+            throw new VehicleNotInWorkshopException("El vehículo ya no está en el taller");
         }
     }
 
@@ -316,26 +321,26 @@ public class WorkOrderService {
                 .orElseThrow(() -> new VehicleNotFoundException(plate));
 
         boolean isWorker = currentUser.getRole().isWorker();
+        boolean isAdmin = currentUser.getRole().isAdmin();
         Long currentWorkshopId = null;
 
-        if(isWorker){
-            if(currentUser.getWorkshop() == null || vehicle.getWorkshop() == null ||
-                    !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId()) && !vehicle.getOwner().getDni().equals(currentUser.getDni())){
-                throw new VehicleNotInWorkshopException("Acceso denegado: El vehiculo no esta en el taller ahora mismo");
+        if (isWorker || isAdmin) {
+            if (currentUser.getWorkshop() == null || vehicle.getWorkshop() == null ||
+                    (!vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId()) && !vehicle.getOwner().getDni().equals(currentUser.getDni()))) {
+                throw new VehicleNotInWorkshopException("Acceso denegado: El vehículo no está en el taller ahora mismo");
             }
             currentWorkshopId = currentUser.getWorkshop().getWorkshopId();
-        }else{
-            if(vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())){
-                throw new UnauthorizedActionException("Acceso denegado: Este vehñiculo no es tuyo");
+        } else {
+            if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
+                throw new UnauthorizedActionException("Acceso denegado: Este vehículo no es tuyo");
             }
         }
 
         Page<WorkOrder> workOrderPage = workOrderJpaRepository.findByVehicle_Plate(plate, pageable);
-
-        final Long finalWorkshopId = isWorker ? currentWorkshopId: -1L;
+        final Long finalWorkshopId = isWorker ? currentWorkshopId : -1L;
 
         return workOrderPage.map(order -> {
-            if(!isWorker){
+            if (!isWorker) {
                 return new VehicleHistoryDTO(
                         order.getId().toString(),
                         order.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
@@ -345,7 +350,7 @@ public class WorkOrderService {
                         true
                 );
             }
-                    return VehicleHistoryDTO.of(order, finalWorkshopId);
-                });
+            return VehicleHistoryDTO.of(order, finalWorkshopId);
+        });
     }
 }

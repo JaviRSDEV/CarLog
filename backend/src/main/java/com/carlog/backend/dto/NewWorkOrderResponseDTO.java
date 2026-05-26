@@ -65,6 +65,10 @@ public record NewWorkOrderResponseDTO(Long id,
                 line.getSubTotal()
         )).toList();
 
+        String nameMechanic = wo.getMechanic() != null ? wo.getMechanic().getName() : "Mecánico eliminado";
+        String dniMechanic = wo.getMechanic() != null ? wo.getMechanic().getDni() : null;
+        Long idWorkshop = wo.getWorkshop() != null ? wo.getWorkshop().getWorkshopId() : null;
+
         return new NewWorkOrderResponseDTO(
                 wo.getId(),
                 wo.getDescription(),
@@ -74,9 +78,9 @@ public record NewWorkOrderResponseDTO(Long id,
                 wo.getClosedAt(),
                 vehicleDTO,
                 wo.getKilometers(),
-                wo.getMechanic().getName(),
-                wo.getMechanic().getDni(),
-                wo.getWorkshop().getWorkshopId(),
+                nameMechanic,
+                dniMechanic,
+                idWorkshop,
                 wo.getTotalAmount(),
                 linesDto,
                 wo.getPaymentStatus()

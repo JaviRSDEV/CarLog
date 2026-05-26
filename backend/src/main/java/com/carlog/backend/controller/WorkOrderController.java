@@ -31,13 +31,13 @@ public class WorkOrderController {
     private final WorkOrderService workOrderService;
     private final InvoiceService invoiceService;
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @GetMapping("/workshop/{id}")
     public ResponseEntity<List<NewWorkOrderResponseDTO>> showByWorkshop(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(workOrderService.getWorkOrderByWorkshop(id, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @GetMapping("/vehicle/{plate}")
     public ResponseEntity<Page<NewWorkOrderResponseDTO>> getByVehicle(
             @PathVariable String plate,
@@ -50,56 +50,56 @@ public class WorkOrderController {
         return ResponseEntity.ok(workOrderService.getByVehicle(plate, principal.getName(), pageable));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @GetMapping("/mechanic/{dni}")
     public ResponseEntity<List<NewWorkOrderResponseDTO>> showByMechanic(@PathVariable String dni, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(workOrderService.getByEmployee(dni, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'CLIENT')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'CLIENT', 'ADMIN)")
     @GetMapping("/{id}")
     public ResponseEntity<NewWorkOrderResponseDTO> show(@PathVariable Long id, @Parameter(hidden = true)  Principal principal){
         return ResponseEntity.ok(workOrderService.getById(id, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @PostMapping
     public ResponseEntity<NewWorkOrderResponseDTO> store(@Valid @RequestBody NewWorkOrderDTO workOrder, @Parameter(hidden = true) Principal principal){
         String userEmail = principal.getName();
         return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.add(workOrder, userEmail, workOrder.vehiclePlate()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @PutMapping("/{workOrderId}")
     public ResponseEntity<NewWorkOrderResponseDTO> update(@Valid @RequestBody UpdateWorkOrderDTO workOrderData, @PathVariable Long workOrderId, Principal principal){
         return ResponseEntity.ok(workOrderService.edit(workOrderData, workOrderId, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @PostMapping("/{id}/lines")
     public ResponseEntity<NewWorkOrderResponseDTO> addLine(@Valid @PathVariable Long id, @RequestBody NewWorkOrderLineDTO line, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.status(HttpStatus.CREATED).body(workOrderService.addLine(id, line, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<NewWorkOrderResponseDTO> destroy(@PathVariable Long id, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(workOrderService.delete(id, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @DeleteMapping("/{orderId}/lines/{lineId}")
     public ResponseEntity<NewWorkOrderResponseDTO> deleteLine(@PathVariable Long orderId, @PathVariable Long lineId, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(workOrderService.deleteLine(orderId, lineId, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'ADMIN')")
     @PutMapping("/{orderId}/lines/{lineId}")
     public ResponseEntity<NewWorkOrderResponseDTO> updateWorkOrderLine(@Valid @PathVariable Long orderId, @PathVariable Long lineId, @RequestBody NewWorkOrderLineDTO lineData, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(workOrderService.updateWorkOrderLine(orderId, lineId, lineData, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'ADMIN')")
     @PatchMapping("/{orderId}/reassign")
     public ResponseEntity<NewWorkOrderResponseDTO> reassignWorkOrder(@PathVariable Long orderId, @RequestParam String newMechanicId, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.ok(workOrderService.reassignMechanic(orderId, newMechanicId, principal.getName()));

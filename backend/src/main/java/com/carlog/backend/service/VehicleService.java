@@ -97,6 +97,7 @@ public class VehicleService {
                 .map(NewVehicleDTO::of);
     }
 
+    //Método para añadir vehiculos
     @Transactional
     public NewVehicleDTO add(NewVehicleDTO dto, String userEmail) {
         User connectedUser = userJpaRepository.findByEmail(userEmail)

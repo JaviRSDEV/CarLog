@@ -718,8 +718,6 @@ Funcionalidad para que los usuarios cambien su contraseña estando autenticados,
 
 - **UpdatePasswordDTO**: Incluye `currentPassword` y `newPassword` con validaciones
 
----
-
 ## Sistema de Emails HTML Mejorado
 
 Sistema genérico de envío de emails HTML con Thymeleaf para notificaciones profesionales.
@@ -737,22 +735,6 @@ Sistema genérico de envío de emails HTML con Thymeleaf para notificaciones pro
 ### Servicio
 
 - **MailService.sendHtmlEmail()**: Método genérico para enviar emails HTML con contenido dinámico
-
----
-
-## 🎯 Impacto en el Sistema
-
-- **Mejora UX**: Los usuarios pueden gestionar mejor sus vehículos con alertas automáticas
-- **Seguridad**: Sistema robusto de recuperación y cambio de contraseña
-- **Flexibilidad**: Transferencia de vehículos con confirmación de ambas partes
-- **Automatización**: Tareas programadas para notificaciones proactivas
-- **Comunicación**: Sistema de emails HTML profesional para notificaciones importantes
-### Características
-
-- **Envío asíncrono**: Usa `@Async` para no bloquear el hilo principal
-- **Plantillas HTML**: Thymeleaf para diseño personalizado
-- **Manejo de errores**: Logging de errores sin interrumpir el flujo
-- **Soporte UTF-8**: Compatible con caracteres especiales
 
 ---
 

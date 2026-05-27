@@ -64,9 +64,7 @@ public class UserService {
         if(dto.role() != null)
             roleToSave = dto.role();
 
-        // ADAPTACIÓN: Forzar a CLIENT si se intenta registrar como MECHANIC o CO_MANAGER
-        // para pasar 'add_RoleIsMechanicOrCoManager_ForcesToClient'
-        if (roleToSave == Role.MECHANIC || roleToSave == Role.CO_MANAGER) {
+        if (roleToSave == Role.MECHANIC || roleToSave == Role.CO_MANAGER || roleToSave == Role.ADMIN) {
             roleToSave = Role.CLIENT;
         }
 

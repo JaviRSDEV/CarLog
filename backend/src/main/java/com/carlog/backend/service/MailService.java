@@ -20,6 +20,24 @@ public class MailService {
     private final SpringTemplateEngine templateEngine;
 
     @Async
+    public void sendHtmlEmail(String to, String subject, String htmlContent){
+        try{
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("Email HTML con asunto '{}' enviado con éxito a {}", subject, to);
+        }catch (Exception e){
+            log.error("Error enviando email HTML a {}: {}", to, e.getMessage());
+        }
+    }
+
+    @Async
     public void sendWorkOrderCompletedEmail(String clientEmail, String clientName, String vehiclePlate){
         try{
             MimeMessage message = mailSender.createMimeMessage();

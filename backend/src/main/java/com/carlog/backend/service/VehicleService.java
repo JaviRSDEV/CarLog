@@ -541,7 +541,6 @@ public class VehicleService {
                     .map(NewVehicleDTO::of);
 
         } else if ("WORKSHOP".equalsIgnoreCase(type)) {
-            // PERMISOS ADMIN: El administrador puede ejecutar búsquedas sobre el parque móvil de cualquier taller
             if (!currentUser.getRole().isAdmin() && (currentUser.getWorkshop() == null || !currentUser.getWorkshop().getWorkshopId().equals(workshopId))) {
                 throw new UnauthorizedActionException("Acceso denegado: No perteneces a este taller.");
             }

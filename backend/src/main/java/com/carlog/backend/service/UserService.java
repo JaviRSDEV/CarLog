@@ -253,4 +253,23 @@ public class UserService {
 
         messagingTemplate.convertAndSendToUser(employee.getEmail(), "/queue/notificaciones", notif);
     }
+
+    @Transactional
+    public void updatePassword(String dni, String currentPassword, String newPassword, String authenticatedEmail) {
+        User user = userJpaRepository.findByDni(dni)
+                .orElseThrow(() -> new UserNotFoundException(dni));
+
+        if (!user.getEmail().equals(authenticatedEmail)) {
+            throw new UnauthorizedActionException("No tienes permisos para modificar las credenciales de este perfil.");
+        }
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new UnauthorizedActionException("La contraseña actual introducida no es correcta.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userJpaRepository.save(user);
+
+        log.info("Contraseña modificada con éxito para el usuario con DNI: {}", dni);
+    }
 }

@@ -1,6 +1,7 @@
 package com.carlog.backend.controller;
 
 import com.carlog.backend.dto.NewUserDTO;
+import com.carlog.backend.dto.UpdatePasswordDTO;
 import com.carlog.backend.model.Role;
 import com.carlog.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -68,5 +69,15 @@ public class UserController {
     @DeleteMapping("/{dni}")
     public ResponseEntity<NewUserDTO> delete(@PathVariable String dni) {
         return ResponseEntity.ok(userService.delete(dni));
+    }
+
+    @PostMapping("/{dni}/change-password")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable String dni,
+            @Valid @RequestBody UpdatePasswordDTO dto,
+            @Parameter(hidden = true) Principal principal) {
+
+        userService.updatePassword(dni, dto.currentPassword(), dto.newPassword(), principal.getName());
+        return ResponseEntity.ok().build();
     }
 }

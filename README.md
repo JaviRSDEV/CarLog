@@ -602,12 +602,139 @@ El sistema envía emails automáticos mediante `MailService` usando JavaMailSend
 | Ingreso vehículo | Cliente | "Solicitud de ingreso enviada - CarLog" | Al solicitar ingreso de vehículo |
 | Contratación | Usuario | "Oferta de trabajo - CarLog" | Al invitar a un empleado |
 
+
+## Sistema de Alertas Automatizadas
+
+Sistema completo de alertas personalizadas con notificaciones automáticas por email para eventos importantes de vehículos.
+
+### Características
+
+- **Alertas personalizadas**: Los usuarios pueden crear alertas con título, descripción y fecha límite asociadas a sus vehículos
+- **Notificaciones automáticas**: Sistema scheduler que se ejecuta diariamente a las 8:00 AM
+- **Doble recordatorio**: 
+  - Alerta 1 semana antes de la fecha límite
+  - Alerta el mismo día de la fecha límite
+- **Mantenimiento automático**: Al completar una orden de trabajo, se crea automáticamente una alerta de "Mantenimiento Anual" para 1 año después
+
+### Endpoints
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/api/alerts` | Obtener todas las alertas del usuario autenticado |
+| `POST` | `/api/alerts` | Crear nueva alerta |
+| `PUT` | `/api/alerts/{id}` | Actualizar alerta existente |
+| `DELETE` | `/api/alerts/{id}` | Eliminar alerta |
+
+### Entidades
+
+- **Alert**: Entidad con título, descripción, fecha límite, vehículo, usuario y flags de notificación (`notifiedOneWeek`, `notifiedToday`)
+- **AlertSchedulerService**: Servicio con tarea programada `@Scheduled(cron = "0 0 8 * * ?")` para escaneo y envío de alertas
+
+---
+
+## Sistema de Transferencia de Vehículos con Handshake
+
+Protocolo de transferencia de propiedad de vehículos con doble confirmación entre partes para garantizar seguridad.
+
+### Flujo de Transferencia
+
+1. **Solicitud**: El dueño actual solicita transferir el vehículo a otro usuario
+2. **Aprobación**: El destinatario aprueba la transferencia para completarla
+3. **Rechazo**: Cualquiera de las partes puede cancelar la transferencia pendiente
+
+### Características
+
+- **Handshake de doble confirmación**: Ambas partes deben confirmar la operación
+- **Notificaciones en tiempo real**: WebSocket notifica a las partes involucradas
+- **Validaciones**: 
+  - No se puede transferir a uno mismo
+  - Solo el dueño actual o el destinatario pendiente pueden aprobar/rechazar
+- **Preservación de datos**: Al transferir, se limpian los campos pendientes y se actualiza la propiedad
+
+### Endpoints
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `POST` | `/api/vehicles/{plate}/transfer/request` | Solicitar transferencia de vehículo |
+| `PUT` | `/api/vehicles/{plate}/transfer/approve` | Aprobar transferencia pendiente |
+| `PUT` | `/api/vehicles/{plate}/transfer/reject` | Rechazar/cancelar transferencia |
+
+### Cambios en Base de Datos
+
+- **DTOs actualizados**: `NewVehicleDTO` incluye `pendingOwnerName` y `pendingOwnerId`
+
+---
+
+## Sistema de Recuperación de Contraseña
+
+Sistema robusto de recuperación de contraseña con tokens seguros y expiración controlada.
+
+### Características
+
+- **Tokens UUID únicos**: Cada token es único y aleatorio
+- **Expiración de 15 minutos**: Los tokens expiran automáticamente por seguridad
+- **Eliminación de tokens anteriores**: Al generar un nuevo token, se eliminan los anteriores del usuario
+- **Manejo silencioso**: No revela si un email existe (security best practice)
+- **Email HTML profesional**: Plantilla con botón de acción y advertencia de expiración
+
+### Endpoints
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `POST` | `/api/auth/forgot-password` | Solicitar recuperación de contraseña |
+| `POST` | `/api/auth/reset-password` | Completar recuperación con token |
+
+### Entidades
+
+- **PasswordResetToken**: Entidad con token UUID, relación OneToOne con User y fecha de expiración
+- **PasswordRecoveryService**: Servicio que gestiona generación, validación y uso de tokens
+
+### URL de Recuperación
+
+```
+https://tallercarlog.com/reset-password?token={uuid}
+```
+
+---
+
+## Cambio de Contraseña Autenticado
+
+Funcionalidad para que los usuarios cambien su contraseña estando autenticados, con validación de identidad.
+
+### Características
+
+- **Validación de identidad**: Requiere la contraseña actual para confirmar
+- **Mínimo 6 caracteres**: La nueva contraseña debe tener al menos 6 caracteres
+- **Solo el propio usuario**: Un usuario solo puede cambiar su propia contraseña
+- **Logging**: Registro de cambios para auditoría
+
+### Endpoints
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `POST` | `/api/users/{dni}/change-password` | Cambiar contraseña autenticado |
+
+### DTOs
+
+- **UpdatePasswordDTO**: Incluye `currentPassword` y `newPassword` con validaciones
+
+## Sistema de Emails HTML Mejorado
+
+Sistema genérico de envío de emails HTML con Thymeleaf para notificaciones profesionales.
+
 ### Características
 
 - **Envío asíncrono**: Usa `@Async` para no bloquear el hilo principal
-- **Plantillas HTML**: Thymeleaf para diseño personalizado
-- **Manejo de errores**: Logging de errores sin interrumpir el flujo
-- **Soporte UTF-8**: Compatible con caracteres especiales
+- **Soporte HTML**: Emails con diseño profesional y estilos CSS
+- **Plantillas Thymeleaf**: Sistema de plantillas reutilizables
+- **Múltiples plantillas**:
+  - `password-recovery.html`: Recuperación de contraseña
+  - `alert-notification.html`: Notificación de alertas
+  - Plantillas existentes para facturas y otros eventos
+
+### Servicio
+
+- **MailService.sendHtmlEmail()**: Método genérico para enviar emails HTML con contenido dinámico
 
 ---
 

@@ -169,12 +169,13 @@ class VehicleControllerTest {
     }
 
     @Test
-    @DisplayName("POST /transfer - Happy Path")
+    @DisplayName("POST /api/vehicles/{plate}/transfer/request - Happy Path")
     void transferVehicle_Success() throws Exception {
-        when(vehicleService.requestTransfer(eq("1234ABC"), eq("99999999Z"), anyString())).thenReturn(mockVehicle);
+        when(vehicleService.requestTransfer(eq("1234ABC"), eq("99999999Z"), anyString()))
+                .thenReturn(mockVehicle);
 
-        mockMvc.perform(post("/api/vehicles/1234ABC/transfer")
-                        .param("newOwnerId", "99999999Z")
+        mockMvc.perform(post("/api/vehicles/1234ABC/transfer/request")
+                        .param("newOwnerDni", "99999999Z")
                         .principal(mockPrincipal))
                 .andExpect(status().isOk());
 

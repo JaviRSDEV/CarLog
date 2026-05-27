@@ -30,6 +30,8 @@ public record NewVehicleDTO(
                             Long workshopId,
                             String ownerId,
                             String ownerName,
+                            String pendingOwnerName,
+                            String pendingOwnerId,
                             Long pendingWorkshopId,
                             String pendingWorkshopName) {
 
@@ -48,6 +50,8 @@ public record NewVehicleDTO(
                 v.getWorkshop() != null ? v.getWorkshop().getWorkshopId(): null,
                 v.getOwner() != null ? v.getOwner().getDni(): null,
                 v.getOwner() != null ? v.getOwner().getName(): null,
+                v.getPendingOwner() != null ? v.getPendingOwner().getDni(): null,
+                v.getPendingOwner() != null ? v.getPendingOwner().getName(): null,
                 v.getPendingWorkshop() != null ? v.getPendingWorkshop().getWorkshopId(): null,
                 v.getPendingWorkshop() != null ? v.getPendingWorkshop().getWorkshopName(): null
         );

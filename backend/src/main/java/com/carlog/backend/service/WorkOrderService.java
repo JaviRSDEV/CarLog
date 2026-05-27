@@ -3,27 +3,32 @@ package com.carlog.backend.service;
 import com.carlog.backend.dto.*;
 import com.carlog.backend.error.*;
 import com.carlog.backend.model.*;
+import com.carlog.backend.repository.AlertJpaRepository;
 import com.carlog.backend.repository.UserJpaRepository;
 import com.carlog.backend.repository.VehicleJpaRepository;
 import com.carlog.backend.repository.WorkOrderJpaRepository;
 import com.carlog.backend.repository.WorkOrderLineJpaRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.context.ApplicationEventPublisher;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class WorkOrderService {
 
     private final UserJpaRepository userJpaRepository;
     private final VehicleJpaRepository vehicleJpaRepository;
     private final WorkOrderJpaRepository workOrderJpaRepository;
     private final WorkOrderLineJpaRepository workOrderLineJpaRepository;
+    private final AlertJpaRepository alertJpaRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public List<NewWorkOrderResponseDTO> getByEmployee(String dni, String email) {
@@ -173,8 +178,28 @@ public class WorkOrderService {
             if (order.getPaymentStatus() == PaymentStatus.PAID && dto.status() == WorkOrderStatus.IN_PROGRESS) {
                 throw new ClosedWorkOrderException("Acción bloqueada: No se puede reabrir una orden pagada");
             }
+
+            boolean becomingCompleted = dto.status() == WorkOrderStatus.COMPLETED && order.getStatus() != WorkOrderStatus.COMPLETED;
+
             order.setStatus(dto.status());
             order.setClosedAt(dto.status() == WorkOrderStatus.COMPLETED ? java.time.LocalDate.now() : null);
+
+            if (becomingCompleted && order.getVehicle() != null && order.getVehicle().getOwner() != null) {
+                LocalDate fechaProximoMantenimiento = java.time.LocalDate.now().plusYears(1);
+
+                Alert mantenimientoAnualAlert = Alert.builder()
+                        .title("Mantenimiento Anual")
+                        .description("Ha transcurrido un año desde tu última revisión en el taller (" + order.getWorkshop().getWorkshopName() + "). Es recomendable realizar un cambio de aceite y filtros de seguridad.")
+                        .dueDate(fechaProximoMantenimiento)
+                        .vehicle(order.getVehicle())
+                        .user(order.getVehicle().getOwner())
+                        .notifiedOneWeek(false)
+                        .notifiedToday(false)
+                        .build();
+
+                alertJpaRepository.save(mantenimientoAnualAlert);
+                log.info("Alerta de mantenimiento anual automatizada guardada para el coche con matrícula: {}", order.getVehicle().getPlate());
+            }
         }
 
         if (dto.paymentStatus() != null) {

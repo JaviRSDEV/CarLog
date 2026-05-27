@@ -3,10 +3,7 @@ package com.carlog.backend.service;
 import com.carlog.backend.dto.*;
 import com.carlog.backend.error.*;
 import com.carlog.backend.model.*;
-import com.carlog.backend.repository.UserJpaRepository;
-import com.carlog.backend.repository.VehicleJpaRepository;
-import com.carlog.backend.repository.WorkOrderJpaRepository;
-import com.carlog.backend.repository.WorkOrderLineJpaRepository;
+import com.carlog.backend.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +38,10 @@ class WorkOrderServiceTest {
     private Vehicle vehicle;
     private WorkOrder workOrder;
     private WorkOrderLine workOrderLine;
-    @Mock private MailService mailService;
+    @Mock
+    private MailService mailService;
+    @Mock
+    private AlertJpaRepository alertJpaRepository;
 
     @BeforeEach
     void setUp() {
@@ -148,6 +148,8 @@ class WorkOrderServiceTest {
         when(workOrderJpaRepository.findById(workOrder.getId())).thenReturn(Optional.of(workOrder));
         when(userJpaRepository.findByEmail(mechanic.getEmail())).thenReturn(Optional.of(mechanic));
         when(workOrderJpaRepository.save(any(WorkOrder.class))).thenReturn(workOrder);
+
+        when(alertJpaRepository.save(any(Alert.class))).thenReturn(new Alert());
 
         workOrderService.edit(updateDto, workOrder.getId(), mechanic.getEmail());
 

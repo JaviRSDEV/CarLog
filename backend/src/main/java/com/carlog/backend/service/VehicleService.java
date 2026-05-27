@@ -427,17 +427,104 @@ public class VehicleService {
         return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
     }
 
-    public NewVehicleDTO changeOwner(String plate, String newOwnerId, String email){
-        User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
-        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate).orElseThrow(() -> new VehicleNotFoundException(plate));
+    public NewVehicleDTO requestTransfer(String plate, String newOwnerId, String email){
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
 
         if (!currentUser.getRole().isAdmin() && (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni()))) {
             throw new UnauthorizedActionException("Acceso denegado: Solo el dueño actual puede transferir el vehículo.");
         }
 
         User newOwner = userJpaRepository.findByDni(newOwnerId).orElseThrow(() -> new UserNotFoundException(newOwnerId));
-        vehicle.setOwner(newOwner);
 
+        if (newOwner.getDni().equals(currentUser.getDni())) {
+            throw new UnauthorizedActionException("Acción inválida: No puedes transferirte un vehículo a ti mismo.");
+        }
+
+        vehicle.setPendingOwner(newOwner);
+        Vehicle savedVehicle = vehicleJpaRepository.save(vehicle);
+
+        NotificationDTO notif = NotificationDTO.builder()
+                .type("VEHICLE_TRANSFER_REQUEST")
+                .title("Solicitud de Transferencia")
+                .message("El usuario " + currentUser.getName() + " quiere transferirte la propiedad del vehículo con matrícula " + plate.toUpperCase())
+                .extraData(plate)
+                .build();
+
+        try {
+            messagingTemplate.convertAndSendToUser(newOwner.getEmail(), "/queue/notificaciones", notif);
+            log.info("Handshake de transferencia iniciado: Coche {} ofertado a {}", plate, newOwner.getEmail());
+        } catch (Exception e) {
+            log.error("Error enviando el WebSocket de transferencia al destinatario: {}", e.getMessage());
+        }
+
+        return NewVehicleDTO.of(savedVehicle);
+    }
+
+    @Transactional
+    public NewVehicleDTO approveTransfer(String plate, String email) {
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        if (vehicle.getPendingOwner() == null) {
+            throw new NoPendingRequestException("No existe ninguna propuesta de transferencia para el vehículo: " + plate);
+        }
+
+        if (!currentUser.getRole().isAdmin() && !vehicle.getPendingOwner().getDni().equals(currentUser.getDni())) {
+            throw new UnauthorizedActionException("Acceso denegado: No eres el destinatario de la transferencia de este coche.");
+        }
+
+        User oldOwner = vehicle.getOwner();
+        User newOwner = vehicle.getPendingOwner();
+
+        vehicle.setOwner(newOwner);
+        vehicle.setPendingOwner(null);
+        vehicle.setWorkshop(null);
+
+        Vehicle savedVehicle = vehicleJpaRepository.save(vehicle);
+
+        if (oldOwner != null) {
+            NotificationDTO alert = NotificationDTO.builder()
+                    .type("VEHICLE_TRANSFER_APPROVED")
+                    .title("¡Transferencia Completada!")
+                    .message("El usuario " + newOwner.getName() + " ha aceptado el vehículo " + plate.toUpperCase() + ". Ya no figura en tu cuenta.")
+                    .extraData(plate)
+                    .build();
+            try {
+                messagingTemplate.convertAndSendToUser(oldOwner.getEmail(), "/queue/notificaciones", alert);
+            } catch (Exception e) {
+                log.error("Error enviando confirmación WebSocket al vendedor: {}", e.getMessage());
+            }
+        }
+
+        return NewVehicleDTO.of(savedVehicle);
+    }
+
+    @Transactional
+    public NewVehicleDTO rejectTransfer(String plate, String email) {
+        Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
+                .orElseThrow(() -> new VehicleNotFoundException(plate));
+        User currentUser = userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        if (vehicle.getPendingOwner() == null) {
+            throw new NoPendingRequestException("No existe ninguna transferencia pendiente para el vehículo: " + plate);
+        }
+
+        boolean isPendingOwner = vehicle.getPendingOwner().getDni().equals(currentUser.getDni());
+        boolean isCurrentOwner = vehicle.getOwner() != null && vehicle.getOwner().getDni().equals(currentUser.getDni());
+
+        if (!currentUser.getRole().isAdmin() && !isPendingOwner && !isCurrentOwner) {
+            throw new UnauthorizedActionException("No tienes autorización para revocar o rechazar este handshake.");
+        }
+
+        vehicle.setPendingOwner(null);
+        log.info("Handshake de transferencia del vehículo {} cancelado/rechazado por el usuario {}", plate, email);
         return NewVehicleDTO.of(vehicleJpaRepository.save(vehicle));
     }
 

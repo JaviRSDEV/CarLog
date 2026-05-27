@@ -89,6 +89,8 @@ class VehicleControllerTest {
                 "11111111A",
                 null,
                 null,
+                null,
+                null,
                 null
         );
     }
@@ -139,6 +141,8 @@ class VehicleControllerTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
         );
 
@@ -167,14 +171,14 @@ class VehicleControllerTest {
     @Test
     @DisplayName("POST /transfer - Happy Path")
     void transferVehicle_Success() throws Exception {
-        when(vehicleService.changeOwner(eq("1234ABC"), eq("99999999Z"), anyString())).thenReturn(mockVehicle);
+        when(vehicleService.requestTransfer(eq("1234ABC"), eq("99999999Z"), anyString())).thenReturn(mockVehicle);
 
         mockMvc.perform(post("/api/vehicles/1234ABC/transfer")
                         .param("newOwnerId", "99999999Z")
                         .principal(mockPrincipal))
                 .andExpect(status().isOk());
 
-        verify(vehicleService).changeOwner(eq("1234ABC"), eq("99999999Z"), anyString());
+        verify(vehicleService).requestTransfer(eq("1234ABC"), eq("99999999Z"), anyString());
     }
 
     @Test

@@ -56,7 +56,7 @@ public class WorkOrderController {
         return ResponseEntity.ok(workOrderService.getByEmployee(dni, principal.getName()));
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'CLIENT', 'ADMIN)")
+    @PreAuthorize("hasAnyAuthority('MANAGER', 'CO_MANAGER', 'MECHANIC', 'CLIENT', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<NewWorkOrderResponseDTO> show(@PathVariable Long id, @Parameter(hidden = true)  Principal principal){
         return ResponseEntity.ok(workOrderService.getById(id, principal.getName()));

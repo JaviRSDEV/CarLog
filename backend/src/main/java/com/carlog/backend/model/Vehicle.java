@@ -83,5 +83,9 @@ public class Vehicle implements Serializable {
     @EqualsAndHashCode.Exclude
     private Workshop pendingWorkshop;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pending_owner_dni")
+    private User pendingOwner;
+
 
 }

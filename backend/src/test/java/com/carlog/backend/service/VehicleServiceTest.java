@@ -140,7 +140,7 @@ class VehicleServiceTest {
         NewVehicleDTO editDto = new NewVehicleDTO(
                 "1234-ABC", "Citroen", "C3", null, 150000L,
                 "1.4 HDi", 70, 160, "Michelin",
-                base64Images, null, null, null, null, null, null
+                base64Images, null, null, null,null, null, null, null, null
         );
 
         vehicleService.add(editDto, clientUser.getEmail());
@@ -340,9 +340,9 @@ class VehicleServiceTest {
         when(userJpaRepository.findByDni(newOwner.getDni())).thenReturn(Optional.of(newOwner));
         when(vehicleJpaRepository.save(any(Vehicle.class))).thenReturn(vehicle);
 
-        vehicleService.changeOwner(vehicle.getPlate(), newOwner.getDni(), clientUser.getEmail());
+        vehicleService.requestTransfer(vehicle.getPlate(), newOwner.getDni(), clientUser.getEmail());
 
-        assertEquals(newOwner.getDni(), vehicle.getOwner().getDni());
+        assertEquals(newOwner.getDni(), vehicle.getPendingOwner().getDni());
         verify(vehicleJpaRepository).save(vehicle);
     }
 
@@ -383,7 +383,7 @@ class VehicleServiceTest {
         NewVehicleDTO editDto = new NewVehicleDTO(
                 "1234-ABC", "Ford", "Mustang", null, 5000L,
                 "Gasolina", 400, 500, "Pirelli",
-                new ArrayList<>(), null, null, null, null, null, null
+                new ArrayList<>(), null, null, null, null, null, null, null, null
         );
 
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));
@@ -402,7 +402,7 @@ class VehicleServiceTest {
         NewVehicleDTO editDto = new NewVehicleDTO(
                 "9999-NEW", "Ford", "Mustang", null, 5000L,
                 "Gasolina", 400, 500, "Pirelli",
-                null, null, null, null, null, null, null
+                null, null, null, null, null, null, null, null, null
         );
 
         when(userJpaRepository.findByEmail(clientUser.getEmail())).thenReturn(Optional.of(clientUser));

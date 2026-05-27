@@ -84,11 +84,6 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleService.rejectEntry(plate, principal.getName()));
     }
 
-    @PostMapping("/{plate}/transfer")
-    public ResponseEntity<NewVehicleDTO> transferVehicle(@PathVariable String plate, @RequestParam String newOwnerId, @Parameter(hidden = true) Principal principal){
-        return ResponseEntity.ok(vehicleService.changeOwner(plate, newOwnerId, principal.getName()));
-    }
-
     @GetMapping("/{plate}/history")
     public ResponseEntity<Page<NewWorkOrderResponseDTO>> getVehicleHistory(
             @PathVariable String plate,
@@ -111,5 +106,27 @@ public class VehicleController {
 
         Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(vehicleService.searchVehicles(q, workshopId, type, principal.getName(), pageable));
+    }
+
+    @PostMapping("/{plate}/transfer/request")
+    public ResponseEntity<NewVehicleDTO> requestTransfer(
+            @PathVariable String plate,
+            @RequestParam String newOwnerDni,
+            @Parameter(hidden = true) Principal principal) {
+        return ResponseEntity.ok(vehicleService.requestTransfer(plate, newOwnerDni, principal.getName()));
+    }
+
+    @PutMapping("/{plate}/transfer/approve")
+    public ResponseEntity<NewVehicleDTO> approveTransfer(
+            @PathVariable String plate,
+            @Parameter(hidden = true) Principal principal) {
+        return ResponseEntity.ok(vehicleService.approveTransfer(plate, principal.getName()));
+    }
+
+    @PutMapping("/{plate}/transfer/reject")
+    public ResponseEntity<NewVehicleDTO> rejectTransfer(
+            @PathVariable String plate,
+            @Parameter(hidden = true) Principal principal) {
+        return ResponseEntity.ok(vehicleService.rejectTransfer(plate, principal.getName()));
     }
 }

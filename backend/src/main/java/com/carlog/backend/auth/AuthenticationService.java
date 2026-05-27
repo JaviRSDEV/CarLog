@@ -1,5 +1,6 @@
 package com.carlog.backend.auth;
 
+import com.carlog.backend.model.Role;
 import com.carlog.backend.model.User;
 import com.carlog.backend.repository.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,11 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
 
     public User register(RegisterRequest registerRequest) {
+
+        if(registerRequest.getRole() == Role.ADMIN || registerRequest.getRole() == Role.MECHANIC || registerRequest.getRole() == Role.CO_MANAGER){
+            registerRequest.setRole(Role.CLIENT);
+        }
+
         var user = User.builder()
                 .dni(registerRequest.getDni())
                 .name(registerRequest.getName())

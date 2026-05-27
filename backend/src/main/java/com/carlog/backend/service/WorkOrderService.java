@@ -345,32 +345,35 @@ public class WorkOrderService {
         Vehicle vehicle = vehicleJpaRepository.findByPlate(plate)
                 .orElseThrow(() -> new VehicleNotFoundException(plate));
 
+        boolean isOwner = vehicle.getOwner() != null && vehicle.getOwner().getDni().equals(currentUser.getDni());
         boolean isWorker = currentUser.getRole().isWorker();
         boolean isAdmin = currentUser.getRole().isAdmin();
         Long currentWorkshopId = null;
 
-        if (isWorker || isAdmin) {
+        if (isAdmin || isOwner) {
+            if (isWorker && currentUser.getWorkshop() != null) {
+                currentWorkshopId = currentUser.getWorkshop().getWorkshopId();
+            }
+        }else if (isWorker) {
             if (currentUser.getWorkshop() == null || vehicle.getWorkshop() == null ||
-                    (!vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId()) && !vehicle.getOwner().getDni().equals(currentUser.getDni()))) {
+                    !vehicle.getWorkshop().getWorkshopId().equals(currentUser.getWorkshop().getWorkshopId())) {
                 throw new VehicleNotInWorkshopException("Acceso denegado: El vehículo no está en el taller ahora mismo");
             }
             currentWorkshopId = currentUser.getWorkshop().getWorkshopId();
-        } else {
-            if (vehicle.getOwner() == null || !vehicle.getOwner().getDni().equals(currentUser.getDni())) {
-                throw new UnauthorizedActionException("Acceso denegado: Este vehículo no es tuyo");
-            }
+        }else {
+            throw new UnauthorizedActionException("Acceso denegado: Este vehículo no es tuyo");
         }
 
         Page<WorkOrder> workOrderPage = workOrderJpaRepository.findByVehicle_Plate(plate, pageable);
         final Long finalWorkshopId = isWorker ? currentWorkshopId : -1L;
 
         return workOrderPage.map(order -> {
-            if (!isWorker) {
+            if (isOwner || isAdmin || !isWorker) {
                 return new VehicleHistoryDTO(
                         order.getId().toString(),
                         order.getCreatedAt().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                         order.getKilometers(),
-                        order.getWorkshop().getWorkshopName(),
+                        order.getWorkshop() != null ? order.getWorkshop().getWorkshopName() : "Taller Temporal",
                         order.getLines().stream().map(WorkOrderLine::getConcept).toList(),
                         true
                 );

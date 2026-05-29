@@ -103,7 +103,11 @@ public class UserService {
             user.setPhone(dto.phone());
 
             if ((isManagerOfEmployee || isAdmin) && dto.role() != null) {
-                user.setRole(dto.role());
+                if(dto.role() == Role.ADMIN && !isAdmin){
+                    throw new UnauthorizedActionException("No tienes permisos para asignar ese rol");
+                }else{
+                    user.setRole(dto.role());
+                }
             }
 
             return NewUserDTO.of(userJpaRepository.save(user));

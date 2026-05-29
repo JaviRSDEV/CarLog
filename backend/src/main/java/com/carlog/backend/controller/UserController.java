@@ -33,6 +33,7 @@ public class UserController {
         return userService.getByName(name);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<NewUserDTO> store(@Valid @RequestBody NewUserDTO user){
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.add(user));

@@ -56,3 +56,7 @@ out/
 .vscode/
 
 .idea/workspace.xml
+
+.antigravitycli
+
+/CarLog/.antigravitycli

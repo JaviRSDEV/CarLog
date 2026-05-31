@@ -16,7 +16,7 @@ public class AuthenticationService {
 
     public User register(RegisterRequest registerRequest) {
 
-        if(registerRequest.getRole() == Role.ADMIN || registerRequest.getRole() == Role.MECHANIC || registerRequest.getRole() == Role.CO_MANAGER){
+        if(registerRequest.getRole() != Role.CLIENT){
             registerRequest.setRole(Role.CLIENT);
         }
 

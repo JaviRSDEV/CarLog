@@ -42,7 +42,7 @@ public class WorkOrderService {
         boolean isSameWorkshop = currentUser.getWorkshop() != null && targetMechanic.getWorkshop() != null &&
                 currentUser.getWorkshop().getWorkshopId().equals(targetMechanic.getWorkshop().getWorkshopId());
 
-        if (!isSelf && !isSameWorkshop || isAdmin) {
+        if (!isAdmin && !isSelf && !isSameWorkshop) {
             throw new UnauthorizedActionException("Acceso denegado: No puedes ver las órdenes de un mecánico de otro taller.");
         }
 
@@ -300,6 +300,9 @@ public class WorkOrderService {
 
     private void verifyReadAccess(WorkOrder workOrder, String email) {
         User currentUser = userJpaRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException(email));
+        if (currentUser.getRole().isAdmin()) {
+            return;
+        }
         boolean isWorker = currentUser.getRole().isWorker();
 
         if (isWorker) {

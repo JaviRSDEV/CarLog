@@ -15,6 +15,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry){
         registry.addInterceptor(rateLimitingInterceptor)
                 .addPathPatterns("/api/auth/authenticate")
-                .addPathPatterns("/api/auth/register");
+                .addPathPatterns("/api/auth/register")
+                .addPathPatterns("/api/auth/forgot-password")
+                .addPathPatterns("/api/auth/reset-password");
     }
 }

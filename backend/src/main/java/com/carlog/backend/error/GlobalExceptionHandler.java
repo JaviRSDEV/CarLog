@@ -116,6 +116,11 @@ public class GlobalExceptionHandler {
         return buildResponse("Error de validación en mensaje: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException ex) {
+        return buildResponse("Acceso denegado: No tienes permisos para realizar esta acción.", HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         log.error("Error interno no controlado: ", ex);

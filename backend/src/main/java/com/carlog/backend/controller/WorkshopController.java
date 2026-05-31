@@ -36,7 +36,7 @@ public class WorkshopController {
         return userService.getEmployeesByWorkshopId(id, principal.getName());
     }
 
-    @PreAuthorize("hasAnyAuthority('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('CLIENT', 'MANAGER', 'ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<NewWorkshopDTO> store(@Valid @RequestBody NewWorkshopDTO workshop, @Parameter(hidden = true) Principal principal){
         return ResponseEntity.status(HttpStatus.CREATED).body(workshopService.add(workshop, principal.getName()));

@@ -8,6 +8,7 @@
 ![JWT](https://img.shields.io/badge/Auth-JWT-black?style=for-the-badge&logo=jsonwebtokens)
 ![WebSocket](https://img.shields.io/badge/RealTime-WebSocket_STOMP-010101?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+[![English README](https://img.shields.io/badge/Language-English-blue?style=for-the-badge)](./README_EN.md)
 
 ## Estado del Proyecto
 

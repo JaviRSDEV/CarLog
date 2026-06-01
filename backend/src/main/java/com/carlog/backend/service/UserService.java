@@ -132,8 +132,6 @@ public class UserService {
 
         userJpaRepository.save(user);
 
-        // ADAPTACIÓN: Usar deleteByDni en vez de delete(user)
-        // para cumplir con la verificación exacta de 'delete_Exists_DeletesUser'
         userJpaRepository.deleteByDni(dni);
 
         return NewUserDTO.of(user);

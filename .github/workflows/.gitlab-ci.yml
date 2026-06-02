@@ -1,0 +1,75 @@
+stages:
+  - build_and_scan
+  - deploy
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+build_and_scan:
+  stage: build_and_scan
+  tags:
+    - serverjavi
+    - self-hosted
+  image: maven:3.9.6-eclipse-temurin-21
+  services:
+    - name: mysql:8.0
+      alias: mysql-db
+      command: ["--default-authentication-plugin=mysql_native_password"]
+  variables:
+    MYSQL_ROOT_PASSWORD: "rootpassword"
+    MYSQL_DATABASE: "carlog"
+    SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-db:3306/carlog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+    SPRING_DATASOURCE_USERNAME: "root"
+    SPRING_DATASOURCE_PASSWORD: "rootpassword"
+    JWT_SECRET_KEY: $JWT_SECRET_KEY
+    SONAR_TOKEN: $SONAR_TOKEN
+    MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  cache:
+    key: "${CI_COMMIT_REF_SLUG}-maven-sonar"
+    paths:
+      - .m2/repository
+      - .sonar/cache
+  script:
+    - cd backend
+    - >
+      mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
+      -Dsonar.projectKey=JaviRSDEV_CarLog 
+      -Dsonar.organization=javirsdev 
+      -Dsonar.host.url=https://sonarcloud.io 
+      -Dsonar.token=$SONAR_TOKEN
+    - echo "Análisis enviado a SonarCloud con éxito."
+
+deploy:
+  stage: deploy
+  tags:
+    - serverjavi
+    - self-hosted
+  image:
+  before_script: []
+  script:
+    - cd ~/CarLog
+
+    - git fetch origin
+    - git reset --hard origin/main
+
+    - cd backend
+    - docker compose down
+    - docker compose pull
+    - docker compose up -d --build
+
+    - echo "Esperando 25 segundos para asegurar el arranque completo..."
+    - sleep 25
+    - echo "=== LOG COMPLETO DEL BACKEND (Últimos 1000 registros) ==="
+    - LOGS=$(docker logs carlog-backend --tail 1000)
+    - echo "$LOGS"
+    - echo "=== COMPROBANDO VALIDACIÓN REAL ==="
+    - STATUS=$(docker inspect -f '{{.State.Status}}' carlog-backend)
+    - if [ "$STATUS" != "running" ]; then echo "ERROR El contenedor no está corriendo. Estado $STATUS"; docker logs carlog-backend --tail 50; exit 1; fi
+    - if ! echo "$LOGS" | grep -q "Started BackendApplication"; then echo "ERROR Fallo detectado en el arranque de Spring Boot."; exit 1; fi
+    - echo "¡Despliegue exitoso! El backend ha iniciado el contexto sin errores."
+  dependencies:
+    - build_and_scan
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

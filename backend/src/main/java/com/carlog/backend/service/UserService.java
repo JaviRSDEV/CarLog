@@ -104,7 +104,7 @@ public class UserService {
 
             if ((isManagerOfEmployee || isAdmin) && dto.role() != null) {
                 if(dto.role() == Role.ADMIN && !isAdmin){
-                    throw new UnauthorizedActionException("No tienes permiso para asignar ese rol");
+                    throw new UnauthorizedActionException("No tienes permisos para asignar ese rol");
                 }else{
                     user.setRole(dto.role());
                 }

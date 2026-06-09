@@ -1,4 +1,3 @@
-
 # CarLog — Plataforma de Gestión Integral de Talleres Mecánicos
 
 ![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot_4.0.1-6db33f?style=for-the-badge&logo=spring)
